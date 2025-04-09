@@ -66,34 +66,30 @@ lemma l01 : ContinuousOn (MyCoordChangeL 0 1) (U.source ∩ V.source) := by
   let f := fun (x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)) ↦
             if (x.val 1) > 0 then ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
                              else -ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
-  have h1 : (MyCoordChangeL 0 1) = f := rfl
   let g : EuclideanSpace ℝ (Fin 1) → (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 → EuclideanSpace ℝ (Fin 1)) :=
       fun y => (fun x => f x y)
 
-  have hb5 : ∀ (v : EuclideanSpace ℝ (Fin 1)), ContinuousOn (fun x => v) sl1 := fun v => continuousOn_const
   have hb6 : ∀ (v : EuclideanSpace ℝ (Fin 1)), EqOn (fun x => v) (g v) sl1 := by
     intro v x hx
-    have hb6a:  (fun x => v) x = v := rfl
     have hb6b : g v x = v := h_eq_on_pre x hx v
     rw [hb6b]
+
   have h7 : ∀ (v : EuclideanSpace ℝ (Fin 1)), ContinuousOn (g v) sl1 := by
     intro v
     have h1 : EqOn (fun x => v) (g v) sl1 := hb6 v
-    have h2 : ContinuousOn (fun x => v) sl1 := hb5 v
-    have h3 : ContinuousOn (g v) sl1 := ContinuousOn.congr h2 h1.symm
+    have h3 : ContinuousOn (g v) sl1 := ContinuousOn.congr continuousOn_const h1.symm
     exact h3
 
-  have hc5 : ∀ (v : EuclideanSpace ℝ (Fin 1)), ContinuousOn (fun x => -v) sl2 := fun v => continuousOn_const.neg
   have hc6 : ∀ (v : EuclideanSpace ℝ (Fin 1)), EqOn (fun x => -v) (g v) sl2 := by
     intro v x hx
     have hb6a:  (fun x => v) x = v := rfl
     have hb6b : g v x = -v := h_eq_on2_pre x hx v
     rw [hb6b]
+
   have hc7 : ∀ (v : EuclideanSpace ℝ (Fin 1)), ContinuousOn (g v) sl2 := by
     intro v
     have h1 : EqOn (fun x => -v) (g v) sl2 := hc6 v
-    have h2 : ContinuousOn (fun x => -v) sl2 := hc5 v
-    have h3 : ContinuousOn (g v) sl2 := ContinuousOn.congr h2 h1.symm
+    have h3 : ContinuousOn (g v) sl2 := ContinuousOn.congr continuousOn_const.neg h1.symm
     exact h3
 
   have hp : ∀ (v : EuclideanSpace ℝ (Fin 1)), ContinuousOn (g v) (sl1 ∪ sl2) := by
@@ -101,17 +97,11 @@ lemma l01 : ContinuousOn (MyCoordChangeL 0 1) (U.source ∩ V.source) := by
     have hp1 : ContinuousOn (g v) (sl1 ∪ sl2) := continuous_on_union_of_open sl1_open sl2_open (h7 v) (hc7 v)
     exact hp1
 
-  have hz : (U.source ∩ V.source) = sl1 ∪ sl2 := SulSource
-
   have h8 : ∀ (v : EuclideanSpace ℝ (Fin 1)), ContinuousOn (g v) (U.source ∩ V.source) := by
-    rw [hz]
+    rw [SulSource]
     exact hp
 
-  have h3 : ContinuousOn f (U.source ∩ V.source) ↔
-     ∀ (y : EuclideanSpace ℝ (Fin 1)), ContinuousOn (fun x ↦ f x y) (U.source ∩ V.source) := continuousOn_clm_apply
-
-  have h4 : ContinuousOn f (U.source ∩ V.source) := h3.mpr h8
-
+  have h4 : ContinuousOn f (U.source ∩ V.source) := continuousOn_clm_apply.mpr h8
   exact h4
 
 lemma l10 : ContinuousOn (MyCoordChangeL 1 0) (U.source ∩ V.source) := by
