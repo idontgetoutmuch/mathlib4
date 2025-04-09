@@ -13,6 +13,43 @@ set_option linter.style.cdot false
 
 open Bundle Topology MulAction Set
 
+def cavbCoordChange
+  (i j : atlas (EuclideanSpace ℝ (Fin 1)) (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1))
+  (x : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :
+  EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1) :=
+  ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
+
+noncomputable
+def CylinderAsVectorBundle : VectorBundleCore ℝ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) (EuclideanSpace ℝ (Fin 1))
+                          (atlas (EuclideanSpace ℝ (Fin 1)) (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1))  where
+  baseSet i := i.1.source
+  isOpen_baseSet i := i.1.open_source
+  indexAt := achart (EuclideanSpace ℝ (Fin 1))
+  mem_baseSet_at := mem_chart_source (EuclideanSpace ℝ (Fin 1))
+  coordChange i j x := cavbCoordChange i j x
+  coordChange_self _ _ _ _ := rfl
+  continuousOn_coordChange i j := by
+
+    let s := ((fun i ↦ i.1.source) i ∩ (fun i ↦ i.1.source) j)
+    let f := fun (x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)) ↦ ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
+    let g : EuclideanSpace ℝ (Fin 1) → (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 → EuclideanSpace ℝ (Fin 1)) :=
+      fun y => (fun x => f x y)
+
+    have h0 : ∀ (y : EuclideanSpace ℝ (Fin 1)), ContinuousOn (g y) s := by
+      intro y
+      have h1 : ContinuousOn (fun x => f x y) s := continuousOn_const
+      exact h1
+
+    have h2 : ContinuousOn f s ↔
+     ∀ (y : EuclideanSpace ℝ (Fin 1)), ContinuousOn (fun x ↦ f x y) s := continuousOn_clm_apply
+
+    have h3 : ContinuousOn ((fun x ↦ ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))))
+                           ((fun i ↦ i.1.source) i ∩ (fun i ↦ i.1.source) j) := h2.mpr h0
+
+    exact h3
+
+  coordChange_comp i j k x hx v := rfl
+
 noncomputable
 def MyCoordChangeL : Fin 2 → Fin 2 → (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) → EuclideanSpace ℝ (Fin 1) →L[ℝ]  EuclideanSpace ℝ (Fin 1)
   | 0, 0, _ => ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
@@ -29,6 +66,12 @@ theorem MyCoordChange_selfL : ∀ (i : Fin 2),
         | 0 => rfl
         | 1 => rfl
     exact h
+
+lemma l00 : ContinuousOn (MyCoordChangeL 0 0) U.source :=
+  continuousOn_const
+
+lemma l11 : ContinuousOn (MyCoordChangeL 1 1) V.source :=
+  continuousOn_const
 
 def sl1 : Set (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) := { x | 0 < x.val 1 }
 def sl2 : Set (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) := { x | 0 > x.val 1 }
@@ -151,6 +194,12 @@ lemma l10 : ContinuousOn (MyCoordChangeL 1 0) (U.source ∩ V.source) := by
   have h3 : ContinuousOn (MyCoordChangeL 1 0) (U.source ∩ V.source) := ContinuousOn.congr l01 h2
   exact h3
 
+noncomputable def ff : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) → EuclideanSpace ℝ (Fin 1) → EuclideanSpace ℝ (Fin 1)
+  | x, α => if (x.val 1) > 0 then α else -α
+
+lemma ll (x : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) (v : EuclideanSpace ℝ (Fin 1)) : f x (f x v) = v := by
+  by_cases h : x.val 1 > 0 <;> simp [f, h]
+
 theorem l1001 (x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)) (v : EuclideanSpace ℝ (Fin 1)) :
     MyCoordChangeL 1 0 x (MyCoordChangeL 0 1 x v) = v := by
     simp_all [MyCoordChangeL]
@@ -162,9 +211,10 @@ theorem l1001 (x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)) (v : Eucl
 
 theorem l0110 (x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)) (v : EuclideanSpace ℝ (Fin 1)) :
     MyCoordChangeL 0 1 x (MyCoordChangeL 1 0 x v) = v := by
-  have h1 : MyCoordChangeL 0 1 x (MyCoordChangeL 1 0 x v) =
+  have h1 : MyCoordChangeL 0 1 = MyCoordChangeL 1 0 := rfl
+  have h2 : MyCoordChangeL 0 1 x (MyCoordChangeL 1 0 x v) =
    MyCoordChangeL 1 0 x (MyCoordChangeL 0 1 x v) := rfl
-  rw [h1, l1001]
+  rw [h2, l1001]
 
 theorem MyCoordChangeL_comp : ∀ (i j k : Fin 2),
   ∀ x ∈ (fun i => if i = 0 then U.source else V.source) i ∩
@@ -205,7 +255,7 @@ def MobiusAsVectorBundle : VectorBundleCore ℝ (Metric.sphere (0 : EuclideanSpa
                   ((fun i ↦ if i = 0 then U.source else V.source) ((fun i ↦ i) 0) ∩
                    (fun i ↦ if i = 0 then U.source else V.source) ((fun i ↦ i) 0)) := by
           simp
-          exact continuousOn_const
+          exact l00
         exact h2
       · exact l01
     · fin_cases j
@@ -220,6 +270,6 @@ def MobiusAsVectorBundle : VectorBundleCore ℝ (Metric.sphere (0 : EuclideanSpa
                   ((fun i ↦ if i = 0 then U.source else V.source) ((fun i ↦ i) 1) ∩
                    (fun i ↦ if i = 0 then U.source else V.source) ((fun i ↦ i) 1)) := by
           simp
-          exact continuousOn_const
+          exact l11
         exact h2
   coordChange_comp := MyCoordChangeL_comp
