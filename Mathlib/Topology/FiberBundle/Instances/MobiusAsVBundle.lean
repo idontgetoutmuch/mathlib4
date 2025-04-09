@@ -14,10 +14,14 @@ set_option linter.style.cdot false
 open Bundle Topology MulAction Set
 
 noncomputable
-def MyCoordChangeL : Fin 2 → Fin 2 → (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) → EuclideanSpace ℝ (Fin 1) →L[ℝ]  EuclideanSpace ℝ (Fin 1)
+def MyCoordChangeL : Fin 2 → Fin 2 →
+  (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) →
+  EuclideanSpace ℝ (Fin 1) →L[ℝ]  EuclideanSpace ℝ (Fin 1)
   | 0, 0, _ => ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
-  | 0, 1, x => if (x.val 1) > 0 then ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1)) else -ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
-  | 1, 0, x => if (x.val 1) > 0 then ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1)) else -ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
+  | 0, 1, x => if (x.val 1) > 0 then ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
+                                else -ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
+  | 1, 0, x => if (x.val 1) > 0 then ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
+                                else -ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
   | 1, 1, _ => ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
 
 theorem MyCoordChange_selfL : ∀ (i : Fin 2),
@@ -33,55 +37,21 @@ theorem MyCoordChange_selfL : ∀ (i : Fin 2),
 def sl1 : Set (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) := { x | 0 < x.val 1 }
 def sl2 : Set (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) := { x | 0 > x.val 1 }
 
-lemma h6 : (sl1 ∪ sl2) = (({x | x.val 1 > 0} ∪ {x | x.val 1 < 0})) := by
-    ext ⟨p, v⟩
-    simp only [Set.mem_union, Set.mem_prod, Set.mem_univ, and_true, Set.mem_setOf_eq]
-    exact Iff.rfl
+lemma h_eq_on_pre : ∀ x ∈ sl1, ∀ (v : EuclideanSpace ℝ (Fin 1)),
+                    (MyCoordChangeL 0 1 x) v = v := by
+  simp_all [MyCoordChangeL]
+  intro x _ hx
+  have h : 0 < x 1 := hx
+  rw [if_pos h]
+  simp
 
-lemma h_eq_on_pre : ∀ x ∈ sl1, ∀ (v : EuclideanSpace ℝ (Fin 1)), (MyCoordChangeL 0 1 x) v = v := by
-    intro x hx v
-    have h0 :
-      ((MyCoordChangeL 0 1 x) v) =
-      (if (x.val 1) > 0 then ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
-                          else -ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))) v := rfl
-
-    have h2 :(x.val 1) > 0 := by exact hx
-
-    have h4 :
-      ((MyCoordChangeL 0 1 x) v) = ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1)) v := by
-        rw [if_pos h2] at h0
-        exact h0
-
-    have h5 : ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1)) v = v := rfl
-
-    have h6 : ((MyCoordChangeL 0 1 x) v) = v := by rw [h5] at h4; exact h4
-
-    exact h6
-
-lemma h_eq_on2_pre : ∀ x ∈ sl2, ∀ (v : EuclideanSpace ℝ (Fin 1)), (MyCoordChangeL 0 1 x) v = -v := by
-    intro x hx v
-    have h0 :
-      ((MyCoordChangeL 0 1 x) v) =
-      (if (x.val 1) > 0 then ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
-                          else -ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))) v := rfl
-
-    have h2 : ¬ (x.val 1 > 0) := not_lt_of_gt hx
-
-    have h4 :
-      ((MyCoordChangeL 0 1 x) v) = -ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1)) v := by
-        rw [if_neg h2] at h0
-        exact h0
-
-    have h5 : ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1)) v = v := rfl
-
-    have h6 : ((MyCoordChangeL 0 1 x) v) = -v := by rw [h5] at h4; exact h4
-
-    exact h6
-
-lemma h7 :
-    EqOn (fun x => ((MyCoordChangeL 0 1 x.1) x.2)) Prod.snd s1 →
-    ContinuousOn (fun x => ((MyCoordChangeL 0 1 x.1) x.2)) s1 :=
-      continuous_snd.continuousOn.congr
+lemma h_eq_on2_pre : ∀ x ∈ sl2, ∀ (v : EuclideanSpace ℝ (Fin 1)),
+                    (MyCoordChangeL 0 1 x) v = -v := by
+  simp_all [MyCoordChangeL]
+  intro x _ hx
+  have h : ¬ (0 < x 1) := not_lt_of_gt hx
+  rw [if_neg h]
+  simp
 
 theorem sl1_open : IsOpen sl1 :=
   isOpen_induced_iff.mpr ⟨{ x : EuclideanSpace ℝ (Fin 2) | x 1 > 0 },
@@ -201,25 +171,13 @@ def MobiusAsVectorBundle : VectorBundleCore ℝ (Metric.sphere (0 : EuclideanSpa
     intro i j
     fin_cases i
     · fin_cases j
-      . have h2 : ContinuousOn (MyCoordChangeL ((fun i ↦ i) 0) ((fun i ↦ i) 0))
-                  ((fun i ↦ if i = 0 then U.source else V.source) ((fun i ↦ i) 0) ∩
-                   (fun i ↦ if i = 0 then U.source else V.source) ((fun i ↦ i) 0)) := by
-          simp
-          exact continuousOn_const
-        exact h2
+      . simp_all [MyCoordChangeL]
+        exact continuousOn_const
       · exact l01
     · fin_cases j
-      · have h2 : ContinuousOn (MyCoordChangeL ((fun i ↦ i) 1) ((fun i ↦ i) 0))
-          ((fun i ↦ if i = 0 then U.source else V.source) ((fun i ↦ i) 1) ∩
-          (fun i ↦ if i = 0 then U.source else V.source) ((fun i ↦ i) 0)) := by
-            simp
-            rw [inter_comm]
-            exact l10
-        exact h2
-      · have h2 : ContinuousOn (MyCoordChangeL ((fun i ↦ i) 1) ((fun i ↦ i) 1))
-                  ((fun i ↦ if i = 0 then U.source else V.source) ((fun i ↦ i) 1) ∩
-                   (fun i ↦ if i = 0 then U.source else V.source) ((fun i ↦ i) 1)) := by
-          simp
-          exact continuousOn_const
-        exact h2
+      · simp_all [MyCoordChangeL]
+        rw [inter_comm]
+        exact l10
+      · simp_all [MyCoordChangeL]
+        exact continuousOn_const
   coordChange_comp := MyCoordChangeL_comp
