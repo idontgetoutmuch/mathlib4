@@ -229,17 +229,6 @@ theorem SulSource : U.source ∩ V.source = { x | x.val 1 > 0 } ∪ { x | x.val 
          _ =  { x : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := h1.symm
   simp [hq]
 
-lemma continuous_on_union_of_open {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
-    {f : X → Y} {s t : Set X} (hs : IsOpen s) (ht : IsOpen t)
-    (hfs : ContinuousOn f s) (hft : ContinuousOn f t) :
-    ContinuousOn f (s ∪ t) := by
-  rw [continuousOn_open_iff (IsOpen.union hs ht)]
-  intro u hu
-  rw [inter_comm, Set.inter_union_distrib_left, inter_comm]
-  apply ((continuousOn_open_iff hs).mp hfs u hu).union
-  rw [Set.inter_comm]
-  exact (continuousOn_open_iff ht).mp hft u hu
-
 def s1 : Set ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1)) := { x | 0 < x.1.val 1 }
 
 lemma fooo : {(x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)) | x.val 1 > 0} ×ˢ (univ : Set (EuclideanSpace ℝ (Fin 1))) ⊆ { x | 0 < x.1.val 1 } := by
@@ -303,7 +292,7 @@ theorem t01 : ContinuousOn (fun p => MyCoordChange 0 1 p.1 p.2) ((U.source ∩ V
     dsimp [f, s2] at hx ⊢
     rw [if_neg (not_lt_of_gt hx)]
   rw [h1, ← h6]
-  exact continuous_on_union_of_open s1_is_open s2_is_open hz1 hz2
+  exact ContinuousOn.union_of_isOpen hz1 hz2 s1_is_open s2_is_open
 
  theorem t10 : ContinuousOn (fun p => MyCoordChange 1 0 p.1 p.2) ((V.source ∩ U.source) ×ˢ univ) := by
   have h1 : MyCoordChange 1 0 = MyCoordChange 0 1 := rfl
