@@ -172,27 +172,7 @@ def MobiusAsVectorBundle : VectorBundleCore ℝ (Metric.sphere (0 : EuclideanSpa
   continuousOn_coordChange := uk
   coordChange_comp := MyCoordChangeL_comp
 
-open Bundle
-open Manifold
-
-#synth ChartedSpace ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × (EuclideanSpace ℝ (Fin 1)))
-                    (TotalSpace (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber)
-
-#synth ContMDiffVectorBundle 0 (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber (𝓡 1)
-
-#synth ContMDiffVectorBundle ⊤ (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber (𝓡 1)
-
-
-#check VectorBundle
-#check trivializationAt
-#check VectorPrebundle.toVectorBundle
-#check FiberPrebundle.toFiberBundle
-
-#check VectorBundleCore.fiberBundle
-
-#check MobiusAsVectorBundle.fiberBundle
-#check MobiusAsVectorBundle.fiberBundle.trivializationAt
-#check FiberBundle.trivializationAt'
+open Bundle Manifold Trivialization VectorBundleCore Topology
 
 noncomputable
 def e := MobiusAsVectorBundle.localTriv 0
@@ -211,30 +191,131 @@ def φ (x : ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) )) :
   (EuclideanSpace ℝ (Fin 1)) →L[ℝ] (EuclideanSpace ℝ (Fin 1)) :=
     (Trivialization.coordChangeL ℝ e e' x)
 
-example : ContMDiffOn (𝓡 1)
+noncomputable
+def φ00 (x : ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) )) :
+  (EuclideanSpace ℝ (Fin 1)) →L[ℝ] (EuclideanSpace ℝ (Fin 1)) :=
+    (Trivialization.coordChangeL ℝ e e x)
+
+noncomputable
+def φ10 (x : ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) )) :
+  (EuclideanSpace ℝ (Fin 1)) →L[ℝ] (EuclideanSpace ℝ (Fin 1)) :=
+    (Trivialization.coordChangeL ℝ e' e x)
+
+noncomputable
+def φ11 (x : ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) )) :
+  (EuclideanSpace ℝ (Fin 1)) →L[ℝ] (EuclideanSpace ℝ (Fin 1)) :=
+    (Trivialization.coordChangeL ℝ e' e' x)
+
+lemma φ_eq_coordChange' :
+  ∀ x, x ∈ e.baseSet ∩ e'.baseSet →
+    φ x = MobiusAsVectorBundle.coordChange 0 1 x := by
+  intros x hx
+  apply ContinuousLinearMap.ext
+  intro y
+  exact VectorBundleCore.localTriv_coordChange_eq MobiusAsVectorBundle 0 1 hx y
+
+lemma hh01 : ContMDiffOn (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤
+ (MobiusAsVectorBundle.coordChange 0 1) (e.baseSet ∩ e'.baseSet) := by
+
+  have h0 : MobiusAsVectorBundle.coordChange 0 1 = MyCoordChangeL 0 1 := rfl
+
+  let f (x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)) := if x.val 1 > 0
+    then ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
+    else -ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
+
+  let c := ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
+  let d := -ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin 1))
+  let g := fun _ : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 => c
+  let h := fun _ : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 => d
+
+  have h_eq : ∀ x, x.val 1 > 0 → f x = g x := by
+    intros x hx
+    simp only [f]
+    rw [if_pos hx]
+
+  have h_er : ∀ x, x.val 1 < 0 → f x = h x := by
+    intros x hx
+    simp only [f, h]
+    rw [if_neg (by linarith : ¬x.val 1 > 0)]
+
+  have h1_const_pt : ∀ x ∈ {x | x.val 1 > 0},
+    ContMDiffWithinAt (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
+                      ⊤ g {x | x.val 1 > 0} x :=
+    fun x hx => contMDiffWithinAt_const
+
+  have h2 : ∀ x ∈ {x | x.val 1 > 0},
+  ContMDiffWithinAt (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
+    ⊤ f {x | x.val 1 > 0} x :=
+    fun x hx => ContMDiffWithinAt.congr (h1_const_pt x hx) (fun y hy => h_eq y hy) (h_eq x hx)
+
+  have h1 : ContMDiffOn (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤ f {x | x.val 1 > 0} := h2
+
+  have ha_const_pt : ∀ x ∈ {x | x.val 1 < 0},
+    ContMDiffWithinAt (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
+                      ⊤ h {x | x.val 1 < 0} x :=
+    fun x hx => contMDiffWithinAt_const
+
+  have hb : ∀ x ∈ {x | x.val 1 < 0},
+  ContMDiffWithinAt (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
+    ⊤ f {x | x.val 1 < 0} x :=
+    fun x hx => ContMDiffWithinAt.congr (ha_const_pt x hx) (fun y hy => h_er y hy) (h_er x hx)
+
+  have hc : ContMDiffOn (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤ f {x | x.val 1 < 0} := hb
+
+  have h6 : ContMDiffOn (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤ f ({x | x.val 1 > 0} ∪ {x | x.val 1 < 0}) := by
+    intro x hx
+    rcases (Set.mem_union x _ _).1 hx with (hxp | hxn)
+    · have h61 : {x | x.val 1 > 0} ∈ 𝓝 x := tOpen.mem_nhds hxp
+      have h62 : ContMDiffAt (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤ f x :=
+       ContMDiffOn.contMDiffAt h1 h61
+      have h63 : ContMDiffWithinAt (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤ f
+                                    ({y | y.val 1 > 0} ∪ {y | y.val 1 < 0}) x := h62.contMDiffWithinAt
+      exact h63
+    · have h61 : {x | x.val 1 < 0} ∈ 𝓝 x := tOpen'.mem_nhds hxn
+      have h62 : ContMDiffAt (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤ f x :=
+       ContMDiffOn.contMDiffAt hc h61
+      have h63 : ContMDiffWithinAt (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤ f
+                                    ({y | y.val 1 > 0} ∪ {y | y.val 1 < 0}) x := h62.contMDiffWithinAt
+      exact h63
+
+  have he : U.source = e.baseSet := rfl
+  have he' : V.source = e'.baseSet := rfl
+
+  have h4 : U.source ∩ V.source = { x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := SulSource
+  rw [<-he, <-he', h4]
+
+  exact h6
+
+lemma c00 : ContMDiffOn (𝓡 1)
               𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
-              ⊤ φ (e.baseSet ∩ e'.baseSet) := sorry
+              ⊤ φ00 (e.baseSet ∩ e.baseSet) := sorry
+
+lemma c01 : ContMDiffOn (𝓡 1)
+              𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
+              ⊤ φ (e.baseSet ∩ e'.baseSet) := by
+  apply ContMDiffOn.congr hh01
+  intros x hx
+  exact φ_eq_coordChange' x hx
+
+lemma c10 : ContMDiffOn (𝓡 1)
+              𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
+              ⊤ φ10 (e'.baseSet ∩ e.baseSet) := sorry
+
+lemma c11 : ContMDiffOn (𝓡 1)
+              𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
+              ⊤ φ11 (e'.baseSet ∩ e'.baseSet) := sorry
+
+lemma trivialization_mem_iff (e : Trivialization _ _) :
+  MemTrivializationAtlas e ↔
+  e = MobiusAsVectorBundle.localTriv 0 ∨ e = MobiusAsVectorBundle.localTriv 1 := sorry
 
 noncomputable
 instance : ContMDiffVectorBundle ⊤ (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber (𝓡 1) :=
 {
-  contMDiffOn_coordChangeL := fun e e' [MemTrivializationAtlas e] [MemTrivializationAtlas e'] =>
-
-    let h1 : ContMDiffOn (𝓡 1)
-              𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
-              ⊤
-              (fun b => (Trivialization.coordChangeL ℝ e e' b
-                          : EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)))
-              (e.baseSet ∩ e'.baseSet) := sorry
-    h1
+  contMDiffOn_coordChangeL := fun e e' mem_e mem_e' =>
+    match (trivialization_mem_iff e).mp mem_e, (trivialization_mem_iff e').mp mem_e' with
+    | Or.inl l00, Or.inl r00 => by subst l00; subst r00; exact c00
+    | Or.inl l01, Or.inr r01 => by subst l01; subst r01; exact c01
+    | Or.inr l10, Or.inl r10 => by subst l10; subst r10; exact c10
+    | Or.inr l11, Or.inr r11 => by subst l11; subst r11; exact c11
 }
-
-
-instance : ContMDiffVectorBundle ⊤ (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber (𝓡 1) := by
-
-  refine { contMDiffOn_coordChangeL := ?_ }
-  refine fun e e' [MemTrivializationAtlas e] [MemTrivializationAtlas e'] ↦ ?_
-
-  have h1 : ContMDiffOn (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤
-    (fun b ↦ (Trivialization.coordChangeL ℝ e e' b : EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))) (e.baseSet ∩ e'.baseSet) := sorry
-  exact h1
