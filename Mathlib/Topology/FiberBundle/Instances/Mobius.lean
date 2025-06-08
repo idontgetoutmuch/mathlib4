@@ -407,3 +407,27 @@ instance : ChartedSpace (EuclideanSpace ℝ (Fin (1 + 1))) (Bundle.TotalSpace (E
     (Bundle.TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius.Fiber)
 
 #synth IsManifold (𝓡 2) 0 (TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius.Fiber)
+
+open Bundle Manifold Trivialization VectorBundleCore Topology
+
+noncomputable
+def ef := Mobius.localTriv 0
+
+noncomputable
+def ef' := Mobius.localTriv 1
+
+lemma trivialization_mem_iff_f (e : Trivialization _ _) :
+    MemTrivializationAtlas e ↔
+    e = Mobius.localTriv 0 ∨ e = Mobius.localTriv 1 := by
+  dsimp [MemTrivializationAtlas, Mobius]
+  constructor
+  · intro h
+    simp only [Set.mem_range] at h
+    obtain ⟨i, rfl⟩ := h
+    fin_cases i
+    · left; rfl
+    · right; rfl
+  · intro h
+    cases h with
+    | inl h0 => exact ⟨0, h0.symm⟩
+    | inr h1 => exact ⟨1, h1.symm⟩
