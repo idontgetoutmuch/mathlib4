@@ -143,7 +143,7 @@ theorem t10L : ContinuousOn (fun p => MyCoordChangeL 1 0 p) ((V.source ∩ U.sou
   rw [Set.inter_comm]
   exact t01L
 
-theorem uk : ∀ (i j : Fin 2),
+theorem MyContinuousOn_coordChangeL : ∀ (i j : Fin 2),
   ContinuousOn (MyCoordChangeL i j)
    ((if i = 0 then U.source else V.source) ∩ if j = 0 then U.source else V.source) := by
     intro i j
@@ -169,7 +169,7 @@ def MobiusAsVectorBundle : VectorBundleCore ℝ (Metric.sphere (0 : EuclideanSpa
   mem_baseSet_at := my_mem_baseSet_at
   coordChange := MyCoordChangeL
   coordChange_self := MyCoordChangeL_self
-  continuousOn_coordChange := uk
+  continuousOn_coordChange := MyContinuousOn_coordChangeL
   coordChange_comp := MyCoordChangeL_comp
 
 open Bundle Manifold Trivialization VectorBundleCore Topology
@@ -213,6 +213,36 @@ lemma φ_eq_coordChange' :
   apply ContinuousLinearMap.ext
   intro y
   exact VectorBundleCore.localTriv_coordChange_eq MobiusAsVectorBundle 0 1 hx y
+
+lemma φ10_eq_coordChange :
+  ∀ x, x ∈ e'.baseSet ∩ e.baseSet →
+    φ10 x = MobiusAsVectorBundle.coordChange 1 0 x := by
+  intros x hx
+  apply ContinuousLinearMap.ext
+  intro y
+  exact VectorBundleCore.localTriv_coordChange_eq MobiusAsVectorBundle 1 0 hx y
+
+lemma φ00_eq_coordChange :
+  ∀ x, x ∈ e.baseSet ∩ e.baseSet →
+    φ00 x = MobiusAsVectorBundle.coordChange 0 0 x := by
+  intros x hx
+  apply ContinuousLinearMap.ext
+  intro y
+  exact VectorBundleCore.localTriv_coordChange_eq MobiusAsVectorBundle 0 0 hx y
+
+lemma φ11_eq_coordChange :
+  ∀ x, x ∈ e'.baseSet ∩ e'.baseSet →
+    φ11 x = MobiusAsVectorBundle.coordChange 1 1 x := by
+  intros x hx
+  apply ContinuousLinearMap.ext
+  intro y
+  exact VectorBundleCore.localTriv_coordChange_eq MobiusAsVectorBundle 1 1 hx y
+
+lemma hh00 : ContMDiffOn (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤
+ (MobiusAsVectorBundle.coordChange 0 0) (e.baseSet ∩ e.baseSet) := contMDiffOn_const
+
+lemma hh11 : ContMDiffOn (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤
+ (MobiusAsVectorBundle.coordChange 1 1) (e'.baseSet ∩ e'.baseSet) := contMDiffOn_const
 
 lemma hh01 : ContMDiffOn (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤
  (MobiusAsVectorBundle.coordChange 0 1) (e.baseSet ∩ e'.baseSet) := by
@@ -286,9 +316,15 @@ lemma hh01 : ContMDiffOn (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ]
 
   exact h6
 
+lemma hh10 : ContMDiffOn (𝓡 1) 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1)) ⊤
+ (MobiusAsVectorBundle.coordChange 0 1) (e.baseSet ∩ e'.baseSet) := hh01
+
 lemma c00 : ContMDiffOn (𝓡 1)
               𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
-              ⊤ φ00 (e.baseSet ∩ e.baseSet) := sorry
+              ⊤ φ00 (e.baseSet ∩ e.baseSet) := by
+  apply ContMDiffOn.congr hh00
+  intros x hx
+  exact φ00_eq_coordChange x (Set.mem_inter hx.1 hx.1)
 
 lemma c01 : ContMDiffOn (𝓡 1)
               𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
@@ -297,17 +333,46 @@ lemma c01 : ContMDiffOn (𝓡 1)
   intros x hx
   exact φ_eq_coordChange' x hx
 
+lemma c10' : ContMDiffOn (𝓡 1)
+              𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
+              ⊤ φ10 (e.baseSet ∩ e'.baseSet) := by
+  apply ContMDiffOn.congr hh10
+  intros x hx
+  have h1 : x ∈ e'.baseSet ∩ e.baseSet := Set.mem_inter hx.2 hx.1
+  exact φ10_eq_coordChange x h1
+
 lemma c10 : ContMDiffOn (𝓡 1)
               𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
-              ⊤ φ10 (e'.baseSet ∩ e.baseSet) := sorry
+              ⊤ φ10 (e'.baseSet ∩ e.baseSet) := by
+  rw [Set.inter_comm]
+  exact c10'
 
 lemma c11 : ContMDiffOn (𝓡 1)
               𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1))
-              ⊤ φ11 (e'.baseSet ∩ e'.baseSet) := sorry
+              ⊤ φ11 (e'.baseSet ∩ e'.baseSet) := by
+  apply ContMDiffOn.congr hh11
+  intros x hx
+  exact φ11_eq_coordChange x (Set.mem_inter hx.1 hx.1)
+
+#check vectorBundle MobiusAsVectorBundle
+
+#synth VectorBundle ℝ (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber
 
 lemma trivialization_mem_iff (e : Trivialization _ _) :
-  MemTrivializationAtlas e ↔
-  e = MobiusAsVectorBundle.localTriv 0 ∨ e = MobiusAsVectorBundle.localTriv 1 := sorry
+    MemTrivializationAtlas e ↔
+    e = MobiusAsVectorBundle.localTriv 0 ∨ e = MobiusAsVectorBundle.localTriv 1 := by
+  dsimp [MemTrivializationAtlas, MobiusAsVectorBundle]
+  constructor
+  · intro h
+    simp only [Set.mem_range] at h
+    obtain ⟨i, rfl⟩ := h
+    fin_cases i
+    · left; rfl
+    · right; rfl
+  · intro h
+    cases h with
+    | inl h0 => exact ⟨0, h0.symm⟩
+    | inr h1 => exact ⟨1, h1.symm⟩
 
 noncomputable
 instance : ContMDiffVectorBundle ⊤ (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber (𝓡 1) :=
@@ -319,3 +384,28 @@ instance : ContMDiffVectorBundle ⊤ (EuclideanSpace ℝ (Fin 1)) MobiusAsVector
     | Or.inr l10, Or.inl r10 => by subst l10; subst r10; exact c10
     | Or.inr l11, Or.inr r11 => by subst l11; subst r11; exact c11
 }
+
+#synth ContMDiffVectorBundle ⊤ (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber (𝓡 1)
+
+noncomputable
+instance : ChartedSpace ((EuclideanSpace ℝ (Fin 1)) × (EuclideanSpace ℝ (Fin 1)))
+                       (TotalSpace (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber)
+ := ChartedSpace.comp
+  (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1)))
+  ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × (EuclideanSpace ℝ (Fin 1)))
+  (TotalSpace (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber)
+
+noncomputable
+instance : ChartedSpace (EuclideanSpace ℝ (Fin (1 + 1))) (Bundle.TotalSpace (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber) := by
+  exact ChartedSpace.comp
+    (EuclideanSpace ℝ (Fin (1 + 1)))
+    ((EuclideanSpace ℝ (Fin 1)) × (EuclideanSpace ℝ (Fin 1)))
+    (Bundle.TotalSpace (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber)
+
+#synth VectorBundle ℝ (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber
+#synth ContMDiffVectorBundle ⊤ (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber (𝓡 1)
+
+#synth IsManifold ((𝓡 1).prod (𝓡 1)) ⊤ (TotalSpace (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber)
+
+#synth IsManifold (𝓡 2) 0 (TotalSpace (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber)
+#synth IsManifold (𝓡 2) ⊤ (TotalSpace (EuclideanSpace ℝ (Fin 1)) MobiusAsVectorBundle.Fiber)
