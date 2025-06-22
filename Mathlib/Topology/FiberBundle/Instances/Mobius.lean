@@ -604,6 +604,76 @@ noncomputable instance Mobius.chartedSpaceTotal :
 #check @atlas (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1))) _
                    Mobius.TotalSpace _ (Mobius.chartedSpaceTotal Mobius.chartedSpaceBase)
 
+noncomputable
+def totalChartAt' : Mobius.TotalSpace → PartialHomeomorph Mobius.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)) :=
+  fun x ↦
+    let _ := Mobius.chartedSpaceBase
+    let φ := chartAt (EuclideanSpace ℝ (Fin 1)) x.proj
+    let i := Mobius.indexAt x.proj
+    (Mobius.localTriv i).toPartialHomeomorph ≫ₕ (φ.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+
+def totalAtlas'  : Set (PartialHomeomorph Mobius.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))) :=
+  { (Mobius.localTriv 0).toPartialHomeomorph ≫ₕ (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))),
+    (Mobius.localTriv 1).toPartialHomeomorph ≫ₕ (φ₁.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) }
+
+noncomputable instance Mobius.chartedSpaceTotal' :
+  ChartedSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)) Mobius.TotalSpace :=
+  { atlas := totalAtlas'
+    chartAt := totalChartAt'
+    mem_chart_source := by
+      intro x
+      dsimp [totalChartAt']
+      let φ := chartAt (EuclideanSpace ℝ (Fin 1)) x.proj
+      let i := Mobius.indexAt x.proj
+      apply And.intro
+      · exact (FiberBundleCore.mem_localTrivAt_source Mobius x x.proj).mpr
+              (FiberBundle.mem_baseSet_trivializationAt' x.proj)
+      · refine mem_preimage.mpr ?_
+        apply Set.mem_prod.mpr
+        constructor
+        · have : (Mobius.localTrivAt x.proj x).1 = x.proj := rfl
+          rw [this]
+          exact @mem_chart_source _ _ _ _ Mobius.chartedSpaceBase x.proj
+        · exact Set.mem_univ _
+    chart_mem_atlas := by
+      rintro ⟨x, ξ⟩
+      let _ := Mobius.chartedSpaceBase
+      dsimp [totalChartAt', totalAtlas']
+      let φ := chartAt (EuclideanSpace ℝ (Fin 1)) x
+      let i := Mobius.indexAt x
+      have h8 : Mobius.localTrivAt x =  Mobius.localTriv (if (x.val 0) > 0 then 0 else 1) := rfl
+
+      cases (Classical.em ((x.val 0) > 0)) with
+      | inl hx => have h1 : (if (x.val 0) > 0 then φ₀ else φ₁) = φ₀ := if_pos hx
+                  have h3 : Mobius.localTriv (if (x.val 0) > 0 then 0 else 1) = Mobius.localTriv 0 := by
+                   congr
+                   exact if_pos hx
+                  have h5 : Mobius.localTrivAt x = Mobius.localTriv 0 := by
+                    rw [h8, h3]
+                  have h6 : (Mobius.localTriv 0).toPartialHomeomorph ≫ₕ
+                            φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))) ∈ totalAtlas' := by simp [totalAtlas']
+                  have h7 : (Mobius.localTrivAt x).toPartialHomeomorph ≫ₕ
+                            (chartAt (EuclideanSpace ℝ (Fin 1)) x).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))) ∈ totalAtlas' := by
+                    rw [h5]
+                    exact mem_of_eq_of_mem (congrArg (Mobius.localTriv 0).trans
+                      (congrFun (congrArg PartialHomeomorph.prod h1) (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))) h6
+                  exact h7
+      | inr hx => have h1 : (if (x.val 0) > 0 then φ₀ else φ₁) = φ₁ := if_neg hx
+                  have h3 : Mobius.localTriv (if (x.val 0) > 0 then 0 else 1) = Mobius.localTriv 1 := by
+                    congr
+                    exact if_neg hx
+                  have h5 : Mobius.localTrivAt x = Mobius.localTriv 1 := by
+                    rw [h8, h3]
+                  have h6 : (Mobius.localTriv 1).toPartialHomeomorph ≫ₕ
+                            φ₁.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))) ∈ totalAtlas' := by simp [totalAtlas']
+                  have h7 : (Mobius.localTrivAt x).toPartialHomeomorph ≫ₕ
+                            (chartAt (EuclideanSpace ℝ (Fin 1)) x).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))) ∈ totalAtlas' := by
+                    rw [h5]
+                    exact mem_of_eq_of_mem (congrArg (Mobius.localTriv 1).trans
+                      (congrFun (congrArg PartialHomeomorph.prod h1) (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))) h6
+                  exact h7
+   }
+
 lemma hz1
   (x t : EuclideanSpace ℝ (Fin 1))
   (e : PartialHomeomorph Mobius.TotalSpace (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1))))
@@ -629,6 +699,149 @@ lemma hz2
   have h3 : ((𝓡 1).prod (𝓡 1)).symm (x, t) ∈ e.target := by
     exact h2 h₁
   exact h3
+
+noncomputable
+def conj :=
+  (φ₀.prod (PartialHomeomorph.refl _)).symm ≫ₕ
+  ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ
+   (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ
+  (φ₀.prod (PartialHomeomorph.refl _))
+
+def A : Set ((↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)) × EuclideanSpace ℝ (Fin 1)) :=
+  {p | p.1.val 1 > 0}
+
+def B := Prod.map φ₀ id '' A
+def C := (φ₀.prod (PartialHomeomorph.refl _)) '' A
+
+/- FIXME -/
+example : ContDiffOn ℝ ⊤ (ee00.symm ≫ₕ ee10) C := by
+  have h0 : ee10 = (Mobius.localTriv 1).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))) := rfl
+
+  have h6 : (ee00.symm ≫ₕ ee10) =
+  ((φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ≫ₕ ((Mobius.localTriv 0).toPartialHomeomorph).symm) ≫ₕ
+  ((Mobius.localTriv 1).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) := by
+    exact rfl
+
+  have h7 : ((φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ≫ₕ ((Mobius.localTriv 0).toPartialHomeomorph).symm) ≫ₕ
+  ((Mobius.localTriv 1).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))  =
+  (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ≫ₕ ((((Mobius.localTriv 0).toPartialHomeomorph).symm) ≫ₕ
+  (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) := by
+    rw [PartialHomeomorph.trans_assoc, PartialHomeomorph.trans_assoc]
+
+  have h8 : (ee00.symm ≫ₕ ee10) =
+    (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ≫ₕ ((((Mobius.localTriv 0).toPartialHomeomorph).symm) ≫ₕ
+    (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) := by
+    rw [h6, h7]
+
+  have h9 : (ee00.symm ≫ₕ ee10) = conj := by
+    rw [h8]
+    exact rfl
+
+  have h5 : ∀ (x : Mobius.Base) (v : EuclideanSpace ℝ (Fin 1)),
+    (x.val 1) > 0 →
+    ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v)
+      = (x, v) := by
+    intros x v ha
+    have hx : x ∈ { x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := Or.inl ha
+    have hx' : x ∈ U.source ∩ V.source := SulSource.symm ▸ hx
+    have h1 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
+              (x, Mobius.coordChange 0 1 x v) := localTrivTransition_eq_coordChange 0 1 hx'
+    have h2 : Mobius.coordChange 0 1 x v = if (x.val 1) > 0 then v else -v := rfl
+    have h3 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
+    (x, if (x.val 1) > 0 then v else -v) := by
+      rw [h2] at h1
+      exact h1
+    have h4 : (x.val 1) > 0 → (if (x.val 1) > 0 then v else -v) = v := by
+      intro h4
+      rw [if_pos h4]
+    rw [h3, h4]
+    exact ha
+
+  have ha : ∀ z ∈ C, conj z = z := by
+    rintro z ⟨⟨x, v⟩, hx, rfl⟩
+    dsimp only [PartialHomeomorph.prod_apply, PartialHomeomorph.refl_apply, id_eq]
+    have ha1 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
+               (x, v) := h5 x v hx
+    have ha2 : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) (x, v) = (φ₀ x, v) := rfl
+
+    have hu : xh.val 1 = 0 := rfl
+    have hs : (-xh).val 1 = 0 := by simp [hu]
+    have hv : (x.val 1) > 0 := hx
+    have hw : x.val 1 ≠ xh.val 1 := Ne.symm (ne_of_lt hx)
+    have ht : φ₀.source = { x | x ≠ -xh } := hU.source
+    have hne : x ≠ -xh := by
+      intro h_eq
+      have : x.val = (-xh).val := congr_arg Subtype.val h_eq
+      rw [← Bool.coe_false]
+      rw [this] at hv
+      linarith
+
+    have hx_in_src : x ∈ φ₀.source := by
+      rw [ht]
+      exact hne
+
+    have ha3 : (φ₀.prod (PartialHomeomorph.refl _)).symm (φ₀ x, v) = (x, v) := by
+      have ha3a : φ₀.symm (φ₀ x) = x := PartialHomeomorph.left_inv φ₀ hx_in_src
+      exact Prod.ext ha3a rfl
+
+    have ha4 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) = (x, v) := h5 x v hv
+
+
+    have ha5 : conj (φ₀ x, v) = (φ₀ x, v) := by
+      calc
+        conj (φ₀ x, v)
+          = ((φ₀.prod (PartialHomeomorph.refl _)).symm ≫ₕ
+            ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ
+            (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ
+            (φ₀.prod (PartialHomeomorph.refl _))) (φ₀ x, v) := rfl
+        _ = (((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ
+            (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ
+            (φ₀.prod (PartialHomeomorph.refl _))) ((φ₀.prod (PartialHomeomorph.refl _)).symm (φ₀ x, v)) := by
+          rw [PartialHomeomorph.trans_apply]
+        _ = (((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ
+            (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ
+            (φ₀.prod (PartialHomeomorph.refl _))) (x, v) := by rw [ha3]
+        _ = (φ₀.prod (PartialHomeomorph.refl _)) (((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ
+            (Mobius.localTriv 1).toPartialHomeomorph) (x, v)) := by rw  [PartialHomeomorph.trans_apply]
+        _ = (φ₀.prod (PartialHomeomorph.refl _)) (x, v) := by rw [ha4]
+        _ = (φ₀ x, v) := rfl
+
+    exact ha5
+
+  have h6 : ∀ z ∈ (φ₀.prod (PartialHomeomorph.refl _)) '' A, (ee00.symm ≫ₕ ee10) z = z := by
+    exact fun z a ↦ ha z a
+
+  have h7 : ContDiffOn ℝ ⊤ (ee00.symm ≫ₕ ee10) B := by
+    apply ContDiffOn.congr
+    exact contDiffOn_id
+    intro y hy
+    obtain ⟨x, v⟩ := y
+    exact h6 (x, v) hy
+
+  exact h7
+
+example
+  (x t : EuclideanSpace ℝ (Fin 1))
+  (e e' : PartialHomeomorph Mobius.TotalSpace
+                            (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1))))
+  (he : e ∈ @atlas (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1))) _
+                   Mobius.TotalSpace _ (Mobius.chartedSpaceTotal' Mobius.chartedSpaceBase))
+  (he' : e' ∈ @atlas (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1))) _
+                    Mobius.TotalSpace _ (Mobius.chartedSpaceTotal' Mobius.chartedSpaceBase))
+   : ContDiffOn ℝ ⊤
+      (↑((𝓡 1).prod (𝓡 1)) ∘ ↑(e.symm ≫ₕ e') ∘ ↑((𝓡 1).prod (𝓡 1)).symm)
+      (↑((𝓡 1).prod (𝓡 1)).symm ⁻¹' (e.symm ≫ₕ e').source ∩ (range ↑((𝓡 1).prod (𝓡 1)))) := by
+
+  have h5 :  ∀ (p : Mobius.TotalSpace),
+    (Mobius.localTriv 0) p = (p.proj, Mobius.coordChange (Mobius.indexAt p.proj) 0 p.proj p.snd) := by
+      exact FiberBundleCore.localTriv_apply Mobius 0
+
+  cases (Classical.em (e = (Mobius.localTriv 0).toPartialHomeomorph ≫ₕ (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))))) with
+  | inl heq =>  cases (Classical.em (e' = (Mobius.localTriv 0).toPartialHomeomorph ≫ₕ (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))))) with
+                | inl heq' => have h1 : e = e' := by rw [heq, heq']
+                              exact sorry
+                | inr hne' => exact sorry
+  | inr hne => exact sorry
 
 example
   (x t : EuclideanSpace ℝ (Fin 1))
@@ -1087,29 +1300,28 @@ lemma localTrivTransition_eq_coordChange (i j : Fin 2)
 example : Mobius.baseSet 0 = { x | x ≠ -xh } := hU.source
 example : Mobius.baseSet 1 = { x | x ≠ -ug } := hV.source
 
-example : ∀ (x : Mobius.Base) (hx : x ∈ { x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 }) v,
- ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 0).toPartialHomeomorph) (x, v) =
-    (x, Mobius.coordChange 0 1 x v) := by
-  intro x hx v
-  have hx' : (x : Mobius.Base) ∈ U.source ∩ V.source := SulSource.symm ▸ hx
+example : ∀ (x : Mobius.Base) (hx : x ∈ { x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 }),
+ ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+    (((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph))
+    ({x | x.1.val 1 < 0} ∪ {x | x.1.val 1 < 0}) := by
 
-  have h1 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
-    (x, Mobius.coordChange 0 1 x v) := localTrivTransition_eq_coordChange 0 1 hx'
-
-  have h2 : Mobius.coordChange 0 1 x v = if (x.val 1) > 0 then v else -v := rfl
-
-  have h3 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
+  have h5 : ∀ (x : Mobius.Base) (v : EuclideanSpace ℝ (Fin 1)),
+    (x.val 1) > 0 →
+    ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v)
+      = (x, v) := by
+    intros x v ha
+    have hx : x ∈ { x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := Or.inl ha
+    have hx' : x ∈ U.source ∩ V.source := SulSource.symm ▸ hx
+    have h1 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
+              (x, Mobius.coordChange 0 1 x v) := localTrivTransition_eq_coordChange 0 1 hx'
+    have h2 : Mobius.coordChange 0 1 x v = if (x.val 1) > 0 then v else -v := rfl
+    have h3 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
     (x, if (x.val 1) > 0 then v else -v) := by
-    rw [h2] at h1
-    exact h1
-
-  have h4 : (x.val 1) > 0 → (if (x.val 1) > 0 then v else -v) = v := by
-    intro h4
-    rw [if_pos h4]
-
-  have h5 : (x.val 1) > 0 → ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v)
-  = (x, v) := by
-    intro ha
+      rw [h2] at h1
+      exact h1
+    have h4 : (x.val 1) > 0 → (if (x.val 1) > 0 then v else -v) = v := by
+      intro h4
+      rw [if_pos h4]
     rw [h3, h4]
     exact ha
 
@@ -1121,8 +1333,150 @@ example : ∀ (x : Mobius.Base) (hx : x ∈ { x | x.val 1 > 0 } ∪ { x | x.val 
       · intro y hy
         obtain ⟨x, v⟩ := y
         dsimp at hy
-        exact sorry
+        exact h5 x v hy
 
-  exact sorry
+  have h7 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+      ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph)
+      {x : ↑(Metric.sphere 0 1) × EuclideanSpace ℝ (Fin 1) | (x.1.val 1) < 0} := sorry
 
-#check ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph)
+  have h8 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+      ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph)
+      ({x : ↑(Metric.sphere 0 1) × EuclideanSpace ℝ (Fin 1) | (x.1.val 1) < 0} ∪
+       {x : ↑(Metric.sphere 0 1) × EuclideanSpace ℝ (Fin 1) | (x.1.val 1) < 0}) := sorry
+
+  exact fun x hx ↦ h8
+
+noncomputable
+def pre : PartialHomeomorph (↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1))
+                            (↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1)) :=
+ (((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph))
+
+noncomputable
+def ee00 :=  (Mobius.localTriv 0).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))
+
+noncomputable
+def ee10 := (Mobius.localTriv 1).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))
+
+#check (↑(ee00.symm ≫ₕ ee10) : EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1) →
+  EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))
+
+noncomputable
+def conj :=
+  (φ₀.prod (PartialHomeomorph.refl _)).symm ≫ₕ
+  ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ
+   (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ
+  (φ₀.prod (PartialHomeomorph.refl _))
+
+def A : Set ((↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)) × EuclideanSpace ℝ (Fin 1)) :=
+  {p | p.1.val 1 > 0}
+
+def B := Prod.map φ₀ id '' A
+def C := (φ₀.prod (PartialHomeomorph.refl _)) '' A
+
+example : ContDiffOn ℝ ⊤ (ee00.symm ≫ₕ ee10) C := by
+  have h0 : ee10 = (Mobius.localTriv 1).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))) := rfl
+
+  have h6 : (ee00.symm ≫ₕ ee10) =
+  ((φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ≫ₕ ((Mobius.localTriv 0).toPartialHomeomorph).symm) ≫ₕ
+  ((Mobius.localTriv 1).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) := by
+    exact rfl
+
+  have h7 : ((φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ≫ₕ ((Mobius.localTriv 0).toPartialHomeomorph).symm) ≫ₕ
+  ((Mobius.localTriv 1).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))  =
+  (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ≫ₕ ((((Mobius.localTriv 0).toPartialHomeomorph).symm) ≫ₕ
+  (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) := by
+    rw [PartialHomeomorph.trans_assoc, PartialHomeomorph.trans_assoc]
+
+  have h8 : (ee00.symm ≫ₕ ee10) =
+    (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ≫ₕ ((((Mobius.localTriv 0).toPartialHomeomorph).symm) ≫ₕ
+    (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) := by
+    rw [h6, h7]
+
+  have h9 : (ee00.symm ≫ₕ ee10) = conj := by
+    rw [h8]
+    exact rfl
+
+  have h5 : ∀ (x : Mobius.Base) (v : EuclideanSpace ℝ (Fin 1)),
+    (x.val 1) > 0 →
+    ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v)
+      = (x, v) := by
+    intros x v ha
+    have hx : x ∈ { x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := Or.inl ha
+    have hx' : x ∈ U.source ∩ V.source := SulSource.symm ▸ hx
+    have h1 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
+              (x, Mobius.coordChange 0 1 x v) := localTrivTransition_eq_coordChange 0 1 hx'
+    have h2 : Mobius.coordChange 0 1 x v = if (x.val 1) > 0 then v else -v := rfl
+    have h3 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
+    (x, if (x.val 1) > 0 then v else -v) := by
+      rw [h2] at h1
+      exact h1
+    have h4 : (x.val 1) > 0 → (if (x.val 1) > 0 then v else -v) = v := by
+      intro h4
+      rw [if_pos h4]
+    rw [h3, h4]
+    exact ha
+
+  have ha : ∀ z ∈ C, conj z = z := by
+    rintro z ⟨⟨x, v⟩, hx, rfl⟩
+    dsimp only [PartialHomeomorph.prod_apply, PartialHomeomorph.refl_apply, id_eq]
+    have ha1 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
+               (x, v) := h5 x v hx
+    have ha2 : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) (x, v) = (φ₀ x, v) := rfl
+
+    have hu : xh.val 1 = 0 := rfl
+    have hs : (-xh).val 1 = 0 := by simp [hu]
+    have hv : (x.val 1) > 0 := hx
+    have hw : x.val 1 ≠ xh.val 1 := Ne.symm (ne_of_lt hx)
+    have ht : φ₀.source = { x | x ≠ -xh } := hU.source
+    have hne : x ≠ -xh := by
+      intro h_eq
+      have : x.val = (-xh).val := congr_arg Subtype.val h_eq
+      rw [← Bool.coe_false]
+      rw [this] at hv
+      linarith
+
+    have hx_in_src : x ∈ φ₀.source := by
+      rw [ht]
+      exact hne
+
+    have ha3 : (φ₀.prod (PartialHomeomorph.refl _)).symm (φ₀ x, v) = (x, v) := by
+      have ha3a : φ₀.symm (φ₀ x) = x := PartialHomeomorph.left_inv φ₀ hx_in_src
+      exact Prod.ext ha3a rfl
+
+    have ha4 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) = (x, v) := h5 x v hv
+
+
+    have ha5 : conj (φ₀ x, v) = (φ₀ x, v) := by
+      calc
+        conj (φ₀ x, v)
+          = ((φ₀.prod (PartialHomeomorph.refl _)).symm ≫ₕ
+            ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ
+            (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ
+            (φ₀.prod (PartialHomeomorph.refl _))) (φ₀ x, v) := rfl
+        _ = (((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ
+            (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ
+            (φ₀.prod (PartialHomeomorph.refl _))) ((φ₀.prod (PartialHomeomorph.refl _)).symm (φ₀ x, v)) := by
+          rw [PartialHomeomorph.trans_apply]
+        _ = (((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ
+            (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ
+            (φ₀.prod (PartialHomeomorph.refl _))) (x, v) := by rw [ha3]
+        _ = (φ₀.prod (PartialHomeomorph.refl _)) (((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ
+            (Mobius.localTriv 1).toPartialHomeomorph) (x, v)) := by rw  [PartialHomeomorph.trans_apply]
+        _ = (φ₀.prod (PartialHomeomorph.refl _)) (x, v) := by rw [ha4]
+        _ = (φ₀ x, v) := rfl
+
+    exact ha5
+
+  have h6 : ∀ z ∈ (φ₀.prod (PartialHomeomorph.refl _)) '' A, (ee00.symm ≫ₕ ee10) z = z := by
+    exact fun z a ↦ ha z a
+
+  have h7 : ContDiffOn ℝ ⊤ (ee00.symm ≫ₕ ee10) B := by
+    apply ContDiffOn.congr
+    exact contDiffOn_id
+    intro y hy
+    obtain ⟨x, v⟩ := y
+    exact h6 (x, v) hy
+
+  exact h7
+
+#check PartialHomeomorph.trans_apply
