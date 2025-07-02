@@ -562,10 +562,10 @@ lemma trivialization_mem_iff_f (e : Trivialization _ _) :
     | inl h0 => exact ⟨0, h0.symm⟩
     | inr h1 => exact ⟨1, h1.symm⟩
 
-noncomputable def chart := (𝓡 1).prod (𝓡 1)
-noncomputable def chart_symm := ((𝓡 1).prod (𝓡 1)).symm
-noncomputable def e := Mobius.localTriv 0
-noncomputable def e' := Mobius.localTriv 1
+-- noncomputable def chart := (𝓡 1).prod (𝓡 1)
+-- noncomputable def chart_symm := ((𝓡 1).prod (𝓡 1)).symm
+-- noncomputable def e := Mobius.localTriv 0
+-- noncomputable def e' := Mobius.localTriv 1
 
 example :  ∀ (p : Mobius.TotalSpace),
     (Mobius.localTriv 0) p = (p.proj, Mobius.coordChange (Mobius.indexAt p.proj) 0 p.proj p.snd) := by
@@ -727,8 +727,6 @@ instance : IsManifold (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2
 
 #check @chart_mem_maximalAtlas ℝ _ _ _ _ _ _ (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) _ Mobius.chartedSpaceBase _ xh
 
-#synth ChartedSpace (EuclideanSpace ℝ (Fin 1)) (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)
-
 noncomputable def UU := chartAt (EuclideanSpace ℝ (Fin 1))
   (⟨x, h⟩ : ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)))
 
@@ -765,7 +763,6 @@ lemma smoothChartUpper : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (�
   (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm (φ₀.target ×ˢ univ) := by
     exact ContMDiffOn.prodMap SmoothFrom contMDiffOn_id
 
-
 lemma upperInclusion : ∀ (x : Mobius.Base) (v : EuclideanSpace ℝ (Fin 1)),
     (x.val 1) > 0 →
     ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v)
@@ -798,6 +795,167 @@ lemma h6 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
     exact upperInclusion x v hy
 
 def s := (↑(φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' {x | x.1.val 1 > 0})
+
+noncomputable
+def e := (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm
+
+lemma ggg : ∀ x, x.val 1 > 0 → x ≠ -ug := by
+  intro x hx
+  have h1 : ug.val 0 = -1 := rfl
+  have h2 : ug.val 1 = 0 := rfl
+  have h3 : x.val 1 > 0 := hx
+  have h7 : x ≠ -ug := by
+    intro h_eq
+    have h_val_eq : x.val = -ug.val := congrArg Subtype.val h_eq
+    have h_contra : x.val 1 = -ug.val 1 := congrFun h_val_eq 1
+    rw [h2] at h_contra
+    linarith
+  exact h7
+
+lemma hhh : ∀ x, x.val 1 > 0 → x ≠ -xh := by
+  intro x hx
+  have h1 : xh.val 0 = 1 := rfl
+  have h2 : xh.val 1 = 0 := rfl
+  have h3 : x.val 1 > 0 := hx
+  have h7 : x ≠ -xh := by
+    intro h_eq
+    have h_val_eq : x.val = -xh.val := congrArg Subtype.val h_eq
+    have h_contra : x.val 1 = -xh.val 1 := congrFun h_val_eq 1
+    rw [h2] at h_contra
+    linarith
+  exact h7
+
+example : e.symm '' (e.target ∩ {x | x.1.val 1 > 0}) = e.source ∩ ↑e ⁻¹' (e.target ∩ {x | x.1.val 1 > 0})  := by
+  have h1 : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).target =
+            φ₀.target ×ˢ univ := rfl
+  have h2 : φ₀.target = univ := hU.target
+  have h5 : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).target = univ ×ˢ univ := by
+    rw [h1, h2]
+  have h7 : e.symm.target = e.source := PartialHomeomorph.symm_target e
+  have h7 : e.target = (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source :=
+   PartialHomeomorph.symm_target (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+  have h8a : φ₀.source = { x | x ≠ -xh } := hU.source
+  have h8b : (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))).source = univ := rfl
+  have h8c : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source =
+              φ₀.source ×ˢ (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))).source :=
+                PartialHomeomorph.prod_source φ₀ (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))
+  have h8d : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source =
+      { x | x ≠ -xh } ×ˢ univ := by
+      rw [h8a, h8b] at h8c
+      exact h8c
+  have h9 : e.target = { x | x ≠ -xh } ×ˢ univ := by
+    rw [h7, h8d]
+  have ha :  e.target ∩ {x | x.1.val 1 > 0} = ({ x | x ≠ -xh } ×ˢ univ)  ∩ {x | x.1.val 1 > 0} := by
+    rw [h9]
+
+  have hb : {x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1) | x.1.val 1 > 0} ⊆
+   { x : (Metric.sphere 0 1) | x ≠ -xh } ×ˢ univ := by
+    intro x hx
+    have h1 : x.1 ≠ -xh := hhh x.1 hx
+    exact Set.mem_prod.mpr ⟨h1, Set.mem_univ _⟩
+
+  have hc : ({ x | x ≠ -xh } ×ˢ univ) ∩
+            {x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1) | x.1.val 1 > 0} =
+           {x | x.1.val 1 > 0} := by
+    exact inter_eq_self_of_subset_right hb
+
+  have hd : e.target ∩ {x | x.1.val 1 > 0} = {x | x.1.val 1 > 0} := by
+    rw [ha, hc]
+
+  have h3 : e.symm '' (e.target ∩ {x | x.1.val 1 > 0}) = e.source ∩ e ⁻¹' (e.target ∩ {x | x.1.val 1 > 0}) := PartialHomeomorph.symm_image_target_inter_eq e {x | x.1.val 1 > 0}
+
+  have he : e.symm '' ({x | x.1.val 1 > 0}) = e.source ∩ e ⁻¹' ({x | x.1.val 1 > 0}) := by
+    rw [hd] at h3
+    exact h3
+
+  have hf : e.symm = (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) :=
+    PartialHomeomorph.symm_symm (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+
+  have hg : e.source = univ ×ˢ univ := by
+    exact h5
+
+  have hi : e.symm '' ({x | x.1.val 1 > 0}) = e ⁻¹' ({x | x.1.val 1 > 0}) := by
+    rw [hf]
+    rw [hg] at he
+    have h1 :  e.symm '' {x | x.1.val 1 > 0} = univ ×ˢ univ ∩ e ⁻¹' {x | x.1.val 1 > 0} := he
+    have h2 : univ ×ˢ univ ∩ e ⁻¹' {x | x.1.val 1 > 0} = e ⁻¹' {x | x.1.val 1 > 0} := by
+      rw [Set.univ_prod_univ, Set.inter_comm]
+      exact Set.inter_univ  _
+    rw [h2] at h1
+    exact h1
+
+  have hj : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) '' {x | x.1.val 1 > 0} =
+    e ⁻¹' {x | x.1.val 1 > 0} := by
+    rw [hf] at hi
+    exact hi
+
+  exact h3
+
+lemma sRewrite : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) '' {x | x.1.val 1 > 0} = s := by
+  have h1 : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).target =
+            φ₀.target ×ˢ univ := rfl
+  have h2 : φ₀.target = univ := hU.target
+  have h5 : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).target = univ ×ˢ univ := by
+    rw [h1, h2]
+  have h7 : e.symm.target = e.source := PartialHomeomorph.symm_target e
+  have h7 : e.target = (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source :=
+   PartialHomeomorph.symm_target (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+  have h8a : φ₀.source = { x | x ≠ -xh } := hU.source
+  have h8b : (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))).source = univ := rfl
+  have h8c : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source =
+              φ₀.source ×ˢ (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))).source :=
+                PartialHomeomorph.prod_source φ₀ (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))
+  have h8d : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source =
+      { x | x ≠ -xh } ×ˢ univ := by
+      rw [h8a, h8b] at h8c
+      exact h8c
+  have h9 : e.target = { x | x ≠ -xh } ×ˢ univ := by
+    rw [h7, h8d]
+  have ha :  e.target ∩ {x | x.1.val 1 > 0} = ({ x | x ≠ -xh } ×ˢ univ)  ∩ {x | x.1.val 1 > 0} := by
+    rw [h9]
+
+  have hb : {x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1) | x.1.val 1 > 0} ⊆
+   { x : (Metric.sphere 0 1) | x ≠ -xh } ×ˢ univ := by
+    intro x hx
+    have h1 : x.1 ≠ -xh := hhh x.1 hx
+    exact Set.mem_prod.mpr ⟨h1, Set.mem_univ _⟩
+
+  have hc : ({ x | x ≠ -xh } ×ˢ univ) ∩
+            {x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1) | x.1.val 1 > 0} =
+           {x | x.1.val 1 > 0} := by
+    exact inter_eq_self_of_subset_right hb
+
+  have hd : e.target ∩ {x | x.1.val 1 > 0} = {x | x.1.val 1 > 0} := by
+    rw [ha, hc]
+
+  have h3 : e.symm '' (e.target ∩ {x | x.1.val 1 > 0}) = e.source ∩ e ⁻¹' (e.target ∩ {x | x.1.val 1 > 0}) := PartialHomeomorph.symm_image_target_inter_eq e {x | x.1.val 1 > 0}
+
+  have he : e.symm '' ({x | x.1.val 1 > 0}) = e.source ∩ e ⁻¹' ({x | x.1.val 1 > 0}) := by
+    rw [hd] at h3
+    exact h3
+
+  have hf : e.symm = (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) :=
+    PartialHomeomorph.symm_symm (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+
+  have hg : e.source = univ ×ˢ univ := by
+    exact h5
+
+  have hi : e.symm '' ({x | x.1.val 1 > 0}) = e ⁻¹' ({x | x.1.val 1 > 0}) := by
+    rw [hf]
+    rw [hg] at he
+    have h1 :  e.symm '' {x | x.1.val 1 > 0} = univ ×ˢ univ ∩ e ⁻¹' {x | x.1.val 1 > 0} := he
+    have h2 : univ ×ˢ univ ∩ e ⁻¹' {x | x.1.val 1 > 0} = e ⁻¹' {x | x.1.val 1 > 0} := by
+      rw [Set.univ_prod_univ, Set.inter_comm]
+      exact Set.inter_univ  _
+    rw [h2] at h1
+    exact h1
+
+  have hj : (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) '' {x | x.1.val 1 > 0} =
+    e ⁻¹' {x | x.1.val 1 > 0} := by
+    rw [hf] at hi
+    exact hi
+
+  exact hj
 
 lemma SmoothLefs : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
     (((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) ∘
@@ -845,20 +1003,6 @@ lemma smoothChartUpperSymm : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod
   (φ₁.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) (φ₁.source ×ˢ univ) := by
     exact ContMDiffOn.prodMap SmoothTo contMDiffOn_id
 
-
-lemma ggg : ∀ x, x.val 1 > 0 → x ≠ -ug := by
-  intro x hx
-  have h1 : ug.val 0 = -1 := rfl
-  have h2 : ug.val 1 = 0 := rfl
-  have h3 : x.val 1 > 0 := hx
-  have h7 : x ≠ -ug := by
-    intro h_eq
-    have h_val_eq : x.val = -ug.val := congrArg Subtype.val h_eq
-    have h_contra : x.val 1 = -ug.val 1 := congrFun h_val_eq 1
-    rw [h2] at h_contra
-    linarith
-  exact h7
-
 lemma SmoothRighs : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
     (↑(φ₁.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) ∘
       ↑(((Mobius.localTriv 0).toPartialHomeomorph ≫ₕ
@@ -890,6 +1034,29 @@ lemma smoothBoth : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1))
   (((Mobius.localTriv 0).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ≫ₕ
     ((Mobius.localTriv 1).toPartialHomeomorph ≫ₕ φ₁.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))))
   s := SmoothRighs
+
+lemma smoothBothUpper : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+  (((Mobius.localTriv 0).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ≫ₕ
+    ((Mobius.localTriv 1).toPartialHomeomorph ≫ₕ φ₁.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))))
+  ((φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) '' {x | x.1.val 1 > 0})
+ := by
+  have h1 : s = (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) '' {x | x.1.val 1 > 0} := sRewrite.symm
+  rw [<-h1]
+  exact SmoothRighs
+
+lemma smoothBothLower : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+  (((Mobius.localTriv 0).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ≫ₕ
+    ((Mobius.localTriv 1).toPartialHomeomorph ≫ₕ φ₁.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))))
+  ((φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) '' {x | x.1.val 1 < 0})
+ := by
+  exact sorry
+
+lemma smoothBothTotal : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+  (((Mobius.localTriv 0).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ≫ₕ
+    ((Mobius.localTriv 1).toPartialHomeomorph ≫ₕ φ₁.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))))
+  ((φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) '' ({x | x.1.val 1 > 0} ∪ {x | x.1.val 1 < 0}))
+ := by
+  exact sorry
 
 example : ∀ (x : Mobius.Base) (v : EuclideanSpace ℝ (Fin 1)),
     (x.val 1) < 0 →
@@ -1004,6 +1171,14 @@ theorem e0e1 (ee00) (he0 : ee00 = (Mobius.localTriv 0).toPartialHomeomorph ≫�
 
   exact h7
 
+ example : @atlas (EuclideanSpace ℝ (Fin 1)) _ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) _
+   Mobius.chartedSpaceBase = {φ₀, φ₁} := rfl
+
+example : @atlas (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)) _ Mobius.TotalSpace _
+   Mobius.chartedSpaceTotal' =
+   { (Mobius.localTriv 0).toPartialHomeomorph ≫ₕ (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))),
+    (Mobius.localTriv 1).toPartialHomeomorph ≫ₕ (φ₁.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) } := rfl
+
 example
   (x t : EuclideanSpace ℝ (Fin 1))
   (e e' : PartialHomeomorph Mobius.TotalSpace
@@ -1024,7 +1199,11 @@ example
   | inl heq =>  cases (Classical.em (e' = (Mobius.localTriv 0).toPartialHomeomorph ≫ₕ (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))))) with
                 | inl heq' => have h1 : e = e' := by rw [heq, heq']
                               exact sorry
-                | inr hne' => exact sorry
+                | inr hne' => let s := (↑(φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) '' ({x | x.1.val 1 > 0} ∪ {x | x.1.val 1 < 0}))
+                              rw [heq]
+                              have h1 : ContDiffOn ℝ ⊤ (↑((𝓡 1).prod (𝓡 1)) ∘ ↑(e.symm ≫ₕ e') ∘ ↑((𝓡 1).prod (𝓡 1)).symm) s :=
+                                         smoothBothTotal
+                              exact sorry
   | inr hne => exact sorry
 
 example
@@ -1337,27 +1516,3 @@ example : ∀ (x : Mobius.Base) (hx : x ∈ { x | x.val 1 > 0 } ∪ { x | x.val 
        {x : ↑(Metric.sphere 0 1) × EuclideanSpace ℝ (Fin 1) | (x.1.val 1) < 0}) := sorry
 
   exact fun x hx ↦ h8
-
-noncomputable
-def pre : PartialHomeomorph (↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1))
-                            (↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1)) :=
- (((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph))
-
-noncomputable
-def ee00 :=  (Mobius.localTriv 0).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))
-
-noncomputable
-def ee10 := (Mobius.localTriv 1).toPartialHomeomorph ≫ₕ φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))
-
-noncomputable
-def conj :=
-  (φ₀.prod (PartialHomeomorph.refl _)).symm ≫ₕ
-  ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ
-   (Mobius.localTriv 1).toPartialHomeomorph) ≫ₕ
-  (φ₀.prod (PartialHomeomorph.refl _))
-
-def A' : Set ((↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)) × EuclideanSpace ℝ (Fin 1)) :=
-  {p | p.1.val 1 > 0}
-
-def B' := Prod.map φ₀ id '' A
-def C' := (φ₀.prod (PartialHomeomorph.refl _)) '' A
