@@ -8,6 +8,7 @@ import Mathlib
 set_option linter.style.longLine false
 
 open Function Set
+open IsManifold Manifold
 
 def x := (!₂[1, 0] : EuclideanSpace ℝ (Fin 2))
 
@@ -25,40 +26,33 @@ def xh := ((⟨x, h⟩ :  Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 ))
 def ug := ((⟨u, g⟩ :  Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 ))
 
 /-- The constructed chart at u in the standard unit sphere S¹. -/
-noncomputable def V := chartAt (EuclideanSpace ℝ (Fin 1))
+noncomputable def φ₁ := chartAt (EuclideanSpace ℝ (Fin 1))
   (⟨u, g⟩ : ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)))
 
 /-- The constructed chart at x in the standard unit sphere S¹. -/
-noncomputable def U := chartAt (EuclideanSpace ℝ (Fin 1))
+noncomputable def φ₀ := chartAt (EuclideanSpace ℝ (Fin 1))
   (⟨x, h⟩ : ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)))
 
 instance : Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin 2)) = 1 + 1) :=
   ⟨(finrank_euclideanSpace_fin : Module.finrank ℝ (EuclideanSpace ℝ (Fin 2)) = 2)⟩
 
-lemma hU.source : U.source = { x | x ≠ -xh } :=
-  calc U.source = (chartAt (EuclideanSpace ℝ (Fin 1)) xh).source := rfl
+lemma hU.source : φ₀.source = { x | x ≠ -xh } :=
+  calc φ₀.source = (chartAt (EuclideanSpace ℝ (Fin 1)) xh).source := rfl
     _ = (stereographic' 1 (-xh)).source := rfl
     _ = {-xh}ᶜ := stereographic'_source (-xh)
     _ = { x | x ≠ -xh } := rfl
 
-lemma hU.target : U.target = univ := by
-  calc U.target = (chartAt (EuclideanSpace ℝ (Fin 1)) xh).target := rfl
+lemma hU.target : φ₀.target = univ := by
+  calc φ₀.target = (chartAt (EuclideanSpace ℝ (Fin 1)) xh).target := rfl
     _ = (stereographic' 1 (-xh)).target := rfl
     _ = univ := stereographic'_target (-xh)
 
-lemma hV.source : V.source = { x | x ≠ -ug} :=
-  calc V.source = (chartAt (EuclideanSpace ℝ (Fin 1)) ug).source := rfl
+lemma hV.source : φ₁.source = { x | x ≠ -ug} :=
+  calc φ₁.source = (chartAt (EuclideanSpace ℝ (Fin 1)) ug).source := rfl
     _ = (stereographic' 1 (-ug)).source := rfl
     _ = {-ug}ᶜ := stereographic'_source (-ug)
     _ = { x | x ≠ -ug } := rfl
 
-open IsManifold Manifold
-
-noncomputable
-def φ₀ : PartialHomeomorph (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) (EuclideanSpace ℝ (Fin 1)) := U
-
-noncomputable
-def φ₁ : PartialHomeomorph (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) (EuclideanSpace ℝ (Fin 1)) := V
 
 noncomputable
 def baseAtlas : Set (PartialHomeomorph (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) (EuclideanSpace ℝ (Fin 1))) :=
@@ -73,30 +67,30 @@ lemma ChartChangeSmoothOn
     [TopologicalSpace M]
     [ChartedSpace H M]
     [IsManifold I ⊤ M]
-    {U V : PartialHomeomorph M H}
-    (hU : U ∈ maximalAtlas I ⊤ M)
-    (hV : V ∈ maximalAtlas I ⊤ M) :
-    ContMDiffOn I I ⊤ (V ∘ U.symm)
-      (U.target ∩ U.symm ⁻¹' V.source) := by
-  let overlap := U.target ∩ U.symm ⁻¹' V.source
-  have h1 : overlap ⊆ U.target := fun x hx => hx.1
-  have h2 : overlap ⊆ U.symm ⁻¹' V.source := fun x hx => hx.2
+    {φ₀ φ₁ : PartialHomeomorph M H}
+    (hU : φ₀ ∈ maximalAtlas I ⊤ M)
+    (hV : φ₁ ∈ maximalAtlas I ⊤ M) :
+    ContMDiffOn I I ⊤ (φ₁ ∘ φ₀.symm)
+      (φ₀.target ∩ φ₀.symm ⁻¹' φ₁.source) := by
+  let overlap := φ₀.target ∩ φ₀.symm ⁻¹' φ₁.source
+  have h1 : overlap ⊆ φ₀.target := fun x hx => hx.1
+  have h2 : overlap ⊆ φ₀.symm ⁻¹' φ₁.source := fun x hx => hx.2
   have h3 := (contMDiffOn_symm_of_mem_maximalAtlas hU).mono h1
   exact (contMDiffOn_of_mem_maximalAtlas hV).comp h3 h2
 
 lemma UVSmoothOn :
-  ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (V ∘ U.symm) (U.target ∩ U.symm ⁻¹' V.source) :=
-    have h1 : U ∈ IsManifold.maximalAtlas (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :=
+  ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (φ₁ ∘ φ₀.symm) (φ₀.target ∩ φ₀.symm ⁻¹' φ₁.source) :=
+    have h1 : φ₀ ∈ IsManifold.maximalAtlas (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :=
       chart_mem_maximalAtlas xh
-    have h2 : V ∈ IsManifold.maximalAtlas (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :=
+    have h2 : φ₁ ∈ IsManifold.maximalAtlas (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :=
       chart_mem_maximalAtlas ug
     ChartChangeSmoothOn h1 h2
 
 lemma VUSmoothOn :
-  ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (U ∘ V.symm) (V.target ∩ V.symm ⁻¹' U.source) :=
-    have h1 : U ∈ IsManifold.maximalAtlas (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :=
+  ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (φ₀ ∘ φ₁.symm) (φ₁.target ∩ φ₁.symm ⁻¹' φ₀.source) :=
+    have h1 : φ₀ ∈ IsManifold.maximalAtlas (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :=
       chart_mem_maximalAtlas xh
-    have h2 : V ∈ IsManifold.maximalAtlas (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :=
+    have h2 : φ₁ ∈ IsManifold.maximalAtlas (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :=
       chart_mem_maximalAtlas ug
     ChartChangeSmoothOn h2 h1
 
@@ -110,7 +104,7 @@ def MyCoordChange : Fin 2 → Fin 2 →
   | 1, 1, _, α => α
 
 theorem MyCoordChange_self : ∀ (i : Fin 2),
-    ∀ x ∈ (fun i => if i = 0 then U.source else V.source) i,
+    ∀ x ∈ (fun i => if i = 0 then φ₀.source else φ₁.source) i,
     ∀ (v : EuclideanSpace ℝ (Fin 1)), MyCoordChange i i x v = v := by
     intro i x h v
     have h : MyCoordChange i i x v = v :=
@@ -128,9 +122,9 @@ theorem t0110 (x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)) (v : Eucl
   simp_all [MyCoordChange]
 
 theorem MyCoordChange_comp : ∀ (i j k : Fin 2),
-  ∀ x ∈ (fun i => if i = 0 then U.source else V.source) i ∩
-        (fun i => if i = 0 then U.source else V.source) j ∩
-        (fun i => if i = 0 then U.source else V.source) k,
+  ∀ x ∈ (fun i => if i = 0 then φ₀.source else φ₁.source) i ∩
+        (fun i => if i = 0 then φ₀.source else φ₁.source) j ∩
+        (fun i => if i = 0 then φ₀.source else φ₁.source) k,
     ∀ (v : EuclideanSpace ℝ (Fin 1)), MyCoordChange j k x (MyCoordChange i j x v) = MyCoordChange i k x v := by
     intro i j k x h v
     have h : MyCoordChange j k x (MyCoordChange i j x v) = MyCoordChange i k x v :=
@@ -256,7 +250,7 @@ lemma sphere_equator_points : { x | x.val 1 = 0 } = { -xh, -ug } := by
       | inr hug_neg => left; rw [← hf, neg_neg] at hug_neg; exact hug_neg
   exact hi
 
-theorem SulSource : U.source ∩ V.source = { x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := by
+theorem SulSource : φ₀.source ∩ φ₁.source = { x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := by
   ext y
 
   have h1 : { x : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } = { x | x.val 1 = 0 }ᶜ := by
@@ -269,10 +263,10 @@ theorem SulSource : U.source ∩ V.source = { x | x.val 1 > 0 } ∪ { x | x.val 
     simp only [Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_setOf_eq, Set.mem_insert_iff, Set.mem_singleton_iff]
     exact not_or.symm
 
-  have ha : U.source ∩ V.source = { x | x ≠ -xh } ∩ { x | x ≠ -ug } := by rw [hU.source, hV.source]
+  have ha : φ₀.source ∩ φ₁.source = { x | x ≠ -xh } ∩ { x | x ≠ -ug } := by rw [hU.source, hV.source]
 
-  have hq : U.source ∩ V.source = { x : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := by
-    calc U.source ∩ V.source = { x | x ≠ -xh } ∩ { x | x ≠ -ug } := ha
+  have hq : φ₀.source ∩ φ₁.source = { x : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := by
+    calc φ₀.source ∩ φ₁.source = { x | x ≠ -xh } ∩ { x | x ≠ -ug } := ha
          _ = { -xh, -ug }ᶜ := h2
          _ = { x | x.val 1 = 0 }ᶜ := by rw [← sphere_equator_points]
          _ =  { x : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := h1.symm
@@ -317,10 +311,10 @@ lemma s2_is_open : IsOpen s2 := by
   rw [HasSubset.Subset.antisymm foo' bar'] at h2
   exact h2
 
-theorem t00 : ContinuousOn (fun p => MyCoordChange 0 0 p.1 p.2) (U.source ×ˢ univ) := continuousOn_snd
+theorem t00 : ContinuousOn (fun p => MyCoordChange 0 0 p.1 p.2) (φ₀.source ×ˢ univ) := continuousOn_snd
 
-theorem t01 : ContinuousOn (fun p => MyCoordChange 0 1 p.1 p.2) ((U.source ∩ V.source) ×ˢ univ) := by
-  have h1 : (U.source ∩ V.source) = { x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := SulSource
+theorem t01 : ContinuousOn (fun p => MyCoordChange 0 1 p.1 p.2) ((φ₀.source ∩ φ₁.source) ×ˢ univ) := by
+  have h1 : (φ₀.source ∩ φ₁.source) = { x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := SulSource
   let f : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1) → EuclideanSpace ℝ (Fin 1)
   | (x, α) =>if (x.val 1) > 0 then α else -α
   let s1 : Set ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1)) := { x | 0 < x.1.val 1 }
@@ -343,22 +337,22 @@ theorem t01 : ContinuousOn (fun p => MyCoordChange 0 1 p.1 p.2) ((U.source ∩ V
   rw [h1, ← h6]
   exact ContinuousOn.union_of_isOpen hz1 hz2 s1_is_open s2_is_open
 
- theorem t10 : ContinuousOn (fun p => MyCoordChange 1 0 p.1 p.2) ((V.source ∩ U.source) ×ˢ univ) := by
+ theorem t10 : ContinuousOn (fun p => MyCoordChange 1 0 p.1 p.2) ((φ₁.source ∩ φ₀.source) ×ˢ univ) := by
   have h1 : MyCoordChange 1 0 = MyCoordChange 0 1 := rfl
   have h2 : (fun (p : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1)) => MyCoordChange 1 0 p.1 p.2) = (fun p => MyCoordChange 0 1 p.1 p.2) :=
     funext (fun x => by rw [h1])
   rw [h2, inter_comm]
   exact t01
 
-theorem t11 : ContinuousOn (fun p => MyCoordChange 0 0 p.1 p.2) (V.source ×ˢ univ) := by
+theorem t11 : ContinuousOn (fun p => MyCoordChange 0 0 p.1 p.2) (φ₁.source ×ˢ univ) := by
   have h1 : (fun (p : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1)) =>
     MyCoordChange 0 0 p.fst p.snd) = (fun p => p.snd) := by rfl
   rw [h1]
   exact continuousOn_snd
 
 theorem MyContinuousOn_coordChange : ∀ (i j : Fin 2), ContinuousOn (fun p => MyCoordChange i j p.1 p.2)
-  (((fun i => if i = 0 then U.source else V.source) i ∩
-      (fun i => if i = 0 then U.source else V.source) j) ×ˢ
+  (((fun i => if i = 0 then φ₀.source else φ₁.source) i ∩
+      (fun i => if i = 0 then φ₀.source else φ₁.source) j) ×ˢ
     univ) := by
     intro i j
     fin_cases i
@@ -370,7 +364,7 @@ theorem MyContinuousOn_coordChange : ∀ (i j : Fin 2), ContinuousOn (fun p => M
       · simp; exact t11
 
 theorem my_mem_baseSet_at : ∀ (x : ↑(Metric.sphere 0 1)),
-  x ∈ (fun (i : Fin 2) ↦ if i = 0 then U.source else V.source) ((fun x ↦ if x.val 0 > 0 then 0 else 1) x):= by
+  x ∈ (fun (i : Fin 2) ↦ if i = 0 then φ₀.source else φ₁.source) ((fun x ↦ if x.val 0 > 0 then 0 else 1) x):= by
   intro x
   by_cases h : (x.val 0) > 0
   case pos =>
@@ -382,7 +376,7 @@ theorem my_mem_baseSet_at : ∀ (x : ↑(Metric.sphere 0 1)),
       linarith
     have h2 : (fun x ↦ if x.val 0 > 0 then (0 : Fin 2) else 1) x = 0 := if_pos h
     have h3 :
-      (fun (i : Fin 2) ↦ if i = 0 then U.source else V.source) ((fun x ↦ if x.val 0 > 0 then 0 else 1) x) = U.source := by
+      (fun (i : Fin 2) ↦ if i = 0 then φ₀.source else φ₁.source) ((fun x ↦ if x.val 0 > 0 then 0 else 1) x) = φ₀.source := by
         rw [h2]
         exact if_pos rfl
     rw [h3, hU.source]
@@ -396,15 +390,36 @@ theorem my_mem_baseSet_at : ∀ (x : ↑(Metric.sphere 0 1)),
       rw [h1] at h_contra
       linarith
     have h2 : (fun x ↦ if x.val 0 > 0 then (0 : Fin 2) else 1) x = 1 := if_neg h
-    have h3 : (fun (i : Fin 2) ↦ if i = 0 then U.source else V.source) ((fun x ↦ if x.val 0 > 0 then 0 else 1) x) =
-              V.source := by
+    have h3 : (fun (i : Fin 2) ↦ if i = 0 then φ₀.source else φ₁.source) ((fun x ↦ if x.val 0 > 0 then 0 else 1) x) =
+              φ₁.source := by
                 rw [h2]
                 exact if_neg (by exact one_ne_zero)
     rw [h3, hV.source]
     exact h7
 
-open scoped Manifold
 open Bundle
+
+noncomputable
+def Mobius : FiberBundleCore (Fin 2) (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) (EuclideanSpace ℝ (Fin 1)) where
+  baseSet i := if i = 0 then φ₀.source else φ₁.source
+  isOpen_baseSet i := by
+    split
+    · exact φ₀.open_source
+    · exact φ₁.open_source
+  indexAt x := if (x.val 0) > 0 then 0 else 1
+  mem_baseSet_at := my_mem_baseSet_at
+  coordChange := MyCoordChange
+  coordChange_self := MyCoordChange_self
+  continuousOn_coordChange := MyContinuousOn_coordChange
+  coordChange_comp := MyCoordChange_comp
+
+noncomputable
+def ψ₀ :=(Mobius.localTriv 0).toPartialHomeomorph ≫ₕ (φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+noncomputable
+def ψ₁ :=(Mobius.localTriv 1).toPartialHomeomorph ≫ₕ (φ₁.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+
+def totalAtlas  : Set (PartialHomeomorph Mobius.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))) :=
+  { ψ₀, ψ₁ }
 
 #synth ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1)))
   ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × (EuclideanSpace ℝ (Fin 1)))
@@ -433,10 +448,6 @@ instance (m n : ℕ) : ChartedSpace ((EuclideanSpace ℝ (Fin (n + m)))) (Euclid
   exact PartialHomeomorph.singletonChartedSpace z.symm hz
 
 #synth IsManifold (𝓡 1) 0 (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)
-
-open Bundle Manifold Trivialization VectorBundleCore Topology
-
-
 
 noncomputable
 def baseChartAt := (fun (x : (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) ) => if x.val 0 > 0 then φ₀ else φ₁)
@@ -503,7 +514,6 @@ lemma SmoothInnerPreOn : (φ₀ '' ({ x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 })
     rw [h0, ha]
   have h1 : (({ x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 })) = φ₀.source ∩ φ₁.source := by
     rw [<-SulSource]
-    exact rfl
   have h3 : φ₀ '' ({ x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 }) = φ₀ '' (φ₀.source ∩ φ₁.source) := by
     rw [h1]
   rw [h2, h3]
@@ -517,7 +527,6 @@ lemma SmoothInnerPreOn' : (φ₁ '' ({ x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 }
     rw [h0, hb, ha]
   have h1 : (({ x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 })) = φ₀.source ∩ φ₁.source := by
     rw [<-SulSource]
-    exact rfl
   have h3 : φ₁ '' ({ x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 }) = φ₁ '' (φ₀.source ∩ φ₁.source) := by
     rw [h1]
   rw [h2, h3]
@@ -597,3 +606,255 @@ instance Circle.Smooth : @IsManifold ℝ _ _ _ _ _ _ (𝓡 1) ⊤ (Metric.sphere
 
 #synth IsManifold (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1)
 #synth @IsManifold ℝ _ _ _ _ _ _ (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) _ Mobius.chartedSpaceBase
+
+noncomputable
+instance : ChartedSpace ((EuclideanSpace ℝ (Fin 1)) × (EuclideanSpace ℝ (Fin 1)))
+                       (TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius.Fiber)
+ := ChartedSpace.comp
+  (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1)))
+  ((Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × (EuclideanSpace ℝ (Fin 1)))
+  (TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius.Fiber)
+
+noncomputable
+instance (m n : ℕ) : ChartedSpace ((EuclideanSpace ℝ (Fin (n + m)))) (EuclideanSpace ℝ (Fin n) × (EuclideanSpace ℝ (Fin m))) := by
+  have h1 : EuclideanSpace ℝ (Fin (n + m)) ≃L[ℝ] EuclideanSpace ℝ (Fin n) × EuclideanSpace ℝ (Fin m) := EuclideanSpace.finAddEquivProd
+  have h2 : EuclideanSpace ℝ (Fin (n + m)) ≃ₜ EuclideanSpace ℝ (Fin n) × EuclideanSpace ℝ (Fin m) :=  ContinuousLinearEquiv.toHomeomorph h1
+  let x := (EuclideanSpace.finAddEquivProd : EuclideanSpace ℝ (Fin (n + m)) ≃L[ℝ] EuclideanSpace ℝ (Fin n) × EuclideanSpace ℝ (Fin m))
+  let y := ContinuousLinearEquiv.toHomeomorph x
+  let z := Homeomorph.toPartialHomeomorph y
+  have hz : z.symm.source = univ := rfl
+  exact PartialHomeomorph.singletonChartedSpace z.symm hz
+
+noncomputable
+instance : ChartedSpace (EuclideanSpace ℝ (Fin (1 + 1))) (Bundle.TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius.Fiber) := by
+  exact ChartedSpace.comp
+    (EuclideanSpace ℝ (Fin (1 + 1)))
+    ((EuclideanSpace ℝ (Fin 1)) × (EuclideanSpace ℝ (Fin 1)))
+    (Bundle.TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius.Fiber)
+
+#synth IsManifold (𝓡 2) 0 (TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius.Fiber)
+#synth IsManifold (𝓡 2) ⊤ (TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius.Fiber)
+
+noncomputable
+def totalChartAt : Mobius.TotalSpace → PartialHomeomorph Mobius.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)) :=
+  fun x ↦
+    let _ := Mobius.chartedSpaceBase
+    let φ := chartAt (EuclideanSpace ℝ (Fin 1)) x.proj
+    let i := Mobius.indexAt x.proj
+    (Mobius.localTriv i).toPartialHomeomorph ≫ₕ (φ.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+
+noncomputable instance Mobius.chartedSpaceTotal :
+  ChartedSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)) Mobius.TotalSpace :=
+  { atlas := totalAtlas
+    chartAt := totalChartAt
+    mem_chart_source := by
+      intro x
+      dsimp [totalChartAt]
+      let φ := chartAt (EuclideanSpace ℝ (Fin 1)) x.proj
+      let i := Mobius.indexAt x.proj
+      apply And.intro
+      · exact (FiberBundleCore.mem_localTrivAt_source Mobius x x.proj).mpr
+              (FiberBundle.mem_baseSet_trivializationAt' x.proj)
+      · refine mem_preimage.mpr ?_
+        apply Set.mem_prod.mpr
+        constructor
+        · have : (Mobius.localTrivAt x.proj x).1 = x.proj := rfl
+          rw [this]
+          exact @mem_chart_source _ _ _ _ Mobius.chartedSpaceBase x.proj
+        · exact Set.mem_univ _
+    chart_mem_atlas := by
+      rintro ⟨x, ξ⟩
+      let _ := Mobius.chartedSpaceBase
+      dsimp [totalChartAt, totalAtlas]
+      let φ := chartAt (EuclideanSpace ℝ (Fin 1)) x
+      let i := Mobius.indexAt x
+      have h8 : Mobius.localTrivAt x =  Mobius.localTriv (if (x.val 0) > 0 then 0 else 1) := rfl
+
+      cases (Classical.em ((x.val 0) > 0)) with
+      | inl hx => have h1 : (if (x.val 0) > 0 then φ₀ else φ₁) = φ₀ := if_pos hx
+                  have h3 : Mobius.localTriv (if (x.val 0) > 0 then 0 else 1) = Mobius.localTriv 0 := by
+                   congr
+                   exact if_pos hx
+                  have h5 : Mobius.localTrivAt x = Mobius.localTriv 0 := by
+                    rw [h8, h3]
+                  have h6 : (Mobius.localTriv 0).toPartialHomeomorph ≫ₕ
+                            φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))) ∈ totalAtlas := by simp [totalAtlas]
+                                                                                                           exact Or.symm (Or.inr rfl)
+                  have h7 : (Mobius.localTrivAt x).toPartialHomeomorph ≫ₕ
+                            (chartAt (EuclideanSpace ℝ (Fin 1)) x).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))) ∈ totalAtlas := by
+                    rw [h5]
+                    exact mem_of_eq_of_mem (congrArg (Mobius.localTriv 0).trans
+                      (congrFun (congrArg PartialHomeomorph.prod h1) (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))) h6
+                  exact h7
+      | inr hx => have h1 : (if (x.val 0) > 0 then φ₀ else φ₁) = φ₁ := if_neg hx
+                  have h3 : Mobius.localTriv (if (x.val 0) > 0 then 0 else 1) = Mobius.localTriv 1 := by
+                    congr
+                    exact if_neg hx
+                  have h5 : Mobius.localTrivAt x = Mobius.localTriv 1 := by
+                    rw [h8, h3]
+                  have h6 : (Mobius.localTriv 1).toPartialHomeomorph ≫ₕ
+                            φ₁.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))) ∈ totalAtlas := by simp [totalAtlas]
+                                                                                                           exact Or.symm (Or.inl (by exact rfl))
+                  have h7 : (Mobius.localTrivAt x).toPartialHomeomorph ≫ₕ
+                            (chartAt (EuclideanSpace ℝ (Fin 1)) x).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))) ∈ totalAtlas := by
+                    rw [h5]
+                    exact mem_of_eq_of_mem (congrArg (Mobius.localTriv 1).trans
+                      (congrFun (congrArg PartialHomeomorph.prod h1) (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))) h6
+                  exact h7
+   }
+
+lemma SmoothInnerTot00 : ∀ ψ₀ ∈ totalAtlas, ContDiffOn ℝ ⊤ (↑(ψ₀.symm ≫ₕ ψ₀)) (ψ₀.symm ≫ₕ ψ₀).source := by
+  intro ψ₀ hψ₀ x hx
+  have h4 : EqOn (↑(ψ₀.symm ≫ₕ ψ₀)) id ((ψ₀.symm ≫ₕ ψ₀)).source := by
+    intro y hy
+    have h5 : y ∈ ψ₀.target := by exact mem_of_mem_inter_left hy
+    have h6 : ψ₀ (ψ₀.symm y) = y := PartialHomeomorph.right_inv ψ₀ h5
+    exact h6
+  have h5 :ContDiffOn ℝ ⊤ id (ψ₀.symm ≫ₕ ψ₀).source  := by
+    exact contDiffOn_id
+  have h6 : ContDiffOn ℝ ⊤ (↑(ψ₀.symm ≫ₕ ψ₀)) (ψ₀.symm ≫ₕ ψ₀).source := by exact ContDiffOn.congr contDiffOn_id h4
+  exact h6 x hx
+
+lemma localTrivTransition_eq_coordChange (i j : Fin 2)
+  {x : Mobius.Base} {v : (EuclideanSpace ℝ (Fin 1))} (hx : x ∈ Mobius.baseSet i ∩ Mobius.baseSet j) :
+  ((Mobius.localTriv i).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv j).toPartialHomeomorph) (x, v) =
+    (x, Mobius.coordChange i j x v) := by
+  simp
+  have ha : x ∈ Mobius.baseSet (Mobius.indexAt x) := Mobius.mem_baseSet_at x
+  have hd : x ∈ (Mobius.baseSet i ∩ Mobius.baseSet (Mobius.indexAt x)) ∩ Mobius.baseSet j :=
+  ⟨⟨hx.1, ha⟩, hx.2⟩
+  have h2 : Mobius.coordChange (Mobius.indexAt x) j x (Mobius.coordChange i (Mobius.indexAt x) x v) =
+            Mobius.coordChange i j x v :=  Mobius.coordChange_comp i (Mobius.indexAt x) j x hd v
+  exact h2
+
+lemma upperInclusion : ∀ (x : Mobius.Base) (v : EuclideanSpace ℝ (Fin 1)),
+    (x.val 1) > 0 →
+    ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v)
+      = (x, v) := by
+    intros x v ha
+    have hx : x ∈ { x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := Or.inl ha
+    have hx' : x ∈ φ₀.source ∩ φ₁.source := SulSource.symm ▸ hx
+    have h1 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
+              (x, Mobius.coordChange 0 1 x v) := localTrivTransition_eq_coordChange 0 1 hx'
+    have h2 : Mobius.coordChange 0 1 x v = if (x.val 1) > 0 then v else -v := rfl
+    have h3 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
+    (x, if (x.val 1) > 0 then v else -v) := by
+      rw [h2] at h1
+      exact h1
+    have h4 : (x.val 1) > 0 → (if (x.val 1) > 0 then v else -v) = v := by
+      intro h41
+      rw [if_pos h41]
+    rw [h3, h4]
+    exact ha
+
+lemma upperContMDiff : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+      ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph)
+      {x : ↑(Metric.sphere 0 1) × EuclideanSpace ℝ (Fin 1) | (x.1.val 1) > 0} := by
+      apply ContMDiffOn.congr
+      · exact contMDiffOn_id
+      · intro y hy
+        obtain ⟨x, v⟩ := y
+        dsimp at hy
+        exact upperInclusion x v hy
+
+lemma lowerInclusion : ∀ (x : Mobius.Base) (v : EuclideanSpace ℝ (Fin 1)),
+    (x.val 1) < 0 →
+    ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v)
+      = (x, -v) := by
+    intros x v ha
+    have hx : x ∈ { x | x.val 1 > 0 } ∪ { x | x.val 1 < 0 } := Or.inr ha
+    have hx' : x ∈ φ₀.source ∩ φ₁.source := SulSource.symm ▸ hx
+    have h1 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
+              (x, Mobius.coordChange 0 1 x v) := localTrivTransition_eq_coordChange 0 1 hx'
+    have h2 : Mobius.coordChange 0 1 x v = if (x.val 1) > 0 then v else -v := rfl
+    have h3 : ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph) (x, v) =
+    (x, if (x.val 1) > 0 then v else -v) := by
+      rw [h2] at h1
+      exact h1
+    have h4 : ¬ (x.val 1) > 0 → (if (x.val 1) > 0 then v else -v) = -v := by
+      intro h41
+      rw [if_neg h41]
+    rw [h3, h4]
+    exact not_lt_of_gt ha
+
+lemma lowerContMDiff : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+      ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph)
+      {x : ↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1) | (x.1.val 1) < 0} := by
+
+      have h1a : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (fun x ↦ -id x) (univ : Set (EuclideanSpace ℝ (Fin 1))) := contMDiffOn_id.neg
+      have hz : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ id {x : ↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) | (x.val 1) < 0} := contMDiffOn_id
+
+      let f1 : ↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1) → ↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1) :=
+        Prod.map id fun x ↦ -id x
+      let f2 : ↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1) → ↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1) :=
+        fun x ↦ match x with
+        | (x, v) => (x, -v)
+
+      have h2 : f1 = f2 := by
+        exact rfl
+
+      have h2c : ∀ y ∈ {x | x.val 1 < 0} ×ˢ univ, f1 y = Prod.map id (fun x ↦ -id x) y := by
+            intro y hy
+            dsimp at hy
+            exact rfl
+
+      have h1b : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤ (Prod.map id fun x ↦ -id x)
+       ({x : ↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) | (x.val 1) < 0} ×ˢ (univ : Set (EuclideanSpace ℝ (Fin 1)))) := hz.prodMap h1a
+
+      have h3 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤ f1 ({x | x.val 1 < 0} ×ˢ univ) := ContMDiffOn.congr h1b h2c
+
+      have h1 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+        (fun (x, v) => (x, -v)) {x : ↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1) | (x.1.val 1) < 0} := by
+          rw [h2] at h3
+          have h1z :  ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤ f2 ({x | x.val 1 < 0} ×ˢ univ) := h3
+
+          have h1y : ContMDiffOn _ _ ⊤ f2 {x | x.1.val 1 < 0} :=
+           h1z.mono (by
+            intro x hx
+            exact ⟨hx, Set.mem_univ x.2⟩)
+          exact h1y
+
+      apply ContMDiffOn.congr
+      · exact h1
+      · intro y hy
+        obtain ⟨x, v⟩ := y
+        dsimp at hy
+        exact lowerInclusion x v hy
+
+variable {α β : Type*} [TopologicalSpace α] [TopologicalSpace β]
+[NormedAddCommGroup α] [ NormedSpace ℝ α] [NormedAddCommGroup β] [NormedSpace ℝ β]
+variable {I : ModelWithCorners ℝ α α} {I' : ModelWithCorners ℝ β β}
+variable {s t : Set α} {f : α → β}
+
+theorem ContMDiffOn.union_of_isOpen (hfs : ContMDiffOn I I' ⊤ f s)
+    (hft : ContMDiffOn I I' ⊤ f t)
+    (hs : IsOpen s) (ht : IsOpen t) :
+    ContMDiffOn I I' ⊤ f (s ∪ t) := sorry
+
+variable {α : Type*} {β : Type*} [TopologicalSpace α] [TopologicalSpace β]
+variable {s t : Set α}
+variable {I I' : Type*} {f : α → β}
+
+-- theorem ContMDiffOn.union_of_isOpen' {f : α → β} (hfs : ContMDiffOn I I' ⊤ f s) (hft : ContMDiffOn I I' ⊤ f t)
+--     (hs : IsOpen s) (ht : IsOpen t) : ContMDiffOn I I' ⊤ f (s ∪ t) := sorry
+
+lemma bothContMDiff : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+      ((Mobius.localTriv 0).toPartialHomeomorph.symm ≫ₕ (Mobius.localTriv 1).toPartialHomeomorph)
+      {x : ↑(Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) × EuclideanSpace ℝ (Fin 1) | (x.1.val 1) > 0 ∨ (x.1.val 1) < 0} := sorry
+
+def s' := (↑(φ₀.prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' {x | x.1.val 1 > 0})
+
+
+lemma simpleSmoothTot : ∀ (e e' : PartialHomeomorph Mobius.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))),
+    e ∈ totalAtlas →
+    e' ∈ totalAtlas →
+    ContDiffOn ℝ ⊤ (↑(e.symm ≫ₕ e')) ((e.symm ≫ₕ e').source) := by
+  intros e e' he he'
+  simp only [totalAtlas, Set.mem_insert_iff, Set.mem_singleton_iff] at he he'
+  rcases he with (rfl | rfl)
+  · rcases he' with (rfl | rfl)
+    · exact SmoothInnerTot00 ψ₀ (by rw [totalAtlas]; simp)
+    · exact sorry -- SmoothInner01
+  · rcases he' with (rfl | rfl)
+    · exact sorry -- SmoothInner10
+    · exact SmoothInnerTot00 ψ₁ (by rw [totalAtlas]; simp)
