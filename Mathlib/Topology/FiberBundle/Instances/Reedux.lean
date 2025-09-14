@@ -1874,7 +1874,7 @@ lemma φₛ_symm_zero :
     exact h5
   exact h6
 
-lemma hh4 : φₛ.symm ⁻¹' φₙ.source = {x | x ≠ 0} := by
+lemma hhh4 : φₛ.symm ⁻¹' φₙ.source = {x | x ≠ 0} := by
   ext x
   simp only [Set.mem_preimage, hφₙ.source]
   constructor
@@ -1928,7 +1928,7 @@ lemma hh42 (h : (φN φₛ).symm ⁻¹' (φN φₙ).source = {x | x ≠ 0}) :
     exact this
 
 example : ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
-  (φN φₙ).source ×ˢ univ = {x | x.1 ≠ 0} := hh42 (hh41  hh4)
+  (φN φₙ).source ×ˢ univ = {x | x.1 ≠ 0} := hh42 (hh41  hhh4)
 
 lemma kk1 : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {x | x ≠ 0} := φₛ_preimage_ne_zero
 
@@ -1964,7 +1964,7 @@ lemma h9pre'' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
     ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' (φN φₙ).source ×ˢ univ := by rw [h2] at h1; exact h1
   have h4 : ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph) ∘
         ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
-      (φN φₙ).source ×ˢ univ = {x | x.1 ≠ 0} := hh42 (hh41  hh4)
+      (φN φₙ).source ×ˢ univ = {x | x.1 ≠ 0} := hh42 (hh41  hhh4)
 
   have h5 : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
     ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
@@ -1987,7 +1987,7 @@ lemma h9pre'' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
     rw [h7, h8]
 
   have h6 : ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
-    (φN φₙ).source ×ˢ univ = {x | x.1 ≠ 0} := hh42 (hh41  hh4)
+    (φN φₙ).source ×ˢ univ = {x | x.1 ≠ 0} := hh42 (hh41  hhh4)
 
   have hw :  ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
    ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
@@ -2069,3 +2069,69 @@ lemma kkk : ∀ (e e' : PartialHomeomorph Mobius'.TotalSpace (ModelProd (Euclide
     · exact sorry
     · exact sorry
     · exact (jjj ψₛₙ)
+
+lemma kkk' : ∀ (e e' : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))),
+  e ∈ totalAtlas' →
+  e' ∈ totalAtlas' →
+  ContDiffOn ℝ ⊤
+    (↑((𝓡 1).prod (𝓡 1)) ∘ ↑(e.symm ≫ₕ e') ∘ ↑((𝓡 1).prod (𝓡 1)).symm)
+    (↑((𝓡 1).prod (𝓡 1)).symm ⁻¹' (e.symm ≫ₕ e').source ∩ range ↑((𝓡 1).prod (𝓡 1))) := by
+  intros e e' he he'
+  rcases he with (rfl | rfl)
+  · rcases he' with (rfl | rfl)
+    · exact sorry
+    · exact sorry
+  · rcases he' with (rfl | rfl)
+    · exact sorry
+    · exact sorry
+
+lemma kkk'' :
+  ∀ (e e' : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))),
+    e ∈ totalAtlas' →
+    e' ∈ totalAtlas' →
+      ContDiffOn ℝ ⊤ (e.symm ≫ₕ e') ((e.symm ≫ₕ e').source ∩ e'.target) := by
+  intros e e' he he'
+  rcases he with (rfl | rfl)
+  · rcases he' with (rfl | rfl)
+    · have h1 : ContDiffOn ℝ ⊤ (ψₙ ∘ ψₙ.symm) (ψₙ.target ∩ ψₙ.symm ⁻¹' ψₙ.source) := jjj ψₙ
+      have ha : (ψₙ.target ∩ ψₙ.symm ⁻¹' ψₙ.source) = (ψₙ.symm ⁻¹' ψₙ.source ∩ ψₙ.target) :=
+        inter_comm ψₙ.target (↑ψₙ.symm ⁻¹' ψₙ.source)
+      have h0 : (ψₙ ∘ ψₙ.symm) = (ψₙ.symm ≫ₕ ψₙ) := rfl
+      have h4 : (ψₙ.symm ≫ₕ ψₙ).source = ψₙ.symm.source ∩ ↑ψₙ.symm ⁻¹' ψₙ.source :=
+        PartialHomeomorph.trans_source ψₙ.symm ψₙ
+      have h5 : ψₙ.symm.source = ψₙ.target := rfl
+      have h6 : ψₙ.target = univ := sorry
+      have h8 : univ ∩ ψₙ.symm ⁻¹' ψₙ.source = ψₙ.symm ⁻¹' ψₙ.source :=
+        univ_inter (↑ψₙ.symm ⁻¹' ψₙ.source)
+      have h7 : (ψₙ.symm ≫ₕ ψₙ).source = ψₙ.symm ⁻¹' ψₙ.source := by
+        rw [h5, h6, h8] at h4
+        exact h4
+      have h2 : ContDiffOn ℝ ⊤ ((ψₙ.symm ≫ₕ ψₙ)) ((ψₙ.symm ≫ₕ ψₙ).source ∩ ψₙ.target) := by
+        rw [h7, <-h0, <-ha]
+        exact h1
+      exact h2
+    · exact sorry
+  · rcases he' with (rfl | rfl)
+    · exact sorry
+    · exact sorry
+
+noncomputable
+instance : IsManifold ((𝓡 1).prod (𝓡 1)) ⊤ Mobius'.TotalSpace :=
+  isManifold_of_contDiffOn ((𝓡 1).prod (𝓡 1)) ⊤ Mobius'.TotalSpace kkk
+
+noncomputable
+def totalAtlas'' : Set (PartialHomeomorph Mobius'.TotalSpace (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1)))) :=
+  { ψₙ, ψₛ }
+
+noncomputable
+instance Mobius'.ChartedSpace :
+  ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1))) Mobius'.TotalSpace :=
+  { atlas := totalAtlas''
+  , chartAt := sorry
+  , mem_chart_source := sorry
+  , chart_mem_atlas := sorry
+  }
+
+noncomputable
+instance : @IsManifold ℝ _ _ _ _ _ _  ((𝓡 1).prod (𝓡 1)) ⊤ Mobius'.TotalSpace _  Mobius'.ChartedSpace :=
+  isManifold_of_contDiffOn ((𝓡 1).prod (𝓡 1)) ⊤ Mobius'.TotalSpace kkk'
