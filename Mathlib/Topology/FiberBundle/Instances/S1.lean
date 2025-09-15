@@ -345,28 +345,6 @@ noncomputable instance S1.chartedSpace : ChartedSpace (EuclideanSpace ℝ (Fin 1
     · exact Set.mem_insert_of_mem _ (Set.mem_singleton _)
 }
 
-#synth ChartedSpace (EuclideanSpace ℝ (Fin 1)) S1
-
-lemma SmoothInnerNN : ∀ φ₀ ∈ baseAtlas'', ContDiffOn ℝ ⊤ (↑(φ₀.symm ≫ₕ φ₀)) (φ₀.symm ≫ₕ φ₀).source := by
-  intro φ₀ hφ₀ x hx
-  have h4 : EqOn (↑(φ₀.symm ≫ₕ φ₀) : EuclideanSpace ℝ (Fin 1) → EuclideanSpace ℝ (Fin 1)) id ((φ₀.symm ≫ₕ φ₀)).source := by
-    intro y hy
-    have h5 : y ∈ φ₀.target := by exact mem_of_mem_inter_left hy
-    have h6 : φ₀ (φ₀.symm y) = y := PartialHomeomorph.right_inv φ₀ h5
-    exact h6
-  have h5 :ContDiffOn ℝ ⊤ id (φ₀.symm ≫ₕ φ₀).source  := by
-    exact contDiffOn_id
-  have h6 : ContDiffOn ℝ ⊤ (↑(φ₀.symm ≫ₕ φ₀)) (φ₀.symm ≫ₕ φ₀).source := by exact ContDiffOn.congr contDiffOn_id h4
-  exact h6 x hx
-
-lemma SmoothInnerNS : ContDiffOn ℝ ⊤ (φₙ.symm ≫ₕ φₛ) (φₙ.symm ≫ₕ φₛ).source := by
-  rw [← contMDiffOn_iff_contDiffOn]
-  have ha : φₙ ∈ IsManifold.maximalAtlas (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :=
-      chart_mem_maximalAtlas north_pt
-  have hb : φₛ ∈ IsManifold.maximalAtlas (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :=
-      chart_mem_maximalAtlas south_pt
-  convert ChartChangeSmoothOn' ha hb using 1
-
 lemma SmoothInner
   (φₙ : PartialHomeomorph ↑MobiusBase (EuclideanSpace ℝ (Fin 1)))
   (φₛ : PartialHomeomorph ↑MobiusBase (EuclideanSpace ℝ (Fin 1)))
@@ -446,7 +424,9 @@ lemma gg2 : ContDiffOn ℝ ⊤ (↑(𝓡 1) ∘ ↑((φN φₙ).symm ≫ₕ φN 
   have h1 : (↑(𝓡 1) ∘ ↑((φN φₙ).symm ≫ₕ φN φₛ) ∘ ↑(𝓡 1).symm) = (φₙ.symm ≫ₕ φₛ) := by
     exact rfl
   have h4 : ContDiffOn ℝ ⊤ (↑ (↑(𝓡 1) ∘ ↑((φN φₙ).symm ≫ₕ φN φₛ) ∘ ↑(𝓡 1).symm))
-                      (φₙ.symm ≫ₕ φₛ).source := SmoothInnerNS
+                      (φₙ.symm ≫ₕ φₛ).source := SmoothInner φₙ φₛ
+                                                            (chart_mem_maximalAtlas north_pt)
+                                                            (chart_mem_maximalAtlas south_pt)
   have h5 : (↑(𝓡 1).symm ⁻¹' ((φN φₙ).symm ≫ₕ φN φₛ).source ∩ range ↑(𝓡 1)) =
             (φₙ.symm ≫ₕ φₛ).source := hh2
   rw [<-h5] at h4

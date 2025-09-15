@@ -166,14 +166,6 @@ lemma ChartChangeSmoothOn
   have h3 := (contMDiffOn_symm_of_mem_maximalAtlas hU).mono h1
   exact (contMDiffOn_of_mem_maximalAtlas hV).comp h3 h2
 
-lemma NorthSouthSmoothOn :
-  ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (φₛ ∘ φₙ.symm) (φₙ.target ∩ φₙ.symm ⁻¹' φₛ.source) :=
-    have h1 : φₙ ∈ IsManifold.maximalAtlas (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :=
-      chart_mem_maximalAtlas north_pt
-    have h2 : φₛ ∈ IsManifold.maximalAtlas (𝓡 1) ⊤ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :=
-      chart_mem_maximalAtlas south_pt
-    ChartChangeSmoothOn h1 h2
-
 def MyContinuousOn_coordChange' : ∀ (i j : Pole),
   ContinuousOn (fun p => MyCoordChange' i j p.1 p.2)
     (((if i = north then (φN φₙ).source else (φN φₛ).source) ∩ if j = north then (φN φₙ).source else (φN φₛ).source) ×ˢ
@@ -221,6 +213,8 @@ instance (m n : ℕ) : ChartedSpace ((EuclideanSpace ℝ (Fin (n + m)))) (Euclid
 #synth @IsManifold ℝ _ _ _ _ _ _ ((𝓡 1).prod (𝓡 1)) 0 (TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius'.Fiber) _ _
 
 #synth IsManifold ((𝓡 1).prod (𝓡 1)) 0 (TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius'.Fiber)
+
+#synth IsManifold ((𝓡 1).prod (𝓡 1)) ⊤ (TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius'.Fiber)
 
 instance : ChartedSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))
                         (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1))) := by
@@ -644,6 +638,8 @@ have h1 : ContMDiffOn _ _ ⊤ f (U ∪ V) :=
  ContMDiffOn.union_of_isOpen upperContMDiff'' lowerContMDiff'' s1_is_open' s2_is_open'
 exact h1
 
+lemma part2Pre : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ φₙ φₙ.source := contMDiffOn_chart
+
 lemma part2 : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (⇑(φN φₙ)) (φN φₙ).source := by
   have h1 : chartAt (EuclideanSpace ℝ (Fin 1)) { point := north_pt } = φN φₙ := by
     have h1a : (chartAt (EuclideanSpace ℝ (Fin 1)) : S1 → PartialHomeomorph S1 (EuclideanSpace ℝ (Fin 1)))
@@ -652,10 +648,6 @@ lemma part2 : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (⇑(φN φₙ)) (φN φₙ).sou
     simp
   rw [<-h1]
   exact contMDiffOn_chart
-
-lemma part1b : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (⇑((chartAt (EuclideanSpace ℝ (Fin 1)) (S1.mk south_pt)).symm))
-  (chartAt (EuclideanSpace ℝ (Fin 1)) (S1.mk south_pt)).target :=
-  contMDiffOn_chart_symm
 
 lemma baz : -north_pt ≠ north_pt := by
   intro heq
@@ -1036,126 +1028,6 @@ lemma zerosAlignN (x : EuclideanSpace ℝ (Fin 1)) :
       congrFun (congrArg Subtype.val h5) 0
     exact h2
 
-lemma zerosAlignS (x : EuclideanSpace ℝ (Fin 1)) :
-  ((stereographic' 1 south_pt).symm x).val 0 = 0 ↔ x 0 = 0 := by
-  have h1 : (stereographic' 1 south_pt).source = {south_pt}ᶜ := stereographic'_source (south_pt)
-  have h2 : (stereographic' 1 south_pt).symm.target = {south_pt}ᶜ := h1
-  have h4 : (stereographic' 1 south_pt).symm.source = (stereographic' 1 south_pt).target := rfl
-  have h5 : (stereographic' 1 south_pt).target = univ := stereographic'_target south_pt
-  have h6 : x ∈ (stereographic' 1 south_pt).symm.source := by
-    rw [h4, h5]
-    exact trivial
-  have h3 : (stereographic' 1 south_pt).symm x ∈ (stereographic' 1 south_pt).symm.target :=
-    PartialHomeomorph.map_source (stereographic' 1 south_pt).symm h6
-  have h7 : (stereographic' 1 south_pt).symm x ∈ ({south_pt} : Set (Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1))ᶜ := by
-    rw [h2] at h3
-    exact h3
-  have h9 : ((stereographic' 1 south_pt).symm x).val 0 = 0 ↔
-            ((stereographic' 1 south_pt).symm x) = south_pt ∨
-            ((stereographic' 1 south_pt).symm x) = north_pt := by
-    have h91 : ((stereographic' 1 south_pt).symm x).val 0 = 0 ↔
-              (stereographic' 1 south_pt).symm x = north_pt ∨
-              (stereographic' 1 south_pt).symm x = south_pt := polePoints ((stereographic' 1 south_pt).symm x)
-    have h92 : (stereographic' 1 south_pt).symm x = north_pt ∨
-              (stereographic' 1 south_pt).symm x = south_pt ↔
-              (stereographic' 1 south_pt).symm x = south_pt ∨
-              (stereographic' 1 south_pt).symm x = north_pt:= Or.comm
-    exact Iff.trans h91 h92
-
-  have h41 : (stereographic' 1 south_pt).symm 0 = -south_pt := hf south_pt
-  have h44 : (stereographic' 1 south_pt).symm 0 = north_pt := by rw [bar.symm] at h41; exact h41
-
-  constructor
-  · intro hx
-    have h2 : (stereographic' 1 south_pt).symm x = south_pt ∨
-              (stereographic' 1 south_pt).symm x = north_pt := h9.mp hx
-    have h3 : (stereographic' 1 south_pt).symm x = north_pt := by
-      cases h2
-      · exfalso
-        (expose_names; exact h7 h)
-      · (expose_names; exact h)
-
-    have h4 : (stereographic' 1 south_pt).symm 0 = (stereographic' 1 south_pt).symm x := by
-      rw [<-h44] at h3
-      exact id (Eq.symm h3)
-    have h5 : (stereographic' 1 south_pt) ((stereographic' 1 south_pt).symm 0) =
-              (stereographic' 1 south_pt) ((stereographic' 1 south_pt).symm x) := by
-      exact congrArg (↑(stereographic' 1 south_pt)) h4
-    have h7 : 0 ∈ (stereographic' 1 south_pt).target := by trivial
-    have h6 : (stereographic' 1 south_pt) ((stereographic' 1 south_pt).symm 0) = 0 :=
-      PartialHomeomorph.right_inv (stereographic' 1 south_pt) h7
-    have h8 : (stereographic' 1 south_pt) ((stereographic' 1 south_pt).symm x) = x :=
-      PartialHomeomorph.right_inv (stereographic' 1 south_pt) h7
-    have h9 : x = 0 := by
-      rw [h6, h8] at h5
-      exact id (Eq.symm h5)
-    exact congrFun h9 0
-  · intro hx
-    have h3 : ((stereographic' 1 south_pt).symm x) = ((stereographic' 1 south_pt).symm 0) := by
-      have : x = 0 := by
-        ext i
-        fin_cases i
-        · exact hx
-      rw [this]
-    have h4 : (stereographic' 1 south_pt).symm 0 = north_pt := h44
-    have h5 : (stereographic' 1 south_pt).symm x = north_pt := by
-      rw [<-h3] at h4
-      exact h4
-    have h2 : ((stereographic' 1 south_pt).symm x).val 0 = north_pt.val 0 :=
-      congrFun (congrArg Subtype.val h5) 0
-    exact h2
-
-lemma φₙ_preimage_ne_zero : φₙ.symm ⁻¹' {x | x.val 0 ≠ 0} = { x : EuclideanSpace ℝ (Fin 1) | x 0 ≠ 0 } := by
-  ext x
-  have h1 : φₙ = chartAt (EuclideanSpace ℝ (Fin 1)) north_pt := rfl
-  have h2 : chartAt (EuclideanSpace ℝ (Fin 1)) (-north_pt) = stereographic' 1 (-(-north_pt)) := rfl
-  have h4 : -(-north_pt) = north_pt := InvolutiveNeg.neg_neg north_pt
-  have h5 : chartAt (EuclideanSpace ℝ (Fin 1)) (-north_pt) = stereographic' 1 ((north_pt)) := by
-    rw [h4] at h2
-    exact h2
-  have ha : chartAt (EuclideanSpace ℝ (Fin 1)) (north_pt) = stereographic' 1 ((-north_pt)) := rfl
-  have h7 : φₙ.symm = (stereographic' 1 (-north_pt)).symm := by
-    rw [h1, ha]
-
-  have h3 : ((stereographic' 1 north_pt).symm x).val 0 = 0 ↔ x 0 = 0 := zerosAlignN x
-  have h6 : ((stereographic' 1 north_pt).symm x).val 0 ≠ 0 ↔ x 0 ≠ 0 := Iff.ne h3
-
-  have h3' : ((stereographic' 1 south_pt).symm x).val 0 = 0 ↔ x 0 = 0 := zerosAlignS x
-  have h6' : ((stereographic' 1 south_pt).symm x).val 0 ≠ 0 ↔ x 0 ≠ 0 := Iff.ne h3'
-
-  constructor
-  · intro hx
-    have : (φₙ.symm x).val 0 ≠ 0 := hx
-    have h1 : (φₙ.symm x).val ∈ {x | x 0 ≠ 0} := hx
-    have h2 : (φₙ.symm x).val 0 ≠ 0 := hx
-    have hb : ((stereographic' 1 (-north_pt)).symm x).val 0 ≠ 0 := by
-      rw [h7] at h2
-      exact h2
-    have hc : ((stereographic' 1 (south_pt)).symm x).val 0 ≠ 0 := by
-      rw [<-bar'] at hb
-      exact hb
-    have h3 : x 0 ≠ 0 := h6'.mp hc
-    exact h3
-  · intro hx
-    have : x ∈ {x | x 0 ≠ 0} := hx
-    have h1 : φₙ.symm x ∈ φₙ.symm '' {x | x 0 ≠ 0} := mem_image_of_mem (↑φₙ.symm) hx
-    have h2 : (stereographic' 1 (south_pt)).symm x ∈
-              (stereographic' 1 (south_pt)).symm '' {x | x 0 ≠ 0} :=
-       mem_image_of_mem (↑(stereographic' 1 south_pt).symm) hx
-    have h3 : x 0 ≠ 0 := hx
-    have h4 : ((stereographic' 1 south_pt).symm x).val 0 ≠ 0 := h6'.mpr h3
-    have h5 : (stereographic' 1 south_pt).symm = φₙ.symm := by
-      rw [bar']
-      exact h7.symm
-    have h6 : (φₙ.symm x).val 0 ≠ 0 := by
-      rw [<-h5]
-      exact h4
-    by_contra h
-    have : x ∉ φₙ.symm ⁻¹' {x | x.val 0 ≠ 0}  := h
-    have : φₙ.symm x ∉ {x | x.val 0 ≠ 0} := h
-    have hval : (φₙ.symm x).val 0 = 0 := notMem_support.mp h
-    exact h6 hval
-
 lemma ltn1 : (Mobius'.localTriv north).source
        = Mobius'.proj ⁻¹' (S1.mk '' { x | x ≠ -north_pt }) := by
   have : φₙ.source = { x | x ≠ -north_pt } := hφₙ.source
@@ -1179,8 +1051,28 @@ lemma ltn2 : Mobius'.proj ⁻¹' (S1.mk '' {x | x ≠ -north_pt})
 lemma northTriv_source : (Mobius'.localTriv north).source = {p | p.1.point ≠ -north_pt} := by
   rw [ltn1, ltn2]
 
+lemma lts1 : (Mobius'.localTriv south).source
+       = Mobius'.proj ⁻¹' (S1.mk '' { x | x ≠ -south_pt }) := by
+  have : φₛ.source = { x | x ≠ -south_pt } := hφₛ.source
+  have : S1.mk '' φₛ.source = S1.mk '' { x | x ≠ -south_pt } := congrArg (image S1.mk) this
+  have :  Mobius'.proj ⁻¹' (S1.mk '' φₛ.source) =  Mobius'.proj ⁻¹' (S1.mk '' { x | x ≠ -south_pt }) :=
+    congrArg (preimage Mobius'.proj) this
+  rw [<-this]
+  exact rfl
+
+lemma lts2 : Mobius'.proj ⁻¹' (S1.mk '' {x | x ≠ -south_pt})
+        = {p | p.1.point ≠ -south_pt} := by
+  ext p
+  simp only [Set.mem_preimage, Set.mem_image, Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨x, hx, hy⟩
+    exact ne_of_eq_of_ne (congrArg S1.point (id (Eq.symm hy))) hx
+  · intro hp
+    refine ⟨p.1.point, hp, ?_⟩
+    simp
+
 lemma southTriv_source : (Mobius'.localTriv south).source = {p | p.1.point ≠ -south_pt} := by
-  sorry
+    rw [lts1, lts2]
 
 lemma ltt1 :
   (Mobius'.localTriv north).toPartialHomeomorph.target
@@ -1948,3 +1840,5 @@ instance Mobius'.ChartedSpace :
 noncomputable
 instance : @IsManifold ℝ _ _ _ _ _ _  ((𝓡 1).prod (𝓡 1)) ⊤ Mobius'.TotalSpace _  Mobius'.ChartedSpace :=
   isManifold_of_contDiffOn ((𝓡 1).prod (𝓡 1)) ⊤ Mobius'.TotalSpace kkk'
+
+#synth IsManifold ((𝓡 1).prod (𝓡 1)) ⊤ (TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius'.Fiber)
