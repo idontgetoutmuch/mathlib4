@@ -243,35 +243,6 @@ def ψₛ :=(Mobius'.localTriv south).toPartialHomeomorph ≫ₕ ((φN φₛ).pr
 def totalAtlas' : Set (PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))) :=
   { ψₙ, ψₛ }
 
-lemma qqq : trivializationAtlas (EuclideanSpace ℝ (Fin 1)) Mobius'.Fiber =
-  {Mobius'.localTriv north, Mobius'.localTriv south} := by
-  ext x
-  constructor
-  · intro hx
-    rcases hx with ⟨i, rfl⟩
-    cases i
-    · exact Or.inl rfl
-    · exact Or.inr rfl
-  · intro hx
-    rcases hx with rfl | rfl
-    · exact ⟨Pole.north, rfl⟩
-    · exact ⟨Pole.south, rfl⟩
-
-lemma example1 : atlas (Mobius'.Base × (EuclideanSpace ℝ (Fin 1))) Mobius'.TotalSpace =
- {(Mobius'.localTriv north).toPartialHomeomorph, (Mobius'.localTriv south).toPartialHomeomorph} := by
-  rw [← Set.image_pair]
-  rw [← qqq]
-  rfl
-
-lemma example2 : atlas (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1))) (Mobius'.Base × (EuclideanSpace ℝ (Fin 1))) =
- {(φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))),
- (φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))} := by
-  have h5 : image2 PartialHomeomorph.prod {φN φₙ, φN φₛ} {PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))} =
-            {(φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))),
-             (φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))} := by
-    simp [Set.image2_singleton_right, Set.image_pair]
-  exact h5
-
 lemma jjj (ψ : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))) :
   ContDiffOn ℝ ⊤ (↑ψ ∘ ↑ψ.symm) (ψ.target ∩ ↑ψ.symm ⁻¹' ψ.source) := by
   apply ContDiffOn.congr contDiffOn_id
@@ -1935,13 +1906,43 @@ lemma kkk'
   have h4 : e'.target = univ := totalAtlasTarget e' he'
   simpa [I, ModelWithCorners.toPartialEquiv, Function.comp, h3, h4] using kkk'' e e' he he'
 
+example : ψₙ.source = {p | p.proj.point ≠ -north_pt} := calc
+                ψₙ.source = (Mobius'.localTriv north).source := ψₙ_source
+                _ = {p | p.proj.point ≠ -north_pt} := northTriv_source
+
+lemma my_mem_chart_source'' : ∀ (x : Mobius'.TotalSpace), x ∈ (if x.1.point = north_pt then ψₙ else ψₛ).source := by
+  intro x
+  by_cases h : x.1.point = north_pt
+  case pos => have h1 : x.proj.point = north_pt := h
+              rw [if_pos h]
+              have h1 : ψₙ.source = {p | p.proj.point ≠ -north_pt} := calc
+                ψₙ.source = (Mobius'.localTriv north).source := ψₙ_source
+                _ = {p | p.proj.point ≠ -north_pt} := northTriv_source
+              have h2 : north_pt ≠ -north_pt := southIsNotNorth_general north_pt
+              have h3 : x.proj.point ≠ -north_pt := ne_of_eq_of_ne h h2
+              have h5 : x ∈ ψₙ.source := h1 ▸ h3
+              exact h5
+  case neg => rw [if_neg h]
+              have h1 : ψₛ.source = {p | p.proj.point ≠ -south_pt} := calc
+                ψₛ.source = (Mobius'.localTriv south).source := ψₛ_source
+                _ = {p | p.proj.point ≠ -south_pt} := southTriv_source
+              have h3 : ψₛ.source = {p | p.proj.point ≠ north_pt} := by rw [<-bar] at h1; exact h1
+              have h5 : x ∈ {p | p.proj.point ≠ north_pt} := h
+              have h6 : x ∈ ψₛ.source := by rw [<-h3] at h5; exact h5
+              exact h6
+
 noncomputable
 instance Mobius'.ChartedSpace :
   ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1))) Mobius'.TotalSpace :=
   { atlas := totalAtlas'
-  , chartAt := sorry
-  , mem_chart_source := sorry
-  , chart_mem_atlas := sorry
+  , chartAt x := if x.1.point = north_pt then ψₙ else ψₛ
+  , mem_chart_source := my_mem_chart_source''
+  , chart_mem_atlas := by
+      intro x
+      dsimp
+      split_ifs
+      · exact Or.inl rfl
+      · exact Or.inr rfl
   }
 
 noncomputable
