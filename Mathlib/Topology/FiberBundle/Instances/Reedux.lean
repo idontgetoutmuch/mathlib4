@@ -240,11 +240,6 @@ def ψₙ :=(Mobius'.localTriv north).toPartialHomeomorph ≫ₕ ((φN φₙ).pr
 noncomputable
 def ψₛ :=(Mobius'.localTriv south).toPartialHomeomorph ≫ₕ ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
 
-noncomputable
-def ψₙₛ :=(Mobius'.localTriv north).toPartialHomeomorph ≫ₕ ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
-noncomputable
-def ψₛₙ :=(Mobius'.localTriv south).toPartialHomeomorph ≫ₕ ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
-
 def totalAtlas' : Set (PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))) :=
   { ψₙ, ψₛ }
 
@@ -355,8 +350,6 @@ noncomputable
 def χₙ := (Mobius'.localTriv north).toPartialHomeomorph
 noncomputable
 def χₛ := (Mobius'.localTriv south).toPartialHomeomorph
-
-#check Mobius'.coordChange
 
 lemma xNe0 : ∀ (x : S1) (_ : x.point.val 0 > 0), x.point ≠ north_pt := by
   have h1 : north_pt.val 0 = 0 := rfl
@@ -639,8 +632,6 @@ lemma lowerContMDiff' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (�
         dsimp at hy
         exact lowerInclusion' x v hy
 
-#check S1.point
-
 def s1' : Set (S1 × EuclideanSpace ℝ (Fin 1)) := { x | 0 < x.1.point.val 0 }
 
 lemma s1_is_open' : IsOpen s1' := by
@@ -857,35 +848,6 @@ lemma changeModelSpace
       ContMDiffOn.comp (contMDiffOn_univ.mpr ha2b) h1 (Set.subset_univ _)
     exact h2
 
-example : ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph).source =
-          (Mobius'.localTriv south).toPartialHomeomorph.symm.source ∩
-           (Mobius'.localTriv south).toPartialHomeomorph.symm ⁻¹' (Mobius'.localTriv north).toPartialHomeomorph.source := by
-  have h1 : (Mobius'.localTriv south).toPartialHomeomorph.symm.source =
-            (Mobius'.localTriv south).toPartialHomeomorph.target := rfl
-
-  have h2 : ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph) ⁻¹'
-            (φN φₙ).source ×ˢ univ =
-            ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph) ⁻¹'
-            (φN φₙ).source ×ˢ univ := rfl
-
-  -- have h2 : (Mobius'.localTriv south).toPartialHomeomorph.symm ⁻¹' (Mobius'.localTriv north).toPartialHomeomorph.source =
-
-  exact rfl
-
-example : ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph) ⁻¹'
-          (φN φₙ).source ×ˢ univ =
-          ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph) ⁻¹'
-          (φN φₙ).source ×ˢ univ := rfl
-
-example :
-  let f := (Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ
-            (Mobius'.localTriv north).toPartialHomeomorph
-  let s := (φN φₙ).source
-  f ⁻¹' (s ×ˢ (univ : Set _)) = (Prod.fst ∘ (f : _ → _)) ⁻¹' s := by
-  intros f s
-  ext x
-  simp [Set.mem_preimage, Set.mem_prod, and_comm]
-
 open Bundle
 
 lemma mobius_fst_eq :
@@ -902,45 +864,6 @@ lemma mobius_preimage_fst (s : Set S1) :
       = s ×ˢ univ := by
   apply Set.ext
   intro x
-  simp
-
-example :
-  ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph) ⁻¹'
-    ((φN φₙ).source ×ˢ univ) =
-  (φN φₙ).source ×ˢ univ := by
-  rw [← mobius_preimage_fst (φN φₙ).source]
-  rfl
-
-example :
-  ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph ∘
-   ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm) ⁻¹'
-  ((φN φₙ).source ×ˢ univ) =
-  ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' (φN φₙ).source ×ˢ univ  := by
-  have h1 : ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph ∘
-    ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm) ⁻¹'
-      ((φN φₙ).source ×ˢ univ) =
-  (((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm) ⁻¹'
-    (((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph) ⁻¹'
-      ((φN φₙ).source ×ˢ univ)) := rfl
-  have h2 : ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph) ⁻¹'
-    ((φN φₙ).source ×ˢ univ) =
-    (φN φₙ).source ×ˢ univ := by
-      rw [← mobius_preimage_fst (φN φₙ).source]
-      rfl
-  have h3 : ↑((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph) ∘
-        ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
-      (φN φₙ).source ×ˢ univ =
-    ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' (φN φₙ).source ×ˢ univ := by rw [h2] at h1; exact h1
-  exact h3
-
-#check Set.preimage_prod_map_prod
-
-example :
-  ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' ((φN φₙ).source ×ˢ univ) =
-  ((φN φₛ).symm ⁻¹' (φN φₙ).source) ×ˢ univ := by
-  have h : (↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm : _ → _) =
-           Prod.map (↑(φN φₛ).symm) (↑(PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) := rfl
-  rw [h, Set.preimage_prod_map_prod]
   simp
 
 lemma polePoints :
@@ -976,10 +899,6 @@ lemma polePoints :
     rcases hx with rfl | rfl
     · exact rfl
     · exact rfl
-
-#print axioms polePoints
-
-#check mem_sphere_iff_norm
 
 lemma coordinate_characterization (y : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) (a : ℝ) :
   y.val 0 = a ↔ y = ![a, Real.sqrt (1 - a^2)] ∨ y = ![a, -Real.sqrt (1 - a^2)] := by
@@ -1065,12 +984,6 @@ lemma southIsNotNorth_general (p : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)
   have : (0 : ℝ) = 1 := by
     rw [<-sphere_eq, <-sphere_nn]
   exact (by norm_num : (0 : ℝ) ≠ 1) this
-
-#check stereographic'_neg north_pt
-
-#check southIsNotNorth
-#check bar
-#check bar'
 
 instance (n) : Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n) :=
   ⟨(finrank_euclideanSpace_fin : Module.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n)⟩
@@ -1272,24 +1185,6 @@ lemma φₙ_preimage_ne_zero : φₙ.symm ⁻¹' {x | x.val 0 ≠ 0} = { x : Euc
     have hval : (φₙ.symm x).val 0 = 0 := notMem_support.mp h
     exact h6 hval
 
-#check south_pt
-#check S1.point
-#check S1.mk
-
-example : (Mobius'.localTriv north).source = Mobius'.proj ⁻¹' Mobius'.baseSet north := rfl
-
-example : Mobius'.baseSet north = (φN φₙ).source := rfl
-
-example : (Mobius'.localTriv north).source
-       = Mobius'.proj ⁻¹' (φN φₙ).source := rfl
-
-example : (φN φₙ).source = S1.mk '' φₙ.source := rfl
-
-example : (Mobius'.localTriv north).source
-       = Mobius'.proj ⁻¹' (S1.mk '' φₙ.source) := rfl
-
-example : φₙ.source = { x | x ≠ -north_pt } := hφₙ.source
-
 lemma ltn1 : (Mobius'.localTriv north).source
        = Mobius'.proj ⁻¹' (S1.mk '' { x | x ≠ -north_pt }) := by
   have : φₙ.source = { x | x ≠ -north_pt } := hφₙ.source
@@ -1357,12 +1252,6 @@ lemma hc : (φN φₛ).source = { x | x.point ≠ -south_pt } := by
     rw [liftedPts x.point φₛ]
     rw [hφₛ.source]
     exact MapsTo.mem_iff (fun ⦃x⦄ a ↦ a) fun ⦃x⦄ a ↦ a
-
-#check PartialHomeomorph.trans_source
-  (Mobius'.localTriv south).toPartialHomeomorph
-  ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
-
-#check Set.prod_univ
 
 lemma ψₙ_source : ψₙ.source = (Mobius'.localTriv north).source := sorry
 
@@ -1506,11 +1395,6 @@ lemma ψs_target : ψₛ.target = { p | (φN φₛ).symm p.1 ≠ S1.mk (-south_p
   rw [ha''] at h3
   exact h3
 
-#check Set.image_prod
-#check mem_image_of_mem
-#check Function.Injective.ne_iff
-
-
 lemma l1 : { p | φₛ.symm p ≠ -south_pt } = univ := by
   ext p
   constructor
@@ -1553,55 +1437,6 @@ lemma l3 (h : { p | (φN φₛ).symm p ≠ S1.mk (-south_pt)} = univ) :
       rw [← h] at mem
       exact mem
     exact this
-
-example : { p : EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1) | (φN φₛ).symm p.1 ≠ S1.mk (-south_pt) } = univ
-  := l3 (l2 l1)
-
-example : ψₛ.target = univ := by
-  calc  ψₛ.target = { p | (φN φₛ).symm p.1 ≠ S1.mk (-south_pt) } := ψs_target
-        _ = univ := l3 (l2 l1)
-
-#check (((Mobius'.localTriv south).toPartialHomeomorph).symm :
-        PartialHomeomorph (S1 × EuclideanSpace ℝ (Fin 1)) Mobius'.TotalSpace)
-
-#check ((((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm) :
-   PartialHomeomorph (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)) (S1 × EuclideanSpace ℝ (Fin 1)))
-
-example : (ψₛ.symm) ⁻¹' ψₙ.source = {p | ((φN φₛ).symm p.1).point ≠ -north_pt}
-  := by
-
-  have h0 : (ψₛ.symm) ⁻¹' ψₙ.source =
-    ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' (
-      (((Mobius'.localTriv south).toPartialHomeomorph).symm ⁻¹' (Mobius'.localTriv north).source)) := by
-    exact congrArg (preimage ↑ψₛ.symm) ψₙ_source
-
-  have h1 :
-  (((Mobius'.localTriv south).toPartialHomeomorph).symm ⁻¹'
-    (Mobius'.localTriv north).source) =
-    { q | (((Mobius'.localTriv south).toPartialHomeomorph).symm q).1.point ≠ -north_pt } := by
-      ext q
-      simp [northTriv_source, Set.mem_setOf_eq]
-
-  have h2 :
-  ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
-    { q | (((Mobius'.localTriv south).toPartialHomeomorph).symm q).1.point ≠ -north_pt }
-  =
-  { p | ((φN φₛ).symm p.1).point ≠ -north_pt } := by
-    ext p
-    cases p with
-    | mk x y =>
-    simp [Set.mem_setOf_eq]
-
-  have :
-  (ψₛ.symm) ⁻¹' ψₙ.source
-  =
-  { p | ((φN φₛ).symm p.1).point ≠ -north_pt } := by
-    rw [h0, h1, <-h2]
-
-  exact this
-
-example : (chartAt (EuclideanSpace ℝ (Fin 1)) north_pt) =
-          (stereographic' 1 (-north_pt)) := rfl
 
 lemma φs_symm_maps_neg_north_pt_eq_zero : ∀ p, φₛ.symm p = -north_pt ↔ p = 0 := by
   intro p
@@ -1654,11 +1489,6 @@ lemma φNφs_symm_maps_neg_north_pt_eq_zero : ∀ p, (φN φₛ).symm p = S1.mk 
   simp only [φN, PartialHomeomorph.symm]
   rw [←(φs_symm_maps_neg_north_pt_eq_zero p)]
   simp
-
-example : ∀ (p : EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)),
- (φN φₛ).symm p.1 = S1.mk (-north_pt) ↔ p.1 = 0 := by
-  intro p
-  rw [φNφs_symm_maps_neg_north_pt_eq_zero]
 
 lemma φₛ_preimage_ne_zero :
     φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {x | x ≠ 0} := by
@@ -1741,6 +1571,15 @@ lemma ll3 (h : (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {p | (φN φ�
   ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' {x | x.1.point.val 0 ≠ 0} =
    { p | (φN φₛ).symm p.1 ≠ S1.mk (-north_pt)} := sorry
 
+
+lemma totalAtlasTarget
+  (e : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)))
+  (he : e ∈ totalAtlas') : e.target = univ := by
+  rcases he with (rfl | rfl)
+  · exact sorry
+  · calc  ψₛ.target = { p | (φN φₛ).symm p.1 ≠ S1.mk (-south_pt) } := ψs_target
+        _ = univ := l3 (l2 l1)
+
 lemma h9pre' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
     ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
       {x | x.1.point.val 0 > 0 ∨ x.1.point.val 0 < 0} := by
@@ -1772,9 +1611,7 @@ lemma h9pre' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
   { p | ((φN φₛ).symm p.1).point ≠ -north_pt } := by
     rw [h0, h1, <-h2]
 
-  have h4 : ψₛ.target = univ := by
-    calc  ψₛ.target = { p | (φN φₛ).symm p.1 ≠ S1.mk (-south_pt) } := ψs_target
-        _ = univ := l3 (l2 l1)
+  have h4 : ψₛ.target = univ := totalAtlasTarget ψₛ (Or.inr rfl)
 
   have h5 : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
             { p | ((φN φₛ).symm p.1).point ≠ -north_pt } := by
@@ -1832,8 +1669,6 @@ lemma h9pre' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
       {x | x.1.point.val 0 > 0 ∨ x.1.point.val 0 < 0}  := hc
 
   exact hd
-
-#check PartialHomeomorph.symm_image_eq_source_inter_preimage
 
 open Metric
 
@@ -2013,42 +1848,6 @@ lemma bothContMDiff'' : ContDiffOn ℝ ⊤ (ψₙ ∘ ψₛ.symm) (ψₛ.target 
 
   exact contMDiffOn_iff_contDiffOn.mp h93
 
-lemma kkk' : ∀ (e e' : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))),
-  e ∈ totalAtlas' →
-  e' ∈ totalAtlas' →
-  ContDiffOn ℝ ⊤
-    (↑((𝓡 1).prod (𝓡 1)) ∘ ↑(e.symm ≫ₕ e') ∘ ↑((𝓡 1).prod (𝓡 1)).symm)
-    (↑((𝓡 1).prod (𝓡 1)).symm ⁻¹' (e.symm ≫ₕ e').source ∩ range ↑((𝓡 1).prod (𝓡 1))) := by
-  intros e e' he he'
-  rcases he with (rfl | rfl)
-  · rcases he' with (rfl | rfl)
-    · exact sorry
-    · exact sorry
-  · rcases he' with (rfl | rfl)
-    · exact sorry
-    · exact sorry
-
-lemma preKkk
-  (ψₙ : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)))
-  (ψₛ : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)))
-  (h1 : ContDiffOn ℝ ⊤ (ψₙ ∘ ψₛ.symm) (ψₛ.target ∩ ψₛ.symm ⁻¹' ψₙ.source))
-  (h6 : ψₛ.target = univ) : ContDiffOn ℝ ⊤ ((ψₛ.symm ≫ₕ ψₙ)) ((ψₛ.symm ≫ₕ ψₙ).source ∩ ψₛ.target) := by
-  have h0 : (ψₙ ∘ ψₛ.symm) = (ψₛ.symm ≫ₕ ψₙ) := rfl
-  have h4 : (ψₛ.symm ≫ₕ ψₙ).source = ψₛ.symm.source ∩ ↑ψₛ.symm ⁻¹' ψₙ.source :=
-    PartialHomeomorph.trans_source ψₛ.symm ψₙ
-  have h5 : ψₛ.symm.source = ψₛ.target := rfl
-  have h8 : univ ∩ ψₛ.symm ⁻¹' ψₙ.source = ψₛ.symm ⁻¹' ψₙ.source :=
-    univ_inter (ψₛ.symm ⁻¹' ψₙ.source)
-  have h7 : (ψₛ.symm ≫ₕ ψₙ).source = ψₛ.symm ⁻¹' ψₙ.source := by
-    rw [h5, h6, h8] at h4
-    exact h4
-  have ha : (ψₛ.target ∩ ψₛ.symm ⁻¹' ψₙ.source) = (ψₛ.symm ⁻¹' ψₙ.source ∩ ψₛ.target) :=
-    inter_comm ψₛ.target (ψₛ.symm ⁻¹' ψₙ.source)
-  have h2 : ContDiffOn ℝ ⊤ ((ψₛ.symm ≫ₕ ψₙ)) ((ψₛ.symm ≫ₕ ψₙ).source ∩ ψₛ.target) := by
-    rw [h7, <-h0, <-ha]
-    exact h1
-  exact h2
-
 lemma preKkk'
   (ψₙ : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)))
   (ψₛ : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)))
@@ -2080,8 +1879,8 @@ lemma kkk'' :
     e ∈ totalAtlas' →
     e' ∈ totalAtlas' →
       ContDiffOn ℝ ⊤ (e.symm ≫ₕ e') ((e.symm ≫ₕ e').source ∩ e'.target) := by
-  have h6  : ψₛ.target = univ := sorry
-  have h6' : ψₙ.target = univ := sorry
+  have h6  : ψₛ.target = univ := totalAtlasTarget ψₛ (Or.inr rfl)
+  have h6' : ψₙ.target = univ := totalAtlasTarget ψₙ (Or.inl rfl)
   intros e e' he he'
   rcases he with (rfl | rfl)
   · rcases he' with (rfl | rfl)
@@ -2095,18 +1894,51 @@ lemma kkk'' :
     · have h1 : ContDiffOn ℝ ⊤ (ψₛ ∘ ψₛ.symm) (ψₛ.target ∩ ψₛ.symm ⁻¹' ψₛ.source) := jjj ψₛ
       exact preKkk' ψₛ ψₛ h1 h6 h6
 
-noncomputable
-instance : IsManifold ((𝓡 1).prod (𝓡 1)) ⊤ Mobius'.TotalSpace :=
-  isManifold_of_contDiffOn ((𝓡 1).prod (𝓡 1)) ⊤ Mobius'.TotalSpace kkk
+lemma ContDiffOn.conjugate_same_space
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {f : E → E} {s : Set E}
+  {φ : E ≃ₜ E}
+  (hf : ContDiffOn ℝ ⊤ f s)
+  (hφ : ContDiff ℝ ⊤ (⇑φ))
+  (hφ_inv : ContDiff ℝ ⊤ (⇑φ.symm)) :
+  ContDiffOn ℝ ⊤ (⇑φ ∘ f ∘ ⇑φ.symm) (⇑φ.symm ⁻¹' s ∩ Set.range (⇑φ)) := by
+  let t : Set E := ⇑φ.symm ⁻¹' s ∩ Set.range (⇑φ)
+  have h_phi_symm_on_t : ContDiffOn ℝ ⊤ (⇑φ.symm) t := by
+    exact hφ_inv.contDiffOn.mono Set.inter_subset_left
+  have h_f_on_s : ContDiffOn ℝ ⊤ f s := hf
+  have maps_phi_symm_t_s : MapsTo (⇑φ.symm) t s := by
+    intro x hx
+    exact hx.1
+  have h_f_comp_phi_symm_on_t : ContDiffOn ℝ ⊤ (f ∘ ⇑φ.symm) t := by
+    exact ContDiffOn.comp h_f_on_s h_phi_symm_on_t maps_phi_symm_t_s
+  let im : Set E := Set.image (f ∘ ⇑φ.symm) t
+  have h_phi_on_im : ContDiffOn ℝ ⊤ (⇑φ) im := by
+    exact hφ.contDiffOn.mono (Set.subset_univ im)
+  have maps_h_to_im : MapsTo (f ∘ ⇑φ.symm) t im := by
+    intro x hx
+    exact Set.mem_image_of_mem (f ∘ ⇑φ.symm) hx
+  have h_conjugate_on_t : ContDiffOn ℝ ⊤ (⇑φ ∘ f ∘ ⇑φ.symm) t := by
+    exact ContDiffOn.comp h_phi_on_im h_f_comp_phi_symm_on_t maps_h_to_im
+  exact h_conjugate_on_t
 
 noncomputable
-def totalAtlas'' : Set (PartialHomeomorph Mobius'.TotalSpace (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1)))) :=
-  { ψₙ, ψₛ }
+def I := (𝓡 1).prod (𝓡 1)
+
+lemma kkk'
+  (e e' : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)))
+  (he : e ∈ totalAtlas')
+  (he' : e' ∈ totalAtlas') :
+  ContDiffOn ℝ ⊤
+    (↑I ∘ ↑(e.symm ≫ₕ e') ∘ ↑I.symm)
+    (↑I.symm ⁻¹' (e.symm ≫ₕ e').source ∩ Set.range ↑I) := by
+  have h3 : e.target = univ := totalAtlasTarget e he
+  have h4 : e'.target = univ := totalAtlasTarget e' he'
+  simpa [I, ModelWithCorners.toPartialEquiv, Function.comp, h3, h4] using kkk'' e e' he he'
 
 noncomputable
 instance Mobius'.ChartedSpace :
   ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin 1)) (EuclideanSpace ℝ (Fin 1))) Mobius'.TotalSpace :=
-  { atlas := totalAtlas''
+  { atlas := totalAtlas'
   , chartAt := sorry
   , mem_chart_source := sorry
   , chart_mem_atlas := sorry
