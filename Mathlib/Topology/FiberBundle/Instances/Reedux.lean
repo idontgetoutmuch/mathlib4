@@ -1071,9 +1071,9 @@ lemma ltt_south :
   rw [this] at hdef
   exact hdef
 
-lemma ltt2_north :
-  (S1.mk '' { x | x ≠ -north_pt }) ×ˢ (Set.univ : Set (EuclideanSpace ℝ (Fin 1)))
-    = { p | p.point ≠ -north_pt } ×ˢ Set.univ := by
+lemma ltt2 (pt : { x // x ∈ Metric.sphere 0 1 }) :
+  (S1.mk '' { x | x ≠ -pt }) ×ˢ (Set.univ : Set (EuclideanSpace ℝ (Fin 1)))
+    = { p | p.point ≠ -pt } ×ˢ Set.univ := by
   ext p
   simp
   constructor
@@ -1086,11 +1086,10 @@ lemma ltt2_north :
     refine ⟨p.1.point, p.1.point.property,  And.symm ((fun {a b} ↦ Classical.not_imp.mp) fun a ↦ hp (a h2))⟩
 
 lemma northTriv_target : (Mobius'.localTriv north).target = { p | p.point ≠ -north_pt } ×ˢ Set.univ := by
-  rw [ltt_north, ltt2_north]
+  rw [ltt_north, ltt2 north_pt]
 
 lemma southTriv_target : (Mobius'.localTriv south).target = { p | p.point ≠ -south_pt } ×ˢ Set.univ := by
-  rw [ltt_south]
-  exact sorry
+  rw [ltt_south, ltt2 south_pt]
 
 lemma ψₙ_source : ψₙ.source = (Mobius'.localTriv north).source := sorry
 
