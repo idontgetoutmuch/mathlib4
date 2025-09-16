@@ -1109,13 +1109,6 @@ lemma northTriv_target : (Mobius'.localTriv north).target = { p | p.point ≠ -n
 lemma southTriv_target : (Mobius'.localTriv south).target = { p | p.point ≠ -south_pt } ×ˢ Set.univ := by
   sorry
 
-lemma hc : (φN φₛ).source = { x | x.point ≠ -south_pt } := by
-    apply Set.ext
-    intro x
-    rw [liftedPts x.point φₛ]
-    rw [hφₛ.source]
-    exact MapsTo.mem_iff (fun ⦃x⦄ a ↦ a) fun ⦃x⦄ a ↦ a
-
 lemma ψₙ_source : ψₙ.source = (Mobius'.localTriv north).source := sorry
 
 lemma ψₛ_source : ψₛ.source = (Mobius'.localTriv south).source := by
@@ -1413,13 +1406,11 @@ lemma ll2 (h : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₛ.symm p ≠ -no
   ext p
   constructor
   · intro hx
-    have h2 : p ∈ φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} := hx
-    have h3 : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₛ.symm p ≠ -north_pt} := h
-    have h4 : p ∈ {p | φₛ.symm p ≠ -north_pt} := h3 ▸ h2
-    have h6 : φₛ.symm p ≠ -north_pt := h4
-    have h5 : p ∈ {p | S1.mk (φₛ.symm p) ≠ S1.mk (-north_pt)} :=
-      (not_congr ((S1.mk_inj (φₛ.symm p) (-north_pt)))).mpr h6
-    exact h5
+    have h1 : p ∈ {p | φₛ.symm p ≠ -north_pt} := h ▸ hx
+    have h2 : φₛ.symm p ≠ -north_pt := h1
+    have h3 : p ∈ {p | S1.mk (φₛ.symm p) ≠ S1.mk (-north_pt)} :=
+      (not_congr ((S1.mk_inj (φₛ.symm p) (-north_pt)))).mpr h2
+    exact h3
   · intro hx
     have h7 : p ∈  φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} ↔ p ∈ {p | φₛ.symm p ≠ -north_pt} :=
       Eq.to_iff (congrFun h p)
@@ -1433,7 +1424,6 @@ lemma ll2 (h : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₛ.symm p ≠ -no
 lemma ll3 (h : (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {p | (φN φₛ).symm p ≠ S1.mk (-north_pt)}) :
   ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' {x | x.1.point.val 0 ≠ 0} =
    { p | (φN φₛ).symm p.1 ≠ S1.mk (-north_pt)} := sorry
-
 
 lemma totalAtlasTarget
   (e : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)))
@@ -1618,7 +1608,16 @@ lemma hh42 (h : (φN φₛ).symm ⁻¹' (φN φₙ).source = {x | x ≠ 0}) :
 lemma kk1 : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {x | x ≠ 0} := φₛ_preimage_ne_zero
 
 lemma kk2 (h : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {x | x ≠ 0}) :
-  (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {x | x ≠ 0} := sorry
+  (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {x | x ≠ 0} := by
+  ext p
+  have h6 : S1.mk (φₛ.symm p) ∈  {x | x.point.val 0 ≠ 0} ↔ (φₛ.symm p) ∈ {x | x.val 0 ≠ 0} :=
+    MapsTo.mem_iff (fun ⦃x⦄ a ↦ a) fun ⦃x⦄ a ↦ a
+  constructor
+  · intro hx
+    exact h ▸ (h6.mp hx)
+  · intro hx
+    have h2 : p ∈ φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} := h ▸ hx
+    exact (h6.mpr h2)
 
 lemma kk3 (h : (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {x | x ≠ 0}) :
 ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
