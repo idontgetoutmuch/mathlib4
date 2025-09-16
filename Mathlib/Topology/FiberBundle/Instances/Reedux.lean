@@ -51,27 +51,6 @@ theorem MyCoordChange_comp' : ∀ (i j k : Pole),
 
 open Set
 
-/-
-FIXME
--/
-lemma sumOfSquares : ∀ (y : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1),
-      (y.val 0) ^ 2 + (y.val 1) ^ 2 = 1 := by
-  let A := Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1
-  let B := { x : EuclideanSpace ℝ (Fin 2) | ∑ i : Fin 2, x i ^ 2 = 1 ^ 2}
-  have h1 : A = B := by
-    exact EuclideanSpace.sphere_zero_eq 1 (le_of_lt Real.zero_lt_one)
-  intro y
-  have h2 : y.val ∈ A := y.prop
-  have h3 : y.val ∈ B := by
-    rw [h1] at h2
-    exact h2
-  have h4 : ∑ i : Fin 2, y.val i ^ 2 = 1 ^ 2 := by
-    simp at h3
-    exact h3
-  have h5 : (y.val 0) ^ 2 + (y.val 1) ^ 2 = 1 := by
-    rwa [Fin.sum_univ_two, one_pow] at h4
-  exact h5
-
 lemma OverlapNorthSouth :
     (φN φₙ).source ∩ (φN φₛ).source = { x | x.point.val 0 ≠ 0 } := by
   ext x
@@ -1074,40 +1053,44 @@ lemma lts2 : Mobius'.proj ⁻¹' (S1.mk '' {x | x ≠ -south_pt})
 lemma southTriv_source : (Mobius'.localTriv south).source = {p | p.1.point ≠ -south_pt} := by
     rw [lts1, lts2]
 
-lemma ltt1 :
+lemma ltt_north :
   (Mobius'.localTriv north).toPartialHomeomorph.target
     = (S1.mk '' { x | x ≠ -north_pt }) ×ˢ (Set.univ : Set (EuclideanSpace ℝ (Fin 1))) := by
   have hdef : (Mobius'.localTriv north).toPartialHomeomorph.target =
               (S1.mk '' φₙ.source) ×ˢ Set.univ := rfl
   have : φₙ.source = { x | x ≠ -north_pt } := hφₙ.source
-  have : (S1.mk '' φₙ.source) ×ˢ Set.univ =
-         (S1.mk '' { x | x ≠ -north_pt }) ×ˢ (Set.univ : Set (EuclideanSpace ℝ (Fin 1))):=
-    congrArg (fun s => s ×ˢ Set.univ) (congrArg (image S1.mk) this)
-  exact this
+  rw [this] at hdef
+  exact hdef
 
-lemma ltt2 :
+lemma ltt_south :
+  (Mobius'.localTriv south).toPartialHomeomorph.target
+    = (S1.mk '' { x | x ≠ -south_pt }) ×ˢ (Set.univ : Set (EuclideanSpace ℝ (Fin 1))) := by
+  have hdef : (Mobius'.localTriv south).toPartialHomeomorph.target =
+              (S1.mk '' φₛ.source) ×ˢ Set.univ := rfl
+  have : φₛ.source = { x | x ≠ -south_pt } := hφₛ.source
+  rw [this] at hdef
+  exact hdef
+
+lemma ltt2_north :
   (S1.mk '' { x | x ≠ -north_pt }) ×ˢ (Set.univ : Set (EuclideanSpace ℝ (Fin 1)))
     = { p | p.point ≠ -north_pt } ×ˢ Set.univ := by
   ext p
   simp
   constructor
   · rintro ⟨x, hx, hy⟩
-    have h1 : ⟨x, hx⟩ ≠ -north_pt := hy.1
-    have h2 : { point := ⟨x, hx⟩ } = p.1 := hy.2
     have h3 : ⟨x, hx⟩ = p.1.point :=
-      Eq.symm ((fun x y ↦ (S1MobiusBase x y).mp) p.1 ⟨x, hx⟩ (id (Eq.symm h2)))
-    exact ne_of_eq_of_ne (id (Eq.symm h3)) h1
+      Eq.symm ((fun x y ↦ (S1MobiusBase x y).mp) p.1 ⟨x, hx⟩ (id (Eq.symm hy.2)))
+    exact ne_of_eq_of_ne (id (Eq.symm h3)) hy.1
   · intro hp
-    have h0 : ↑p.1.point ∈ MobiusBase := p.1.point.property
-    have h1 : p.1.point ≠ -north_pt := hp
-    have h2 : { point := ⟨p.1.point, h0⟩ } = p.1 := rfl
-    refine ⟨p.1.point, h0,  And.symm ((fun {a b} ↦ Classical.not_imp.mp) fun a ↦ hp (a h2))⟩
+    have h2 : { point := ⟨p.1.point, p.1.point.property⟩ } = p.1 := rfl
+    refine ⟨p.1.point, p.1.point.property,  And.symm ((fun {a b} ↦ Classical.not_imp.mp) fun a ↦ hp (a h2))⟩
 
 lemma northTriv_target : (Mobius'.localTriv north).target = { p | p.point ≠ -north_pt } ×ˢ Set.univ := by
-  rw [ltt1, ltt2]
+  rw [ltt_north, ltt2_north]
 
 lemma southTriv_target : (Mobius'.localTriv south).target = { p | p.point ≠ -south_pt } ×ˢ Set.univ := by
-  sorry
+  rw [ltt_south]
+  exact sorry
 
 lemma ψₙ_source : ψₙ.source = (Mobius'.localTriv north).source := sorry
 

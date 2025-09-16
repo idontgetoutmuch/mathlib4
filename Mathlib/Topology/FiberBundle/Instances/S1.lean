@@ -18,6 +18,45 @@ structure S1 where
 instance : Coe S1 (EuclideanSpace ℝ (Fin 2)) where
   coe w := w.point
 
+/-
+FIXME
+-/
+lemma sumOfSquares : ∀ (y : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1),
+      (y.val 0) ^ 2 + (y.val 1) ^ 2 = 1 := by
+  let A := Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1
+  let B := { x : EuclideanSpace ℝ (Fin 2) | ∑ i : Fin 2, x i ^ 2 = 1 ^ 2}
+  have h1 : A = B := by
+    exact EuclideanSpace.sphere_zero_eq 1 (le_of_lt Real.zero_lt_one)
+  intro y
+  have h2 : y.val ∈ A := y.prop
+  have h3 : y.val ∈ B := by
+    rw [h1] at h2
+    exact h2
+  have h4 : ∑ i : Fin 2, y.val i ^ 2 = 1 ^ 2 := by
+    simp at h3
+    exact h3
+  have h5 : (y.val 0) ^ 2 + (y.val 1) ^ 2 = 1 := by
+    rwa [Fin.sum_univ_two, one_pow] at h4
+  exact h5
+
+instance : Neg S1 where
+  neg x :=
+    let a := x.point.val 0
+    let b := x.point.val 1
+    have h1 : x.point.val ∈ MobiusBase := x.point.prop
+    have h2 : Metric.sphere 0 1 = {x : EuclideanSpace ℝ (Fin 2) | ∑ i, (x i) ^ 2 = 1 ^ 2} :=
+      EuclideanSpace.sphere_zero_eq 1 (le_of_lt Real.zero_lt_one)
+    have h3 : a ^ 2 + b ^ 2 = 1 := sumOfSquares x.point
+    have h4 : (-a) ^ 2 = a ^ 2 := neg_pow_two a
+    have h5 : (-b) ^ 2 = b ^ 2 := neg_pow_two b
+    have h6 : (-a) ^ 2 + (-b) ^ 2 = 1 := by rw [<-h4, <-h5] at h3; exact h3
+    have h7 : ![ -a, -b] ∈ {x : EuclideanSpace ℝ (Fin 2) | ∑ i, (x i) ^ 2 = 1 ^ 2} := by
+      simp [Fin.sum_univ_two]
+      exact h6
+    have : ![ -a, -b ] ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 := by
+      rw [<-h2] at h7; exact h7
+    ⟨![ -a, -b ], this⟩
+
 lemma S1.ext_iff (x y : S1) : x = y ↔ x.point = y.point := by
   apply Iff.intro
   · intro h; rw [h]
