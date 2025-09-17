@@ -1091,18 +1091,15 @@ lemma northTriv_target : (Mobius'.localTriv north).target = { p | p.point ≠ -n
 lemma southTriv_target : (Mobius'.localTriv south).target = { p | p.point ≠ -south_pt } ×ˢ Set.univ := by
   rw [ltt_south, ltt2 south_pt]
 
-lemma ψₙ_source : ψₙ.source = (Mobius'.localTriv north).source := sorry
+lemma ψₙ_source : ψₙ.source = (Mobius'.localTriv north).source := by
+  have h4 : (Mobius'.localTriv north).source ⊆ (Mobius'.localTriv north) ⁻¹' (Mobius'.localTriv north).target :=
+    PartialHomeomorph.source_preimage_target (Mobius'.localTriv north).toPartialHomeomorph
+  have h5 : (Mobius'.localTriv north).source ∩
+            (Mobius'.localTriv north).toPartialHomeomorph ⁻¹' (Mobius'.localTriv north).target =
+    (Mobius'.localTriv north).source := Set.inter_eq_left.mpr h4
+  exact h5
 
 lemma ψₛ_source : ψₛ.source = (Mobius'.localTriv south).source := by
-  have : ψₛ = (Mobius'.localTriv south).toPartialHomeomorph ≫ₕ
-              ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) := rfl
-  have h1 : ψₛ.source =
-    (Mobius'.localTriv south).source ∩
-      ↑(Mobius'.localTriv south).toPartialHomeomorph ⁻¹'
-        ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source :=
-    PartialHomeomorph.trans_source
-    (Mobius'.localTriv south).toPartialHomeomorph
-    ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
   have h4 : (Mobius'.localTriv south).source ⊆ (Mobius'.localTriv south) ⁻¹' (Mobius'.localTriv south).target :=
     PartialHomeomorph.source_preimage_target (Mobius'.localTriv south).toPartialHomeomorph
   have h5 : (Mobius'.localTriv south).source ∩
