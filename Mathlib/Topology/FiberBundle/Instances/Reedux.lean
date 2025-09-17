@@ -1404,8 +1404,16 @@ lemma ll2 (h : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₛ.symm p ≠ -no
     exact ha
 
 lemma ll3 (h : (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {p | (φN φₛ).symm p ≠ S1.mk (-north_pt)}) :
-  ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' {x | x.1.point.val 0 ≠ 0} =
-   { p | (φN φₛ).symm p.1 ≠ S1.mk (-north_pt)} := sorry
+    ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' {x | x.1.point.val 0 ≠ 0} =
+    { p | (φN φₛ).symm p.1 ≠ S1.mk (-north_pt)} := by
+    ext p
+    constructor
+    · intro hx
+      have : p.1 ∈ {p | (φN φₛ).symm p ≠ S1.mk (-north_pt)} := by rwa [← h]
+      exact this
+    · intro hx
+      have : p.1 ∈ (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} := by rwa [h]
+      exact this
 
 lemma totalAtlasTarget
   (e : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)))
