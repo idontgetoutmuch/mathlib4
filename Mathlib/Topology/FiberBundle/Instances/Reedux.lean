@@ -588,6 +588,7 @@ lemma s1_is_open' : IsOpen s1' := by
   exact isOpen_Ioi.preimage h
 
 def s2' : Set (S1 × EuclideanSpace ℝ (Fin 1)) := { x | 0 > x.1.point.val 0 }
+
 lemma s2_is_open' : IsOpen s2' := by
   have h1 : Continuous (fun x : S1 × EuclideanSpace ℝ (Fin 1) => (↑x.1.point : EuclideanSpace ℝ (Fin 2))) :=
     continuous_induced_dom.comp (continuous_induced_dom.comp continuous_fst)
@@ -690,36 +691,6 @@ lemma side2 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
   apply (contMDiffOn_prod_iff _).mpr
   exact ⟨h2, by exact contMDiffOn_snd⟩
 
-lemma tbp1 : {x : S1 × EuclideanSpace ℝ (Fin 1) | x.1.point.val 0 > 0 ∨ x.1.point.val 0 < 0} ⊆
-  ↑((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph) ⁻¹' (φN φₛ).source ×ˢ univ := by
-  intro x hx
-  have h1 : ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph) x ∈
-            (φN φₛ).source ×ˢ univ := by
-    dsimp
-    constructor
-    · simp
-      have h1y : (φN φₙ).source ∩ (φN φₛ).source = {x | x.point.val 0 > 0} ∪ {x | x.point.val 0 < 0}  := SulSource'
-      have h1x : x.1 ∈ {x | x.point.val 0 > 0} ∪ {x | x.point.val 0 < 0} := hx
-      have h1a :  x.1 ∈ (φN φₛ).source := by rw [<-h1y] at h1x; exact h1x.2
-      exact h1a
-    · exact Set.mem_univ _
-  exact h1
-
-lemma tbp2 : {x : S1 × EuclideanSpace ℝ (Fin 1) | x.1.point.val 0 > 0 ∨ x.1.point.val 0 < 0} ⊆
-  ↑((Mobius'.localTriv north).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv south).toPartialHomeomorph) ⁻¹' (φN φₙ).source ×ˢ univ := by
-  intro x hx
-  have h1 : ((Mobius'.localTriv north).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv south).toPartialHomeomorph) x ∈
-            (φN φₙ).source ×ˢ univ := by
-    dsimp
-    constructor
-    · simp
-      have h1y : (φN φₙ).source ∩ (φN φₛ).source = {x | x.point.val 0 > 0} ∪ {x | x.point.val 0 < 0}  := SulSource'
-      have h1x : x.1 ∈ {x | x.point.val 0 > 0} ∪ {x | x.point.val 0 < 0} := hx
-      have h1a :  x.1 ∈ (φN φₙ).source := by rw [<-h1y] at h1x; exact h1x.1
-      exact h1a
-    · exact Set.mem_univ _
-  exact h1
-
 lemma changeModelSpace
   (f : EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1) →
        EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))
@@ -792,14 +763,6 @@ lemma changeModelSpace
 
 open Bundle
 
-lemma mobius_fst_eq :
-    Prod.fst ∘
-      ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ
-       (Mobius'.localTriv north).toPartialHomeomorph) =
-    Prod.fst := by
-  ext x
-  exact rfl
-
 lemma mobius_preimage_fst (s : Set S1) :
     ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ
      (Mobius'.localTriv north).toPartialHomeomorph) ⁻¹' (Prod.fst ⁻¹' s)
@@ -841,57 +804,6 @@ lemma polePoints :
     rcases hx with rfl | rfl
     · exact rfl
     · exact rfl
-
-lemma coordinate_characterization (y : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) (a : ℝ) :
-  y.val 0 = a ↔ y = ![a, Real.sqrt (1 - a^2)] ∨ y = ![a, -Real.sqrt (1 - a^2)] := by
-    constructor
-    · intro hx
-      have sphere_eq : ‖y.val‖ ^ 2 = 1 := by
-        simp
-      have norm_expand : ‖y.val‖ ^ 2 = (y.val 0) ^ 2 + (y.val 1) ^ 2 := by
-        simp
-        exact Eq.symm (sumOfSquares y)
-      rw [hx] at norm_expand
-      have coord_eq : a ^ 2 + (y.val 1) ^ 2 = 1 := by
-        rw [← norm_expand, sphere_eq]
-      have nonneg : (y.val 0) ^ 2 + (y.val 1) ^ 2  = 1 :=  sumOfSquares y
-      have h1 : (y.val 1) ^ 2 = 1 - (y.val 0) ^ 2 := Eq.symm (sub_eq_of_eq_add' (id (Eq.symm nonneg)))
-      have h0 : (y.val 1) ^ 2 ≥ 0 := sq_nonneg (y.val 1)
-      have h2 : 1 - (y.val 0) ^ 2 ≥ 0 := le_of_le_of_eq h0 h1
-      have h3 : 1 - a ^ 2 ≥ 0 := by rw [hx] at h2; exact h2
-      have h4 : (y.val 1) = Real.sqrt (1 - a ^ 2) ∨ (y.val 1) = -Real.sqrt (1 - a ^ 2) := by
-        rw [← sq_eq_sq_iff_eq_or_eq_neg]
-        have : √(1 - a ^ 2) ^ 2 = 1 - a ^ 2 := Real.sq_sqrt h3
-        rw [this]
-        rw [hx] at h1
-        exact h1
-      cases h4 with
-      | inl hp =>
-        have h41 : !₂[y.val 0, y.val 1] = !₂[a,  √(1 - a ^ 2)] := by
-          rw [hx, hp]
-        have h42 : y.val = !₂[y.val 0, y.val 1] := by ext i; fin_cases i <;> simp
-        have h43 :  y.val = !₂[a,  √(1 - a ^ 2)] := by rw [<-h42] at h41; exact h41
-        exact Or.symm (Or.inr h43)
-      | inr hn =>
-        have h41 : !₂[y.val 0, y.val 1] = !₂[a,  -√(1 - a ^ 2)] := by
-          rw [hx, hn]
-        have h42 : y.val = !₂[y.val 0, y.val 1] := by ext i; fin_cases i <;> simp
-        have h43 :  y.val = !₂[a,  -√(1 - a ^ 2)] := by rw [<-h42] at h41; exact h41
-        exact Or.symm (Or.inl h43)
-    · intro hx
-      cases hx with
-      | inl hp =>
-        have : y.val = !₂[a, √(1 - a ^ 2)] := hp
-        have : y.val 0 = a := by
-          rw [this]
-          simp
-        exact this
-      | inr hn =>
-        have : y.val = !₂[a, -√(1 - a ^ 2)] := hn
-        have : y.val 0 = a := by
-          rw [this]
-          simp
-        exact this
 
 lemma stereographic'_neg [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin 2)) = 1 + 1)]
  (v : Metric.sphere (0 : (EuclideanSpace ℝ (Fin 2))) 1) :
@@ -1186,23 +1098,6 @@ lemma exΧₛ :
         exact h1
     exact hc
 
-lemma hφₙnorth : φₙ.symm ⁻¹' { x | x ≠ -north_pt } = univ := by
-  have h1 : φₙ.source = { x | x ≠ -north_pt } := hφₙ.source
-  have h2 : φₙ.symm.target = φₙ.source := rfl
-  have h5 : φₙ.symm.target = { x | x ≠ -north_pt } := by
-    rw [h1] at h2
-    exact h2
-  have h3 : φₙ.target = univ := hφₙ.target
-  have h4 : φₙ.symm.source = univ := h3
-  have h6 : φₙ.symm.source ⊆ φₙ.symm ⁻¹' φₙ.symm.target :=
-    PartialHomeomorph.source_preimage_target φₙ.symm
-  have h7 : univ ⊆ φₙ.symm ⁻¹' φₙ.symm.target := by
-    rw [h4] at h6
-    exact h6
-  have h8 : φₙ.symm ⁻¹' φₙ.symm.target = univ := eq_univ_of_univ_subset h7
-  rw [h5] at h8
-  exact h8
-
 lemma preimage_point_param
     (φₙ : PartialHomeomorph ↑MobiusBase (EuclideanSpace ℝ (Fin 1))) (a : MobiusBase) :
     (φN φₙ).symm ⁻¹' {x : S1 | x.point ≠ a} =
@@ -1210,84 +1105,7 @@ lemma preimage_point_param
   ext s
   simp [φN]
 
-/-
-FIXME: This is a general property for these derived charts
--/
-lemma l1 : { p | φₛ.symm p ≠ -south_pt } = univ := by
-  ext p
-  constructor
-  · exact fun a ↦ trivial
-  · intro hx
-    intro hp
-    have h_mem : φₛ.symm p ∈ φₛ.source :=
-      (φₛ.symm).map_source (by simp [hφₛ.target])
-    rw [hφₛ.source] at h_mem
-    exact h_mem hp
-
-lemma l1n : { p | φₙ.symm p ≠ -north_pt } = univ := by
-  ext p
-  constructor
-  · exact fun a ↦ trivial
-  · intro hx
-    intro hp
-    have h_mem : φₙ.symm p ∈ φₙ.source :=
-      (φₙ.symm).map_source (by simp [hφₙ.target])
-    rw [hφₙ.source] at h_mem
-    exact h_mem hp
-
 open Function
-
-lemma l2 (h : { p | φₛ.symm p ≠ -south_pt } = univ) :
-    { p | (φN φₛ).symm p ≠ S1.mk (-south_pt)} = univ := by
-  ext p
-  constructor
-  · intro _; trivial
-  · intro _
-    have : φₛ.symm p ≠ -south_pt := by
-      have mem := Set.mem_univ p
-      rw [← h] at mem
-      exact mem
-    have : S1.mk (φₛ.symm p) ≠ S1.mk (-south_pt):= S1.mk_injective.ne_iff.mpr this
-    exact this
-
-lemma l2n (h : { p | φₙ.symm p ≠ -north_pt } = univ) :
-    { p | (φN φₙ).symm p ≠ S1.mk (-north_pt)} = univ := by
-  ext p
-  constructor
-  · intro _; trivial
-  · intro _
-    have : φₙ.symm p ≠ -north_pt := by
-      have mem := Set.mem_univ p
-      rw [← h] at mem
-      exact mem
-    have : S1.mk (φₙ.symm p) ≠ S1.mk (-north_pt):= S1.mk_injective.ne_iff.mpr this
-    exact this
-
-lemma l3 (h : { p | (φN φₛ).symm p ≠ S1.mk (-south_pt)} = univ) :
-  { p : EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1) | (φN φₛ).symm p.1 ≠ S1.mk (-south_pt) } = univ
-  := by
-  ext p
-  constructor
-  · intro _; trivial
-  · intro _
-    have : (φN φₛ).symm p.1 ≠ S1.mk (-south_pt) := by
-      have mem := Set.mem_univ p.1
-      rw [← h] at mem
-      exact mem
-    exact this
-
-lemma l3n (h : { p | (φN φₙ).symm p ≠ S1.mk (-north_pt)} = univ) :
-  { p : EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1) | (φN φₙ).symm p.1 ≠ S1.mk (-north_pt) } = univ
-  := by
-  ext p
-  constructor
-  · intro _; trivial
-  · intro _
-    have : (φN φₙ).symm p.1 ≠ S1.mk (-north_pt) := by
-      have mem := Set.mem_univ p.1
-      rw [← h] at mem
-      exact mem
-    exact this
 
 lemma φs_symm_maps_neg_north_pt_eq_zero : ∀ p, φₛ.symm p = -north_pt ↔ p = 0 := by
   intro p
@@ -1334,12 +1152,6 @@ lemma φs_symm_maps_neg_north_pt_eq_zero : ∀ p, φₛ.symm p = -north_pt ↔ p
       exact rfl
 
   exact Iff.symm (Iff.trans (id (Iff.symm hi)) (id (Iff.symm hh)))
-
-lemma φNφs_symm_maps_neg_north_pt_eq_zero : ∀ p, (φN φₛ).symm p = S1.mk (-north_pt) ↔ p = 0 := by
-  intro p
-  simp only [φN, PartialHomeomorph.symm]
-  rw [←(φs_symm_maps_neg_north_pt_eq_zero p)]
-  simp
 
 lemma φₛ_preimage_ne_zero :
     φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {x | x ≠ 0} := by
@@ -1623,7 +1435,13 @@ lemma kk2 (h : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {x | x ≠ 0}) :
 
 lemma kk3 (h : (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {x | x ≠ 0}) :
 ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
-        {x | x.1.point.val 0 ≠ 0} = {x | x.1 ≠ 0}  := sorry
+        {x | x.1.point.val 0 ≠ 0} = {x | x.1 ≠ 0} := by
+  ext ⟨a, b⟩
+  simp
+  have : (a ∈ (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0}) = (a ∈ {x | x ≠ 0}) :=
+    (congrArg (fun s => a ∈ s) h)
+  have : ((φN φₛ).symm a).point.val 0 ≠ 0 ↔ a ≠ 0 := Eq.to_iff this
+  exact this
 
 lemma h9pre'' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
   (↑((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph) ∘
