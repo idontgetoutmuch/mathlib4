@@ -209,9 +209,9 @@ instance : ChartedSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1
 #synth IsManifold 𝓘(ℝ, EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)) 0 (TotalSpace (EuclideanSpace ℝ (Fin 1)) Mobius'.Fiber)
 
 noncomputable
-def ψₙ :=(Mobius'.localTriv north).toPartialHomeomorph ≫ₕ ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+def ψₙ := (Mobius'.localTriv north).toPartialHomeomorph ≫ₕ ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
 noncomputable
-def ψₛ :=(Mobius'.localTriv south).toPartialHomeomorph ≫ₕ ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+def ψₛ := (Mobius'.localTriv south).toPartialHomeomorph ≫ₕ ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
 
 def totalAtlas' : Set (PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))) :=
   { ψₙ, ψₛ }
@@ -1085,11 +1085,11 @@ lemma ltt2 (pt : { x // x ∈ Metric.sphere 0 1 }) :
     have h2 : { point := ⟨p.1.point, p.1.point.property⟩ } = p.1 := rfl
     refine ⟨p.1.point, p.1.point.property,  And.symm ((fun {a b} ↦ Classical.not_imp.mp) fun a ↦ hp (a h2))⟩
 
-lemma northTriv_target : (Mobius'.localTriv north).target = { p | p.point ≠ -north_pt } ×ˢ Set.univ := by
-  rw [ltt_north, ltt2 north_pt]
+lemma hχₙ.target : χₙ.target = { p | p.point ≠ -north_pt } ×ˢ Set.univ := by
+  rw [χₙ, ltt_north, ltt2 north_pt]
 
-lemma southTriv_target : (Mobius'.localTriv south).target = { p | p.point ≠ -south_pt } ×ˢ Set.univ := by
-  rw [ltt_south, ltt2 south_pt]
+lemma hχₛ.target : χₛ.target = { p | p.point ≠ -south_pt } ×ˢ Set.univ := by
+  rw [χₛ, ltt_south, ltt2 south_pt]
 
 lemma ψₙ_source : ψₙ.source = (Mobius'.localTriv north).source := by
   have h4 : (Mobius'.localTriv north).source ⊆ (Mobius'.localTriv north) ⁻¹' (Mobius'.localTriv north).target :=
@@ -1107,129 +1107,104 @@ lemma ψₛ_source : ψₛ.source = (Mobius'.localTriv south).source := by
     (Mobius'.localTriv south).source := Set.inter_eq_left.mpr h4
   exact h5
 
-lemma ψs_target : ψₛ.target = { p | (φN φₛ).symm p.1 ≠ S1.mk (-south_pt) } := by
-  have h8 : ψₛ.target = ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) ''
-    (((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source ∩ χₛ.target) :=
-     PartialHomeomorph.trans_target'' χₛ ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
-  have h1 : χₛ.target = { p | p.point ≠ -south_pt } ×ˢ Set.univ := southTriv_target
-  have hc : (φN φₛ).source = { x | x.point ≠ -south_pt } := by
+lemma hNφₙ.target : (φN φₙ).target = univ := hφₙ.target
+lemma hNφₛ.target : (φN φₛ).target = univ := hφₛ.target
+
+example : ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).target = univ := by
+  rw [PartialHomeomorph.prod_target, hNφₛ.target]
+  simp
+
+#check PartialHomeomorph.trans_target
+#check χₛ.target
+
+example :
+  (χₙ ≫ₕ ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))).target =
+ ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).target ∩
+ (((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' χₙ.target) := by
+
+  exact PartialHomeomorph.trans_target χₙ ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+
+lemma exΧₙ :
+  (χₙ ≫ₕ ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))).target = univ := by
+    have h1 : (χₙ ≫ₕ ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))).target =
+    ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).target ∩
+    (((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' χₙ.target) :=
+    PartialHomeomorph.trans_target χₙ ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+    have h2 : ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).target = univ := by
+      rw [PartialHomeomorph.prod_target, hNφₙ.target]
+      simp
+    have h3 :(χₙ ≫ₕ ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))).target =
+    univ ∩
+    (((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' χₙ.target) := by
+      rw [h2] at h1
+      exact h1
+    have h9 : ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm.source ⊆
+      ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
+        ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm.target :=
+          PartialHomeomorph.source_preimage_target
+           ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm
+    have ha : ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm.source = univ := h2
+    have hb : univ ⊆
+          ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
+        ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm.target := by
+      rw [ha] at h9
+      exact h9
+    have hc : univ ⊆
+          ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' χₙ.target := hb
+    have hd :
+      ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' χₙ.target =
+      univ := eq_univ_of_univ_subset hb
+    have he: (χₙ ≫ₕ ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))).target =
+              univ := by
+      rw [hd] at h3
+      rw [h3, univ_inter univ]
+    exact he
+
+lemma exΧₛ :
+  (χₛ ≫ₕ ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))).target = univ := sorry
+
+lemma hφₙnorth : φₙ.symm ⁻¹' { x | x ≠ -north_pt } = univ := by
+  have h1 : φₙ.source = { x | x ≠ -north_pt } := hφₙ.source
+  have h2 : φₙ.symm.target = φₙ.source := rfl
+  have h5 : φₙ.symm.target = { x | x ≠ -north_pt } := by
+    rw [h1] at h2
+    exact h2
+  have h3 : φₙ.target = univ := hφₙ.target
+  have h4 : φₙ.symm.source = univ := h3
+  have h6 : φₙ.symm.source ⊆ φₙ.symm ⁻¹' φₙ.symm.target :=
+    PartialHomeomorph.source_preimage_target φₙ.symm
+  have h7 : univ ⊆ φₙ.symm ⁻¹' φₙ.symm.target := by
+    rw [h4] at h6
+    exact h6
+  have h8 : φₙ.symm ⁻¹' φₙ.symm.target = univ := eq_univ_of_univ_subset h7
+  rw [h5] at h8
+  exact h8
+
+lemma preimage_point_param
+    (φₙ : PartialHomeomorph ↑MobiusBase (EuclideanSpace ℝ (Fin 1))) (a : MobiusBase) :
+    (φN φₙ).symm ⁻¹' {x : S1 | x.point ≠ a} =
+      φₙ.symm ⁻¹' {x : MobiusBase | x ≠ a} := by
+  ext s
+  simp [φN]
+
+example : (φN φₙ).symm ⁻¹' {x | x.point ≠ -north_pt} = univ := by
+  rw [preimage_point_param φₙ (-north_pt)]
+  exact hφₙnorth
+
+example : ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source =
+             { x | x.point ≠ -north_pt } ×ˢ univ := by
+  have hc : (φN φₙ).source = { x | x.point ≠ -north_pt } := by
     apply Set.ext
     intro x
-    rw [liftedPts x.point φₛ]
-    rw [hφₛ.source]
+    rw [liftedPts x.point φₙ]
+    rw [hφₙ.source]
     exact  MapsTo.mem_iff (fun ⦃x⦄ a ↦ a) fun ⦃x⦄ a ↦ a
-  have h2 : ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source =
-             { x | x.point ≠ -south_pt } ×ˢ univ := by
-    rw [<-hc]
-    exact rfl
-  have : χₛ.target = ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source := by
-    rfl
-  have h4 : ψₛ.target = ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) ''
-    (((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source) := by
-    rw [this, Set.inter_self] at h8
-    exact h8
-  have h5 : ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) ''
-    (((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).source) =
-    ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).target :=
-    PartialHomeomorph.image_source_eq_target ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
+  rw [<-hc]
+  exact rfl
 
-  have hf : (φN φₛ).target = univ := hφₛ.target
-  have hg : (φN φₛ).target ×ˢ (Set.univ : Set (EuclideanSpace ℝ (Fin 1))) = Set.univ := by
-    rw [hf, Set.univ_prod_univ]
-  have hi : ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).target = univ := hg
-
-  have h3 : ψₛ.target = ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) ''
-    (({ p : S1 | p.point ≠ -south_pt } ×ˢ Set.univ)) := by
-    rw [h1, h2, Set.inter_self] at h8
-    exact h8
-
-  have ha :
-    φₛ '' { p | p ≠ -south_pt } = { x | φₛ.symm x ≠ -south_pt } := by
-      ext x
-      constructor
-      · intro hx
-        have htarget : x ∈ φₛ.target := by
-          have : φₛ.target = univ := hφₛ.target
-          rw [this]
-          exact trivial
-        obtain ⟨y, hy, rfl⟩ := hx
-        have : y ∈ φₛ.source := by
-          rw [<-hφₛ.source] at hy
-          exact hy
-        have : φₛ.symm (φₛ y) = y :=  PartialHomeomorph.left_inv φₛ this
-        have : φₛ.symm (φₛ y) ≠ -south_pt := ne_of_eq_of_ne this hy
-        have : φₛ y ∈ {x | φₛ.symm x ≠ -south_pt} := this
-        exact this
-      · intro hx
-        have hy : φₛ.symm x ≠ -south_pt := hx
-        have ha1 : φₛ.target = univ := hφₛ.target
-        have ha2 : x ∈ univ := trivial
-        have : x ∈ φₛ.target := by
-          rw [<-ha1] at ha2
-          exact ha2
-        have h1 : φₛ.symm x ∈ φₛ.source := PartialHomeomorph.map_target φₛ this
-        have h3 :  φₛ.symm x ∈ {x | x ≠ -south_pt} := mem_of_mem_inter_left h1
-        have h4 : φₛ (φₛ.symm x) ∈ φₛ '' {x | x ≠ -south_pt} := mem_image_of_mem φₛ h3
-        have hq : φₛ (φₛ.symm x) = x := PartialHomeomorph.right_inv φₛ this
-        have hr : x ∈ φₛ '' {x | x ≠ -south_pt} := mem_of_eq_of_mem (id (Eq.symm hq)) h4
-        exact hr
-
-  have ha' :
-    ↑((φN φₛ)) '' ({ p : S1 | p.point ≠ -south_pt }) = { x | (φN φₛ).symm x ≠ S1.mk (-south_pt) } := by
-    have ha3 : ∀ x y, (S1.mk x ≠ S1.mk y) ↔ (x ≠ y) := fun x y ↦ Iff.ne (S1.mk_inj x y)
-    have h1 : { x | φₛ.symm x ≠ -south_pt } = { x | (φN φₛ).symm x ≠ S1.mk (-south_pt) } := by
-      ext x
-      constructor
-      · intro hx
-        have ha4 : S1.mk ((φN φₛ).symm x).point ≠ S1.mk (-south_pt) :=
-          (ha3 ((φN φₛ).symm x).point (-south_pt)).mpr hx
-        exact ha4
-      · intro hx
-        exact Ne.symm (ne_of_apply_ne S1.mk fun a ↦ hx (id (Eq.symm a)))
-    have h2 : φₛ '' { p | p ≠ -south_pt } = (φN φₛ) '' ({ p : S1 | p.point ≠ -south_pt }) :=by
-      ext x
-      constructor
-      · intro hx
-        have :  x ∈ φₛ '' {p | p ≠ -south_pt} := hx
-        obtain ⟨a, ha, urk⟩ := hx
-        use S1.mk a
-        constructor
-        · exact ha
-        · exact urk
-      · intro hx
-        obtain ⟨a, ha, rfl⟩ := hx
-        simp_all
-    rw [<-h1, <-h2, ha]
-
-  have ha'' :
-    ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) ''
-      (({ p : S1 | p.point ≠ -south_pt } ×ˢ Set.univ)) =
-    { p | (φN φₛ).symm p.1 ≠ S1.mk (-south_pt) } := by
-    have coe_prod :
-      (↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))) =
-      fun (a : S1 × EuclideanSpace ℝ (Fin 1)) => ((φN φₛ) a.1, a.2) := rfl
-    ext x
-    constructor
-    · intro hx
-      obtain ⟨a, ha, rfl⟩ := hx
-      have : ((φN φₛ) a.1) ∈ (↑(φN φₛ)) '' { p : S1 | p.point ≠ -south_pt } := ⟨a.1, ha.1, rfl⟩
-      have hx1 :
-        ((φN φₛ) a.1) ∈ { x | (φN φₛ).symm x ≠ S1.mk (-south_pt) } := by
-        simpa [ha'] using this
-      have : (φN φₛ).symm ((φN φₛ) a.1) ≠ S1.mk (-south_pt) := by
-        simpa [Set.mem_setOf_eq] using hx1
-      simpa [coe_prod]
-    · intro hx
-      have : x.1 ∈ (↑(φN φₛ)) '' { p : S1 | p.point ≠ -south_pt } := by
-        simpa [ha'] using hx
-      rcases this with ⟨a, haA, ha1⟩
-      refine ⟨⟨a, x.2⟩, ?_, ?_⟩
-      · exact mk_mem_prod haA trivial
-      · exact Prod.ext ha1 rfl
-
-  rw [ha''] at h3
-  exact h3
-
+/-
+FIXME: This is a general property for these derived charts
+-/
 lemma l1 : { p | φₛ.symm p ≠ -south_pt } = univ := by
   ext p
   constructor
@@ -1241,11 +1216,18 @@ lemma l1 : { p | φₛ.symm p ≠ -south_pt } = univ := by
     rw [hφₛ.source] at h_mem
     exact h_mem hp
 
-lemma neq_iff (p : EuclideanSpace ℝ (Fin 1)) :
-    S1.mk (φₛ.symm p) ≠ S1.mk (-south_pt) ↔ φₛ.symm p ≠ -south_pt :=
-by
-  apply not_congr
-  exact ⟨fun h => by injection h, fun h => congrArg S1.mk h⟩
+lemma l1n : { p | φₙ.symm p ≠ -north_pt } = univ := by
+  ext p
+  constructor
+  · exact fun a ↦ trivial
+  · intro hx
+    intro hp
+    have h_mem : φₙ.symm p ∈ φₙ.source :=
+      (φₙ.symm).map_source (by simp [hφₙ.target])
+    rw [hφₙ.source] at h_mem
+    exact h_mem hp
+
+open Function
 
 lemma l2 (h : { p | φₛ.symm p ≠ -south_pt } = univ) :
     { p | (φN φₛ).symm p ≠ S1.mk (-south_pt)} = univ := by
@@ -1257,7 +1239,20 @@ lemma l2 (h : { p | φₛ.symm p ≠ -south_pt } = univ) :
       have mem := Set.mem_univ p
       rw [← h] at mem
       exact mem
-    have : S1.mk (φₛ.symm p) ≠ S1.mk (-south_pt):= (neq_iff p).mpr this
+    have : S1.mk (φₛ.symm p) ≠ S1.mk (-south_pt):= S1.mk_injective.ne_iff.mpr this
+    exact this
+
+lemma l2n (h : { p | φₙ.symm p ≠ -north_pt } = univ) :
+    { p | (φN φₙ).symm p ≠ S1.mk (-north_pt)} = univ := by
+  ext p
+  constructor
+  · intro _; trivial
+  · intro _
+    have : φₙ.symm p ≠ -north_pt := by
+      have mem := Set.mem_univ p
+      rw [← h] at mem
+      exact mem
+    have : S1.mk (φₙ.symm p) ≠ S1.mk (-north_pt):= S1.mk_injective.ne_iff.mpr this
     exact this
 
 lemma l3 (h : { p | (φN φₛ).symm p ≠ S1.mk (-south_pt)} = univ) :
@@ -1268,6 +1263,19 @@ lemma l3 (h : { p | (φN φₛ).symm p ≠ S1.mk (-south_pt)} = univ) :
   · intro _; trivial
   · intro _
     have : (φN φₛ).symm p.1 ≠ S1.mk (-south_pt) := by
+      have mem := Set.mem_univ p.1
+      rw [← h] at mem
+      exact mem
+    exact this
+
+lemma l3n (h : { p | (φN φₙ).symm p ≠ S1.mk (-north_pt)} = univ) :
+  { p : EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1) | (φN φₙ).symm p.1 ≠ S1.mk (-north_pt) } = univ
+  := by
+  ext p
+  constructor
+  · intro _; trivial
+  · intro _
+    have : (φN φₙ).symm p.1 ≠ S1.mk (-north_pt) := by
       have mem := Set.mem_univ p.1
       rw [← h] at mem
       exact mem
@@ -1416,9 +1424,8 @@ lemma totalAtlasTarget
   (e : PartialHomeomorph Mobius'.TotalSpace (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)))
   (he : e ∈ totalAtlas') : e.target = univ := by
   rcases he with (rfl | rfl)
-  · exact sorry
-  · calc  ψₛ.target = { p | (φN φₛ).symm p.1 ≠ S1.mk (-south_pt) } := ψs_target
-        _ = univ := l3 (l2 l1)
+  · exact exΧₙ
+  · exact exΧₛ
 
 lemma h9pre' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
     ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'

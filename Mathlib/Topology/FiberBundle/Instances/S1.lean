@@ -67,6 +67,9 @@ lemma S1.mk_inj (x y : _) : (S1.mk x = S1.mk y) ↔ (x = y) := by
   · intro h; cases h; rfl
   · intro h; rw [h]
 
+theorem S1.mk_injective : Function.Injective S1.mk :=
+  fun _ _ h ↦ (S1.mk_inj _ _).mp h
+
 lemma S1MobiusBase (x : S1) (y : MobiusBase) : x = S1.mk y ↔ x.point = y :=
   S1.ext_iff x (S1.mk y)
 
