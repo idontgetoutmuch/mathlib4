@@ -311,6 +311,66 @@ lemma contNS : ContinuousOn (fun p ↦ MyCoordChange' north south p.1 p.2) (((φ
   rw [h0, <-hg]
   exact he
 
+lemma contSN : ContinuousOn (fun p ↦ MyCoordChange' south north p.1 p.2) (((φN φₛ).source ∩ (φN φₙ).source) ×ˢ univ) := by
+  have h0 : (φN φₙ).source ∩ (φN φₛ).source = { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := SulSource'
+  have h1 : (φN φₛ).source ∩ (φN φₙ).source = { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := by
+    rw [Set.inter_comm] at h0
+    exact h0
+  have hc :
+  ContinuousOn (fun (p : S1 × EuclideanSpace ℝ (Fin 1)) ↦
+                  MyCoordChange' south north p.1 p.2)
+               ({x | x.point.val 0 > 0} ×ˢ univ) :=
+  ContinuousOn.congr continuous_snd.continuousOn (by
+    rintro ⟨x, y⟩ ⟨hx, _⟩
+    exact if_pos hx)
+
+  have hd :
+  ContinuousOn (fun (p : S1 × EuclideanSpace ℝ (Fin 1)) ↦
+                  MyCoordChange' south north p.1 p.2)
+               ({x | x.point.val 0 < 0} ×ˢ univ) :=
+  ContinuousOn.congr (continuous_snd.neg.continuousOn) (by
+    rintro ⟨x, y⟩ ⟨hx, _⟩
+    have hn : ¬(x.point.val 0 > 0) := not_lt_of_gt hx
+    exact if_neg hn)
+
+  have hg : (({x : S1 | x.point.val 0 > 0} ×ˢ univ) ∪ ({x | x.point.val 0 < 0} ×ˢ univ)) =
+            ((({x | x.point.val 0 > 0} ∪ {x | x.point.val 0 < 0}) ×ˢ univ) : Set (S1 × EuclideanSpace ℝ (Fin 1)))
+    := Eq.symm union_prod
+
+  have he : ContinuousOn (fun p ↦ MyCoordChange' south north p.1 p.2)
+            (({x | x.point.val 0 > 0} ×ˢ univ) ∪ ({x | x.point.val 0 < 0} ×ˢ univ)) :=
+
+    have s1_open_prod : IsOpen ({x | x.point.val 0 > 0} ×ˢ univ : Set (S1 × EuclideanSpace ℝ (Fin 1))) := by
+      have h0 : IsOpen s1' := s1_is_open'
+      have h1 : s1' = { x | 0 < x.1.point.val 0 } := rfl
+      have h2 : IsOpen { x : S1 × EuclideanSpace ℝ (Fin 1) | 0 < x.1.point.val 0 } := by
+        rw [h1] at h0
+        exact h0
+      have h3 : { x : S1 × EuclideanSpace ℝ (Fin 1) | 0 < x.1.point.val 0 } =
+                {x | x.point.val 0 > 0} ×ˢ univ := by
+        ext ⟨a, b⟩
+        simp
+      rw [h3] at h2
+      exact h2
+
+    have s2_open_prod : IsOpen ({x | x.point.val 0 < 0} ×ˢ univ : Set (S1 × EuclideanSpace ℝ (Fin 1))) := by
+      have h0 : IsOpen s2' := s2_is_open'
+      have h1 : s2' = { x | 0 > x.1.point.val 0 } := rfl
+      have h2 : IsOpen { x : S1 × EuclideanSpace ℝ (Fin 1) | 0 > x.1.point.val 0 } := by
+        rw [h1] at h0
+        exact h0
+      have h3 : { x : S1 × EuclideanSpace ℝ (Fin 1) | 0 > x.1.point.val 0 } =
+                {x | x.point.val 0 < 0} ×ˢ univ := by
+        ext ⟨a, b⟩
+        simp
+      rw [h3] at h2
+      exact h2
+
+    ContinuousOn.union_of_isOpen hc hd s1_open_prod s2_open_prod
+
+  rw [h1, <-hg]
+  exact he
+
 def MyContinuousOn_coordChange' : ∀ (i j : Pole),
   ContinuousOn (fun p => MyCoordChange' i j p.1 p.2)
     (((if i = north then (φN φₙ).source else (φN φₛ).source) ∩ if j = north then (φN φₙ).source else (φN φₛ).source) ×ˢ
@@ -324,7 +384,7 @@ def MyContinuousOn_coordChange' : ∀ (i j : Pole),
           exact contNS
       · cases j
         · simp
-          exact sorry
+          exact contSN
         · simp
           exact continuousOn_snd
 
