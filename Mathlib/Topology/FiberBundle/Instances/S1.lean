@@ -73,6 +73,12 @@ theorem S1.mk_injective : Function.Injective S1.mk :=
 lemma S1MobiusBase (x : S1) (y : MobiusBase) : x = S1.mk y ↔ x.point = y :=
   S1.ext_iff x (S1.mk y)
 
+instance : Neg MobiusBase where
+  neg x :=
+    let s1x : S1 := S1.mk x
+    let neg_s1x := -s1x
+    neg_s1x.point
+
 inductive Pole
 | north
 | south

@@ -125,25 +125,191 @@ lemma OverlapNorthSouth :
       have h6 : x ∈ (φN φₛ).source := fooS' (x.point) h8
       exact h6
 
-lemma ChartChangeSmoothOn
-    {M E H : Type*}
-    [NormedAddCommGroup E]
-    [NormedSpace ℝ E]
-    [TopologicalSpace H]
-    {I : ModelWithCorners ℝ E H}
-    [TopologicalSpace M]
-    [ChartedSpace H M]
-    [IsManifold I ⊤ M]
-    {φ₀ φ₁ : PartialHomeomorph M H}
-    (hU : φ₀ ∈ maximalAtlas I ⊤ M)
-    (hV : φ₁ ∈ maximalAtlas I ⊤ M) :
-    ContMDiffOn I I ⊤ (φ₁ ∘ φ₀.symm)
-      (φ₀.target ∩ φ₀.symm ⁻¹' φ₁.source) := by
-  let overlap := φ₀.target ∩ φ₀.symm ⁻¹' φ₁.source
-  have h1 : overlap ⊆ φ₀.target := fun x hx => hx.1
-  have h2 : overlap ⊆ φ₀.symm ⁻¹' φ₁.source := fun x hx => hx.2
-  have h3 := (contMDiffOn_symm_of_mem_maximalAtlas hU).mono h1
-  exact (contMDiffOn_of_mem_maximalAtlas hV).comp h3 h2
+lemma stereographic'_symm_zero
+  {n : ℕ} {E : Type*}
+  [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [Fact (Module.finrank ℝ E = n + 1)]
+  (v : Metric.sphere (0 : E) 1) :
+  (stereographic' n v).symm (0 : EuclideanSpace ℝ (Fin n)) = -v.val := by
+  simpa using stereographic'_symm_apply (n := n) v (0 : EuclideanSpace ℝ (Fin n))
+
+lemma φₛ_symm_zero :
+  φₛ.symm (0 : EuclideanSpace ℝ (Fin 1)) = -north_pt := by
+  rw [φₛ]
+  rw [chartAt]
+  have h1 : ((stereographic' 1 north_pt).symm 0) = -north_pt :=
+    SetCoe.ext (stereographic'_symm_zero (n := 1) north_pt)
+  have h3 : chartAt (EuclideanSpace ℝ (Fin 1)) south_pt = stereographic' 1 (-south_pt) := rfl
+  have h4 : chartAt (EuclideanSpace ℝ (Fin 1)) south_pt = stereographic' 1 (north_pt) := by
+    rw [<-bar] at h3
+    exact h3
+  have h5 : (chartAt (EuclideanSpace ℝ (Fin 1)) south_pt).symm 0 = -north_pt := by
+    rw [<-h4] at h1
+    exact h1
+  have h6 : φₛ.symm 0 = -north_pt := by
+    rw [<-φₛ] at h5
+    exact h5
+  exact h6
+
+lemma φₙ_symm_zero :
+  φₙ.symm (0 : EuclideanSpace ℝ (Fin 1)) = -south_pt := by
+  rw [φₙ]
+  rw [chartAt]
+  have h1 : ((stereographic' 1 south_pt).symm 0) = -south_pt :=
+    SetCoe.ext (stereographic'_symm_zero (n := 1) south_pt)
+  have h3 : chartAt (EuclideanSpace ℝ (Fin 1)) north_pt = stereographic' 1 (-north_pt) := rfl
+  have h4 : chartAt (EuclideanSpace ℝ (Fin 1)) north_pt = stereographic' 1 (south_pt) := by
+    rw [<-bar'] at h3
+    exact h3
+  have h5 : (chartAt (EuclideanSpace ℝ (Fin 1)) north_pt).symm 0 = -south_pt := by
+    rw [<-h4] at h1
+    exact h1
+  have h6 : φₙ.symm 0 = -south_pt := by
+    rw [<-φₙ] at h5
+    exact h5
+  exact h6
+
+lemma hhh4 : φₛ.symm ⁻¹' φₙ.source = {x | x ≠ 0} := by
+  ext x
+  simp only [Set.mem_preimage, hφₙ.source]
+  constructor
+  · intro h
+    by_contra hx
+    have h0 : x ∉ {x | x ≠ 0} := hx
+    have h1 : x = 0 := by simp only [Set.mem_setOf, not_not] at hx; exact hx
+    have h2 : φₛ.symm (0 : EuclideanSpace ℝ (Fin 1)) = -north_pt := φₛ_symm_zero
+    rw [<-h1] at h2
+    exact h h2
+  · intro h
+    intro hx
+    have h0 : φₛ.symm.source = univ := hφₛ.target
+    have ha : 0 ∈ univ := trivial
+    have hb : x ∈ univ := trivial
+    have hc : 0 ∈ φₛ.symm.source := h0 ▸ ha
+    have hd : x ∈ φₛ.symm.source := h0 ▸ hb
+    have h1 : φₛ (φₛ.symm 0) = 0 := PartialHomeomorph.left_inv φₛ.symm hc
+    have h2 : φₛ (φₛ.symm x) = x := PartialHomeomorph.left_inv φₛ.symm hd
+    rw [<-φₛ_symm_zero] at hx
+    have h3 : φₛ.symm x = φₛ.symm 0 := hx
+    have h4 : φₛ (φₛ.symm x) = φₛ (φₛ.symm 0) := congrArg (↑φₛ) hx
+    have h5 : x = 0 := by
+      rw [h1, h2] at h4
+      exact h4
+    exact h h5
+
+theorem SulSource' : (φN φₙ).source ∩ (φN φₛ).source = { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := by
+  have h1 : { x : S1 | x.point.val 0 ≠ 0 } ⊆ { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := by
+    intro x hx
+    let y := x.point.val 0
+    have h1 : y ≠ 0 := hx
+    have h2 : (y < 0) ∨ (y = 0) ∨ (0 < y) := lt_trichotomy y 0
+    have h3 : (y < 0) ∨ (0 < y) := by
+      cases h2 with
+      | inl hlt => left; exact hlt
+      | inr hrest =>
+        cases hrest with
+        | inl heq => exfalso; exact hx heq
+        | inr hgt => right; exact hgt
+    exact id (Or.symm h3)
+  have h2 : { x | x.point.val 0 > 0 } ⊆ { x : S1 | x.point.val 0 ≠ 0 } := by
+    intro x hx
+    let y := x.point.val 0
+    have h1 : y > 0 := hx
+    have h4 : y ≠ 0 := Ne.symm (ne_of_lt hx)
+    exact h4
+  have h3 : { x | x.point.val 0 < 0 } ⊆ { x : S1 | x.point.val 0 ≠ 0 } := by
+    intro x hx
+    let y := x.point.val 0
+    have h1 : y < 0 := hx
+    have h4 : y ≠ 0 := Ne.symm (ne_of_gt hx)
+    exact h4
+  have h4 : (φN φₙ).source ∩ (φN φₛ).source = { x | x.point.val 0 ≠ 0 } := OverlapNorthSouth
+  have h5 : { x : S1 | x.point.val 0 ≠ 0 } = { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := by
+    exact Set.Subset.antisymm h1 (Set.union_subset h2 h3)
+  have h6 : (φN φₙ).source ∩ (φN φₛ).source = { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := by
+    rw [h5] at h4
+    exact h4
+  exact h6
+
+
+def s1' : Set (S1 × EuclideanSpace ℝ (Fin 1)) := { x | 0 < x.1.point.val 0 }
+
+lemma s1_is_open' : IsOpen s1' := by
+  have h1 : Continuous (fun x : S1 × EuclideanSpace ℝ (Fin 1) => (↑x.1.point : EuclideanSpace ℝ (Fin 2))) :=
+    continuous_induced_dom.comp (continuous_induced_dom.comp continuous_fst)
+  have h2 : Continuous (fun u : EuclideanSpace ℝ (Fin 2) => u 0) :=
+    continuous_apply 0
+  have h : Continuous (fun x : S1 × EuclideanSpace ℝ (Fin 1) => (↑x.1.point : EuclideanSpace ℝ (Fin 2)) 0) :=
+    h2.comp h1
+  exact isOpen_Ioi.preimage h
+
+def s2' : Set (S1 × EuclideanSpace ℝ (Fin 1)) := { x | 0 > x.1.point.val 0 }
+
+lemma s2_is_open' : IsOpen s2' := by
+  have h1 : Continuous (fun x : S1 × EuclideanSpace ℝ (Fin 1) => (↑x.1.point : EuclideanSpace ℝ (Fin 2))) :=
+    continuous_induced_dom.comp (continuous_induced_dom.comp continuous_fst)
+  have h2 : Continuous (fun u : EuclideanSpace ℝ (Fin 2) => u 0) :=
+    continuous_apply 0
+  have h : Continuous (fun x : S1 × EuclideanSpace ℝ (Fin 1) => (↑x.1.point : EuclideanSpace ℝ (Fin 2)) 0) :=
+    h2.comp h1
+  exact isOpen_Iio.preimage h
+
+lemma contNS : ContinuousOn (fun p ↦ MyCoordChange' north south p.1 p.2) (((φN φₙ).source ∩ (φN φₛ).source) ×ˢ univ) := by
+  have h0 : (φN φₙ).source ∩ (φN φₛ).source = { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := SulSource'
+  have hc :
+  ContinuousOn (fun (p : S1 × EuclideanSpace ℝ (Fin 1)) ↦
+                  MyCoordChange' north south p.1 p.2)
+               ({x | x.point.val 0 > 0} ×ˢ univ) :=
+  ContinuousOn.congr continuous_snd.continuousOn (by
+    rintro ⟨x, y⟩ ⟨hx, _⟩
+    exact if_pos hx)
+
+  have hd :
+  ContinuousOn (fun (p : S1 × EuclideanSpace ℝ (Fin 1)) ↦
+                  MyCoordChange' north south p.1 p.2)
+               ({x | x.point.val 0 < 0} ×ˢ univ) :=
+  ContinuousOn.congr (continuous_snd.neg.continuousOn) (by
+    rintro ⟨x, y⟩ ⟨hx, _⟩
+    have hn : ¬(x.point.val 0 > 0) := not_lt_of_gt hx
+    exact if_neg hn)
+
+  have hg : (({x : S1 | x.point.val 0 > 0} ×ˢ univ) ∪ ({x | x.point.val 0 < 0} ×ˢ univ)) =
+            ((({x | x.point.val 0 > 0} ∪ {x | x.point.val 0 < 0}) ×ˢ univ) : Set (S1 × EuclideanSpace ℝ (Fin 1)))
+    := Eq.symm union_prod
+
+  have he : ContinuousOn (fun p ↦ MyCoordChange' north south p.1 p.2)
+            (({x | x.point.val 0 > 0} ×ˢ univ) ∪ ({x | x.point.val 0 < 0} ×ˢ univ)) :=
+
+    have s1_open_prod : IsOpen ({x | x.point.val 0 > 0} ×ˢ univ : Set (S1 × EuclideanSpace ℝ (Fin 1))) := by
+      have h0 : IsOpen s1' := s1_is_open'
+      have h1 : s1' = { x | 0 < x.1.point.val 0 } := rfl
+      have h2 : IsOpen { x : S1 × EuclideanSpace ℝ (Fin 1) | 0 < x.1.point.val 0 } := by
+        rw [h1] at h0
+        exact h0
+      have h3 : { x : S1 × EuclideanSpace ℝ (Fin 1) | 0 < x.1.point.val 0 } =
+                {x | x.point.val 0 > 0} ×ˢ univ := by
+        ext ⟨a, b⟩
+        simp
+      rw [h3] at h2
+      exact h2
+
+    have s2_open_prod : IsOpen ({x | x.point.val 0 < 0} ×ˢ univ : Set (S1 × EuclideanSpace ℝ (Fin 1))) := by
+      have h0 : IsOpen s2' := s2_is_open'
+      have h1 : s2' = { x | 0 > x.1.point.val 0 } := rfl
+      have h2 : IsOpen { x : S1 × EuclideanSpace ℝ (Fin 1) | 0 > x.1.point.val 0 } := by
+        rw [h1] at h0
+        exact h0
+      have h3 : { x : S1 × EuclideanSpace ℝ (Fin 1) | 0 > x.1.point.val 0 } =
+                {x | x.point.val 0 < 0} ×ˢ univ := by
+        ext ⟨a, b⟩
+        simp
+      rw [h3] at h2
+      exact h2
+
+    ContinuousOn.union_of_isOpen hc hd s1_open_prod s2_open_prod
+
+  rw [h0, <-hg]
+  exact he
 
 def MyContinuousOn_coordChange' : ∀ (i j : Pole),
   ContinuousOn (fun p => MyCoordChange' i j p.1 p.2)
@@ -155,7 +321,7 @@ def MyContinuousOn_coordChange' : ∀ (i j : Pole),
         · simp
           exact continuousOn_snd
         · simp
-          exact sorry
+          exact contNS
       · cases j
         · simp
           exact sorry
@@ -235,40 +401,6 @@ lemma localTrivTransition_eq_coordChange' (i j : Pole)
   have h2 : Mobius'.coordChange (Mobius'.indexAt x) j x (Mobius'.coordChange i (Mobius'.indexAt x) x v) =
             Mobius'.coordChange i j x v :=  Mobius'.coordChange_comp i (Mobius'.indexAt x) j x hd v
   exact h2
-
-theorem SulSource' : (φN φₙ).source ∩ (φN φₛ).source = { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := by
-  have h1 : { x : S1 | x.point.val 0 ≠ 0 } ⊆ { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := by
-    intro x hx
-    let y := x.point.val 0
-    have h1 : y ≠ 0 := hx
-    have h2 : (y < 0) ∨ (y = 0) ∨ (0 < y) := lt_trichotomy y 0
-    have h3 : (y < 0) ∨ (0 < y) := by
-      cases h2 with
-      | inl hlt => left; exact hlt
-      | inr hrest =>
-        cases hrest with
-        | inl heq => exfalso; exact hx heq
-        | inr hgt => right; exact hgt
-    exact id (Or.symm h3)
-  have h2 : { x | x.point.val 0 > 0 } ⊆ { x : S1 | x.point.val 0 ≠ 0 } := by
-    intro x hx
-    let y := x.point.val 0
-    have h1 : y > 0 := hx
-    have h4 : y ≠ 0 := Ne.symm (ne_of_lt hx)
-    exact h4
-  have h3 : { x | x.point.val 0 < 0 } ⊆ { x : S1 | x.point.val 0 ≠ 0 } := by
-    intro x hx
-    let y := x.point.val 0
-    have h1 : y < 0 := hx
-    have h4 : y ≠ 0 := Ne.symm (ne_of_gt hx)
-    exact h4
-  have h4 : (φN φₙ).source ∩ (φN φₛ).source = { x | x.point.val 0 ≠ 0 } := OverlapNorthSouth
-  have h5 : { x : S1 | x.point.val 0 ≠ 0 } = { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := by
-    exact Set.Subset.antisymm h1 (Set.union_subset h2 h3)
-  have h6 : (φN φₙ).source ∩ (φN φₛ).source = { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := by
-    rw [h5] at h4
-    exact h4
-  exact h6
 
 lemma upperInclusion' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
     (x.point.val 0) > 0 →
@@ -575,28 +707,6 @@ lemma lowerContMDiff' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (�
         obtain ⟨x, v⟩ := y
         dsimp at hy
         exact lowerInclusion' x v hy
-
-def s1' : Set (S1 × EuclideanSpace ℝ (Fin 1)) := { x | 0 < x.1.point.val 0 }
-
-lemma s1_is_open' : IsOpen s1' := by
-  have h1 : Continuous (fun x : S1 × EuclideanSpace ℝ (Fin 1) => (↑x.1.point : EuclideanSpace ℝ (Fin 2))) :=
-    continuous_induced_dom.comp (continuous_induced_dom.comp continuous_fst)
-  have h2 : Continuous (fun u : EuclideanSpace ℝ (Fin 2) => u 0) :=
-    continuous_apply 0
-  have h : Continuous (fun x : S1 × EuclideanSpace ℝ (Fin 1) => (↑x.1.point : EuclideanSpace ℝ (Fin 2)) 0) :=
-    h2.comp h1
-  exact isOpen_Ioi.preimage h
-
-def s2' : Set (S1 × EuclideanSpace ℝ (Fin 1)) := { x | 0 > x.1.point.val 0 }
-
-lemma s2_is_open' : IsOpen s2' := by
-  have h1 : Continuous (fun x : S1 × EuclideanSpace ℝ (Fin 1) => (↑x.1.point : EuclideanSpace ℝ (Fin 2))) :=
-    continuous_induced_dom.comp (continuous_induced_dom.comp continuous_fst)
-  have h2 : Continuous (fun u : EuclideanSpace ℝ (Fin 2) => u 0) :=
-    continuous_apply 0
-  have h : Continuous (fun x : S1 × EuclideanSpace ℝ (Fin 1) => (↑x.1.point : EuclideanSpace ℝ (Fin 2)) 0) :=
-    h2.comp h1
-  exact isOpen_Iio.preimage h
 
 lemma bothContMDiff' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
       ((Mobius'.localTriv north).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv south).toPartialHomeomorph)
@@ -1338,61 +1448,6 @@ lemma h9pre' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
   exact hd
 
 open Metric
-
-lemma stereographic'_symm_zero
-  {n : ℕ} {E : Type*}
-  [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Fact (Module.finrank ℝ E = n + 1)]
-  (v : sphere (0 : E) 1) :
-  (stereographic' n v).symm (0 : EuclideanSpace ℝ (Fin n)) = -v.val := by
-  simpa using stereographic'_symm_apply (n := n) v (0 : EuclideanSpace ℝ (Fin n))
-
-lemma φₛ_symm_zero :
-  φₛ.symm (0 : EuclideanSpace ℝ (Fin 1)) = -north_pt := by
-  rw [φₛ]
-  rw [chartAt]
-  have h1 : ((stereographic' 1 north_pt).symm 0) = -north_pt :=
-    SetCoe.ext (stereographic'_symm_zero (n := 1) north_pt)
-  have h2 : φₛ = chartAt (EuclideanSpace ℝ (Fin 1)) south_pt := rfl
-  have h3 : chartAt (EuclideanSpace ℝ (Fin 1)) south_pt = stereographic' 1 (-south_pt) := rfl
-  have h4 : chartAt (EuclideanSpace ℝ (Fin 1)) south_pt = stereographic' 1 (north_pt) := by
-    rw [<-bar] at h3
-    exact h3
-  have h5 : (chartAt (EuclideanSpace ℝ (Fin 1)) south_pt).symm 0 = -north_pt := by
-    rw [<-h4] at h1
-    exact h1
-  have h6 : φₛ.symm 0 = -north_pt := by
-    rw [<-h2] at h5
-    exact h5
-  exact h6
-
-lemma hhh4 : φₛ.symm ⁻¹' φₙ.source = {x | x ≠ 0} := by
-  ext x
-  simp only [Set.mem_preimage, hφₙ.source]
-  constructor
-  · intro h
-    by_contra hx
-    have h0 : x ∉ {x | x ≠ 0} := hx
-    have h1 : x = 0 := by simp only [Set.mem_setOf, not_not] at hx; exact hx
-    have h2 : φₛ.symm (0 : EuclideanSpace ℝ (Fin 1)) = -north_pt := φₛ_symm_zero
-    rw [<-h1] at h2
-    exact h h2
-  · intro h
-    intro hx
-    have h0 : φₛ.symm.source = univ := hφₛ.target
-    have ha : 0 ∈ univ := trivial
-    have hb : x ∈ univ := trivial
-    have hc : 0 ∈ φₛ.symm.source := h0 ▸ ha
-    have hd : x ∈ φₛ.symm.source := h0 ▸ hb
-    have h1 : φₛ (φₛ.symm 0) = 0 := PartialHomeomorph.left_inv φₛ.symm hc
-    have h2 : φₛ (φₛ.symm x) = x := PartialHomeomorph.left_inv φₛ.symm hd
-    rw [<-φₛ_symm_zero] at hx
-    have h3 : φₛ.symm x = φₛ.symm 0 := hx
-    have h4 : φₛ (φₛ.symm x) = φₛ (φₛ.symm 0) := congrArg (↑φₛ) hx
-    have h5 : x = 0 := by
-      rw [h1, h2] at h4
-      exact h4
-    exact h h5
 
 lemma hh41 (h : φₛ.symm ⁻¹' φₙ.source = {x | x ≠ 0}) :
   (φN φₛ).symm ⁻¹' (φN φₙ).source = {x | x ≠ 0} := by
