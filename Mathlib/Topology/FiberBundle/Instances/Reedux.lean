@@ -617,19 +617,6 @@ lemma upperInclusion'' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1))
   have h4 : (x, v) = (χₛ.symm ≫ₕ χₙ).symm (x, v) ↔ (χₛ.symm ≫ₕ χₙ) (x, v) = (x, v):= PartialHomeomorph.eq_symm_apply (χₛ.symm ≫ₕ χₙ) hs ht
   exact (PartialHomeomorph.eq_symm_apply (χₛ.symm ≫ₕ χₙ) hs ht).mp (id (Eq.symm h2))
 
-lemma upperContMDiff' : ContMDiffOn
-  ((𝓡 1).prod (𝓡 1))
-  ((𝓡 1).prod (𝓡 1))
-   ⊤
-      ((Mobius'.localTriv north).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv south).toPartialHomeomorph)
-      {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) > 0} := by
-      apply ContMDiffOn.congr
-      · exact contMDiffOn_id
-      · intro y hy
-        obtain ⟨x, v⟩ := y
-        dsimp at hy
-        exact upperInclusion' x v hy
-
 lemma upperContMDiff'' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
       ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph)
       {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) > 0} := by
@@ -639,26 +626,6 @@ lemma upperContMDiff'' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (�
         obtain ⟨x, v⟩ := y
         dsimp at hy
         exact upperInclusion'' x v hy
-
-lemma lowerInclusion' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
-    (x.point.val 0) < 0 →
-    ((Mobius'.localTriv north).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv south).toPartialHomeomorph) (x, v)
-      = (x, -v) := by
-    intros x v ha
-    have hx : x ∈ { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := Or.inr ha
-    have hx' : x ∈ (φN φₙ).source ∩ (φN φₛ).source := SulSource'.symm ▸ hx
-    have h1 : ((Mobius'.localTriv north).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv south).toPartialHomeomorph) (x, v) =
-              (x, Mobius'.coordChange north south x v) := localTrivTransition_eq_coordChange' north south hx'
-    have h2 : Mobius'.coordChange north south x v = if (x.point.val 0) > 0 then v else -v := rfl
-    have h3 : ((Mobius'.localTriv north).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv south).toPartialHomeomorph) (x, v) =
-    (x, if (x.point.val 0) > 0 then v else -v) := by
-      rw [h2] at h1
-      exact h1
-    have h4 : ¬ (x.point.val 0) > 0 → (if (x.point.val 0) > 0 then v else -v) = -v := by
-      intro h41
-      rw [if_neg h41]
-    rw [h3, h4]
-    exact not_lt_of_gt ha
 
 lemma lowerInclusion'' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
     (x.point.val 0) < 0 →
@@ -723,60 +690,6 @@ lemma lowerContMDiff'' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (�
         obtain ⟨x, v⟩ := y
         dsimp at hy
         exact lowerInclusion'' x v hy
-
-lemma lowerContMDiff' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
-      ((Mobius'.localTriv north).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv south).toPartialHomeomorph)
-      {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) < 0} := by
-
-      have h1a : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (fun x ↦ -id x) (univ : Set (EuclideanSpace ℝ (Fin 1))) := contMDiffOn_id.neg
-      have hz : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ id {x : S1 | (x.point.val 0) < 0} := contMDiffOn_id
-
-      let f1 : S1 × EuclideanSpace ℝ (Fin 1) → S1 × EuclideanSpace ℝ (Fin 1) :=
-        Prod.map id fun x ↦ -id x
-      let f2 : S1 × EuclideanSpace ℝ (Fin 1) → S1 × EuclideanSpace ℝ (Fin 1) :=
-        fun x ↦ match x with
-        | (x, v) => (x, -v)
-
-      have h2 : f1 = f2 := by
-        exact rfl
-
-      have h2c : ∀ y ∈ {x | x.point.val 0 < 0} ×ˢ univ, f1 y = Prod.map id (fun x ↦ -id x) y := by
-            intro y hy
-            dsimp at hy
-            exact rfl
-
-      have h1b : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤ (Prod.map id fun x ↦ -id x)
-       ({x : S1 | (x.point.val 0) < 0} ×ˢ (univ : Set (EuclideanSpace ℝ (Fin 1)))) := hz.prodMap h1a
-
-      have h3 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤ f1 ({x | x.point.val 0 < 0} ×ˢ univ) := ContMDiffOn.congr h1b h2c
-
-      have h1 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
-        (fun (x, v) => (x, -v)) {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) < 0} := by
-          rw [h2] at h3
-          have h1z :  ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤ f2 ({x | x.point.val 0 < 0} ×ˢ univ) := h3
-
-          have h1y : ContMDiffOn _ _ ⊤ f2 {x | x.1.point.val 0 < 0} :=
-           h1z.mono (by
-            intro x hx
-            exact ⟨hx, Set.mem_univ x.2⟩)
-          exact h1y
-
-      apply ContMDiffOn.congr
-      · exact h1
-      · intro y hy
-        obtain ⟨x, v⟩ := y
-        dsimp at hy
-        exact lowerInclusion' x v hy
-
-lemma bothContMDiff' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
-      ((Mobius'.localTriv north).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv south).toPartialHomeomorph)
-      {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) > 0 ∨ (x.1.point.val 0) < 0} := by
-  let U := {x : S1 × EuclideanSpace ℝ (Fin 1) | x.1.point.val 0 > 0}
-  let V := {x : S1 × EuclideanSpace ℝ (Fin 1) | x.1.point.val 0 < 0}
-  let f := ((Mobius'.localTriv north).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv south).toPartialHomeomorph)
-  have h1 : ContMDiffOn _ _ ⊤ f (U ∪ V) :=
-    ContMDiffOn.union_of_isOpen upperContMDiff' lowerContMDiff' s1_is_open' s2_is_open'
-  exact h1
 
 lemma bothContMDiff4 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
  ((Mobius'.localTriv south).toPartialHomeomorph.symm ≫ₕ (Mobius'.localTriv north).toPartialHomeomorph)
