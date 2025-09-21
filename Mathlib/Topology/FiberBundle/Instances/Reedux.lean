@@ -442,7 +442,6 @@ def τₙ := Mobius'.localTriv north
 noncomputable
 def τₛ := Mobius'.localTriv south
 
-
 noncomputable
 def χₙ := τₙ.toPartialHomeomorph
 noncomputable
@@ -478,15 +477,15 @@ lemma localTrivTransition_eq_coordChange' (i j : Pole)
 
 lemma upperInclusion' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
     (x.point.val 0) > 0 →
-    (τₙ.toPartialHomeomorph.symm ≫ₕ τₛ.toPartialHomeomorph) (x, v)
+    (χₙ.symm ≫ₕ χₛ) (x, v)
       = (x, v) := by
     intros x v ha
     have hx : x ∈ { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := Or.inl ha
     have hx' : x ∈ (φN φₙ).source ∩ (φN φₛ).source := SulSource'.symm ▸ hx
-    have h1 : (τₙ.toPartialHomeomorph.symm ≫ₕ τₛ.toPartialHomeomorph) (x, v) =
+    have h1 : (χₙ.symm ≫ₕ χₛ) (x, v) =
               (x, Mobius'.coordChange north south x v) := localTrivTransition_eq_coordChange' north south hx'
     have h2 : Mobius'.coordChange north south x v = if (x.point.val 0) > 0 then v else -v := rfl
-    have h3 : (τₙ.toPartialHomeomorph.symm ≫ₕ τₛ.toPartialHomeomorph) (x, v) =
+    have h3 : (χₙ.symm ≫ₕ χₛ) (x, v) =
     (x, if (x.point.val 0) > 0 then v else -v) := by
       rw [h2] at h1
       exact h1
@@ -627,7 +626,7 @@ lemma upperInclusion'' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1))
   exact (PartialHomeomorph.eq_symm_apply (χₛ.symm ≫ₕ χₙ) hs ht).mp (id (Eq.symm h2))
 
 lemma upperContMDiff'' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
-      (τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph)
+      (χₛ.symm ≫ₕ χₙ)
       {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) > 0} := by
       apply ContMDiffOn.congr
       · exact contMDiffOn_id
@@ -638,16 +637,16 @@ lemma upperContMDiff'' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (�
 
 lemma lowerInclusion'' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
     (x.point.val 0) < 0 →
-    (τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph) (x, v)
+    (χₛ.symm ≫ₕ χₙ) (x, v)
       = (x, -v) := by
   intros x v ha
   have hx : x ∈ { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := Or.inr ha
   have hx' : x ∈ (φN φₙ).source ∩ (φN φₛ).source := SulSource'.symm ▸ hx
   have hx'' :  x ∈ (φN φₛ).source ∩ (φN φₙ).source := by rwa [inter_comm] at hx'
-  have h1 : (τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph) (x, v) =
+  have h1 : (χₛ.symm ≫ₕ χₙ) (x, v) =
             (x, Mobius'.coordChange south north x v) := localTrivTransition_eq_coordChange' south north hx''
   have h2 : Mobius'.coordChange south north x v = if (x.point.val 0) > 0 then v else -v := rfl
-  have h3 : (τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph) (x, v) =
+  have h3 : (χₛ.symm ≫ₕ χₙ) (x, v) =
     (x, if (x.point.val 0) > 0 then v else -v) := by
       rw [h2] at h1
       exact h1
@@ -658,7 +657,7 @@ lemma lowerInclusion'' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1))
   exact not_lt_of_gt ha
 
 lemma lowerContMDiff'' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
-      (τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph)
+      (χₛ.symm ≫ₕ χₙ)
       {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) < 0} := by
       have h1a : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (fun x ↦ -id x) (univ : Set (EuclideanSpace ℝ (Fin 1))) := contMDiffOn_id.neg
       have hz : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ id {x : S1 | (x.point.val 0) < 0} := contMDiffOn_id
@@ -701,11 +700,11 @@ lemma lowerContMDiff'' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (�
         exact lowerInclusion'' x v hy
 
 lemma bothContMDiff4 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
- (τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph)
+ (χₛ.symm ≫ₕ χₙ)
  {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) > 0 ∨ (x.1.point.val 0) < 0} := by
 let U := {x : S1 × EuclideanSpace ℝ (Fin 1) | x.1.point.val 0 > 0}
 let V := {x : S1 × EuclideanSpace ℝ (Fin 1) | x.1.point.val 0 < 0}
-let f := (τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph)
+let f := (χₛ.symm ≫ₕ χₙ)
 have h1 : ContMDiffOn _ _ ⊤ f (U ∪ V) :=
  ContMDiffOn.union_of_isOpen upperContMDiff'' lowerContMDiff'' s1_is_open' s2_is_open'
 exact h1
@@ -856,10 +855,10 @@ lemma changeModelSpace
 open Bundle
 
 lemma mobius_preimage_fst (s : Set S1) :
-    (τₛ.toPartialHomeomorph.symm ≫ₕ
-     τₙ.toPartialHomeomorph) ⁻¹' (Prod.fst ⁻¹' s)
+    (χₛ.symm ≫ₕ
+     χₙ) ⁻¹' (Prod.fst ⁻¹' s)
       = s ×ˢ univ := by
-  rw [τₛ, τₙ]
+  rw [χₛ, χₙ, τₙ, τₛ]
   apply Set.ext
   intro x
   simp
@@ -1021,8 +1020,8 @@ lemma ltn1 : τₙ.source
   rw [<-this]
   exact rfl
 
-lemma ltn2 : Mobius'.proj ⁻¹' (S1.mk '' {x | x ≠ -north_pt})
-        = {p | p.1.point ≠ -north_pt} := by
+lemma lt2 (pt : { x // x ∈ Metric.sphere 0 1 }) : Mobius'.proj ⁻¹' (S1.mk '' {x | x ≠ -pt})
+        = {p | p.1.point ≠ -pt} := by
   ext p
   simp only [Set.mem_preimage, Set.mem_image, Set.mem_setOf_eq]
   constructor
@@ -1033,7 +1032,7 @@ lemma ltn2 : Mobius'.proj ⁻¹' (S1.mk '' {x | x ≠ -north_pt})
     simp
 
 lemma northTriv_source : τₙ.source = {p | p.1.point ≠ -north_pt} := by
-  rw [ltn1, ltn2]
+  rw [ltn1, lt2 north_pt]
 
 lemma lts1 : τₛ.source
        = Mobius'.proj ⁻¹' (S1.mk '' { x | x ≠ -south_pt }) := by
@@ -1044,33 +1043,22 @@ lemma lts1 : τₛ.source
   rw [<-this]
   exact rfl
 
-lemma lts2 : Mobius'.proj ⁻¹' (S1.mk '' {x | x ≠ -south_pt})
-        = {p | p.1.point ≠ -south_pt} := by
-  ext p
-  simp only [Set.mem_preimage, Set.mem_image, Set.mem_setOf_eq]
-  constructor
-  · rintro ⟨x, hx, hy⟩
-    exact ne_of_eq_of_ne (congrArg S1.point (id (Eq.symm hy))) hx
-  · intro hp
-    refine ⟨p.1.point, hp, ?_⟩
-    simp
-
 lemma southTriv_source : τₛ.source = {p | p.1.point ≠ -south_pt} := by
-    rw [lts1, lts2]
+    rw [lts1, lt2 south_pt]
 
 lemma ltt_north :
-  τₙ.toPartialHomeomorph.target
+  χₙ.target
     = (S1.mk '' { x | x ≠ -north_pt }) ×ˢ (Set.univ : Set (EuclideanSpace ℝ (Fin 1))) := by
-  have hdef : τₙ.toPartialHomeomorph.target =
+  have hdef : χₙ.target =
               (S1.mk '' φₙ.source) ×ˢ Set.univ := rfl
   have : φₙ.source = { x | x ≠ -north_pt } := hφₙ.source
   rw [this] at hdef
   exact hdef
 
 lemma ltt_south :
-  τₛ.toPartialHomeomorph.target
+  χₛ.target
     = (S1.mk '' { x | x ≠ -south_pt }) ×ˢ (Set.univ : Set (EuclideanSpace ℝ (Fin 1))) := by
-  have hdef : τₛ.toPartialHomeomorph.target =
+  have hdef : χₛ.target =
               (S1.mk '' φₛ.source) ×ˢ Set.univ := rfl
   have : φₛ.source = { x | x ≠ -south_pt } := hφₛ.source
   rw [this] at hdef
@@ -1091,24 +1079,24 @@ lemma ltt2 (pt : { x // x ∈ Metric.sphere 0 1 }) :
     refine ⟨p.1.point, p.1.point.property,  And.symm ((fun {a b} ↦ Classical.not_imp.mp) fun a ↦ hp (a h2))⟩
 
 lemma hχₙ.target : χₙ.target = { p | p.point ≠ -north_pt } ×ˢ Set.univ := by
-  rw [χₙ, ltt_north, ltt2 north_pt]
+  rw [ltt_north, ltt2 north_pt]
 
 lemma hχₛ.target : χₛ.target = { p | p.point ≠ -south_pt } ×ˢ Set.univ := by
-  rw [χₛ, ltt_south, ltt2 south_pt]
+  rw [ltt_south, ltt2 south_pt]
 
 lemma ψₙ_source : ψₙ.source = τₙ.source := by
   have h4 : τₙ.source ⊆ τₙ ⁻¹' τₙ.target :=
-    PartialHomeomorph.source_preimage_target τₙ.toPartialHomeomorph
+    PartialHomeomorph.source_preimage_target χₙ
   have h5 : τₙ.source ∩
-            τₙ.toPartialHomeomorph ⁻¹' τₙ.target =
+            χₙ ⁻¹' τₙ.target =
     τₙ.source := Set.inter_eq_left.mpr h4
   exact h5
 
 lemma ψₛ_source : ψₛ.source = τₛ.source := by
   have h4 : τₛ.source ⊆ τₛ ⁻¹' τₛ.target :=
-    PartialHomeomorph.source_preimage_target τₛ.toPartialHomeomorph
+    PartialHomeomorph.source_preimage_target χₛ
   have h5 : τₛ.source ∩
-            τₛ.toPartialHomeomorph ⁻¹' τₛ.target =
+            χₛ ⁻¹' τₛ.target =
     τₛ.source := Set.inter_eq_left.mpr h4
   exact h5
 
@@ -1345,19 +1333,19 @@ lemma h9pre' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
       {x | x.1.point.val 0 > 0 ∨ x.1.point.val 0 < 0} := by
   have h0 : (ψₛ.symm) ⁻¹' ψₙ.source =
     ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' (
-      ((τₛ.toPartialHomeomorph).symm ⁻¹' τₙ.source)) := by
+      ((χₛ).symm ⁻¹' τₙ.source)) := by
     exact congrArg (preimage ↑ψₛ.symm) ψₙ_source
 
   have h1 :
-  ((τₛ.toPartialHomeomorph).symm ⁻¹'
+  ((χₛ).symm ⁻¹'
     τₙ.source) =
-    { q | ((τₛ.toPartialHomeomorph).symm q).1.point ≠ -north_pt } := by
+    { q | ((χₛ).symm q).1.point ≠ -north_pt } := by
       ext q
       simp [northTriv_source, Set.mem_setOf_eq]
 
   have h2 :
   ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
-    { q | ((τₛ.toPartialHomeomorph).symm q).1.point ≠ -north_pt }
+    { q | ((χₛ).symm q).1.point ≠ -north_pt }
   =
   { p | ((φN φₛ).symm p.1).point ≠ -north_pt } := by
     ext p
@@ -1483,26 +1471,26 @@ lemma kk3 (h : (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {x | x ≠ 0}
   exact this
 
 lemma h9pre'' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
-  (↑(τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph) ∘
+  (↑(χₛ.symm ≫ₕ χₙ) ∘
       (↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm)) ⁻¹'
     (φN φₙ).source ×ˢ univ := by
 
-  have h1 : (τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph ∘
+  have h1 : (χₛ.symm ≫ₕ χₙ ∘
     ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm) ⁻¹'
       ((φN φₙ).source ×ˢ univ) =
   (((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm) ⁻¹'
-    ((τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph) ⁻¹'
+    ((χₛ.symm ≫ₕ χₙ) ⁻¹'
       ((φN φₙ).source ×ˢ univ)) := rfl
-  have h2 : (τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph) ⁻¹'
+  have h2 : (χₛ.symm ≫ₕ χₙ) ⁻¹'
     ((φN φₙ).source ×ˢ univ) =
     (φN φₙ).source ×ˢ univ := by
       rw [← mobius_preimage_fst (φN φₙ).source]
       rfl
-  have h3 : ↑(τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph) ∘
+  have h3 : ↑(χₛ.symm ≫ₕ χₙ) ∘
         ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
       (φN φₙ).source ×ˢ univ =
     ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' (φN φₙ).source ×ˢ univ := by rw [h2] at h1; exact h1
-  have h4 : (τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph) ∘
+  have h4 : (χₛ.symm ≫ₕ χₙ) ∘
         ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
       (φN φₙ).source ×ˢ univ = {x | x.1 ≠ 0} := hh42 (hh41  hhh4)
 
@@ -1539,7 +1527,7 @@ lemma h9pre'' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
 lemma bothContMDiff'' : ContDiffOn ℝ ⊤ (ψₙ ∘ ψₛ.symm) (ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source):= by
 
   let f := ((((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) ∘
-    (τₛ.toPartialHomeomorph.symm ≫ₕ τₙ.toPartialHomeomorph) ∘
+    (χₛ.symm ≫ₕ χₙ) ∘
     ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm))
 
   have h9pre : (ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source) ⊆ (φN φₛ).target ×ˢ univ := by
