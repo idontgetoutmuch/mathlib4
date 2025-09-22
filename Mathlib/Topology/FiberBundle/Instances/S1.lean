@@ -338,6 +338,24 @@ lemma bar' : south_pt = -north_pt := by
   have hc : -!₂[(0 : ℝ), 1] = !₂[0, -1] := by rw [myNeg (0 : ℝ) (1 : ℝ)]; simp
   exact SetCoe.ext (id (Eq.symm hc))
 
+lemma baz : -north_pt ≠ north_pt := by
+  intro heq
+  have hc : -!₂[(0 : ℝ), 1] = !₂[0, -1] := by rw [myNeg (0 : ℝ) (1 : ℝ)]; simp
+  have hd : -north_pt = -!₂[(0 : ℝ), 1] := rfl
+  have he : -north_pt = !₂[(0 : ℝ), -1] := by rw [hc] at hd; exact hd
+  have hf : north_pt = !₂[(0 : ℝ), 1] := rfl
+  rw [<-heq] at hf
+  have hg :  -north_pt = !₂[(0 : ℝ), 1] := hf
+  have h_eq : !₂[(0 : ℝ), 1] = !₂[(0 : ℝ), -1] := by rw [←hg, he]
+  have hh : !₂[(0 : ℝ), 1] 1 = !₂[(0 : ℝ), -1] 1 := congrFun h_eq 1
+  have hi : !₂[(0 : ℝ), 1] 1=  1 := rfl
+  have hj : !₂[(0 : ℝ), -1] 1 = -1 := rfl
+  have hk : (1 : ℝ) = -1 := by
+    rw [hi, hj] at hh
+    exact hh
+  have hl : (1 : ℝ) ≠ -1 := by norm_num
+  exact hl hh
+
 open Pole
 
 /-

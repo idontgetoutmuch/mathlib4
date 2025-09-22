@@ -475,7 +475,7 @@ lemma localTrivTransition_eq_coordChange' (i j : Pole)
             Mobius'.coordChange i j x v :=  Mobius'.coordChange_comp i (Mobius'.indexAt x) j x hd v
   exact h2
 
-lemma upperInclusion' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
+lemma upperInclusionNS : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
     (x.point.val 0) > 0 →
     (χₙ.symm ≫ₕ χₛ) (x, v)
       = (x, v) := by
@@ -611,7 +611,7 @@ lemma xInTarget : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
     exact h2t
   exact hz
 
-lemma upperInclusion'' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
+lemma upperInclusionSN : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
     (x.point.val 0) > 0 →
     (χₛ.symm ≫ₕ χₙ) (x, v)
       = (x, v) := by
@@ -620,12 +620,12 @@ lemma upperInclusion'' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1))
   have ht : (x, v) ∈ (χₛ.symm ≫ₕ χₙ).target := xInTarget x v h
   have h0 : (χₙ.symm ≫ₕ χₛ).symm = χₛ.symm ≫ₕ χₙ := PartialHomeomorph.trans_symm_eq_symm_trans_symm χₙ.symm χₛ
   have h1 : (χₛ.symm ≫ₕ χₙ).symm = χₙ.symm ≫ₕ χₛ := PartialHomeomorph.trans_symm_eq_symm_trans_symm χₛ.symm χₙ
-  have h2 : (χₙ.symm ≫ₕ χₛ) (x, v) = (x, v) := upperInclusion' x v h
+  have h2 : (χₙ.symm ≫ₕ χₛ) (x, v) = (x, v) := upperInclusionNS x v h
   have h3 : (χₛ.symm ≫ₕ χₙ).symm (x, v) = (x, v) := by rw [<-h1] at h2; exact h2
   have h4 : (x, v) = (χₛ.symm ≫ₕ χₙ).symm (x, v) ↔ (χₛ.symm ≫ₕ χₙ) (x, v) = (x, v):= PartialHomeomorph.eq_symm_apply (χₛ.symm ≫ₕ χₙ) hs ht
   exact (PartialHomeomorph.eq_symm_apply (χₛ.symm ≫ₕ χₙ) hs ht).mp (id (Eq.symm h2))
 
-lemma upperContMDiff'' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+lemma upperContMDiffSN : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
       (χₛ.symm ≫ₕ χₙ)
       {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) > 0} := by
       apply ContMDiffOn.congr
@@ -633,21 +633,28 @@ lemma upperContMDiff'' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (�
       · intro y hy
         obtain ⟨x, v⟩ := y
         dsimp at hy
-        exact upperInclusion'' x v hy
+        exact upperInclusionSN x v hy
 
-lemma lowerInclusion'' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
-    (x.point.val 0) < 0 →
-    (χₛ.symm ≫ₕ χₙ) (x, v)
-      = (x, -v) := by
+lemma upperContMDiffNS : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+      (χₙ.symm ≫ₕ χₛ)
+      {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) > 0} := by
+      apply ContMDiffOn.congr
+      · exact contMDiffOn_id
+      · intro y hy
+        obtain ⟨x, v⟩ := y
+        dsimp at hy
+        exact upperInclusionNS x v hy
+
+lemma lowerInclusionSN : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
+    (x.point.val 0) < 0 → (χₛ.symm ≫ₕ χₙ) (x, v) = (x, -v) := by
   intros x v ha
   have hx : x ∈ { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := Or.inr ha
-  have hx' : x ∈ (φN φₙ).source ∩ (φN φₛ).source := SulSource'.symm ▸ hx
-  have hx'' :  x ∈ (φN φₛ).source ∩ (φN φₙ).source := by rwa [inter_comm] at hx'
-  have h1 : (χₛ.symm ≫ₕ χₙ) (x, v) =
-            (x, Mobius'.coordChange south north x v) := localTrivTransition_eq_coordChange' south north hx''
+  have hx'  : x ∈ (φN φₙ).source ∩ (φN φₛ).source := SulSource'.symm ▸ hx
+  have hx'' : x ∈ (φN φₛ).source ∩ (φN φₙ).source := by rwa [inter_comm] at hx'
+  have h1 : (χₛ.symm ≫ₕ χₙ) (x, v) = (x, Mobius'.coordChange south north x v) :=
+    localTrivTransition_eq_coordChange' south north hx''
   have h2 : Mobius'.coordChange south north x v = if (x.point.val 0) > 0 then v else -v := rfl
-  have h3 : (χₛ.symm ≫ₕ χₙ) (x, v) =
-    (x, if (x.point.val 0) > 0 then v else -v) := by
+  have h3 : (χₛ.symm ≫ₕ χₙ) (x, v) = (x, if (x.point.val 0) > 0 then v else -v) := by
       rw [h2] at h1
       exact h1
   have h4 : ¬ (x.point.val 0) > 0 → (if (x.point.val 0) > 0 then v else -v) = -v := by
@@ -656,58 +663,100 @@ lemma lowerInclusion'' : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1))
   rw [h3, h4]
   exact not_lt_of_gt ha
 
-lemma lowerContMDiff'' : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
-      (χₛ.symm ≫ₕ χₙ)
-      {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) < 0} := by
-      have h1a : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (fun x ↦ -id x) (univ : Set (EuclideanSpace ℝ (Fin 1))) := contMDiffOn_id.neg
-      have hz : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ id {x : S1 | (x.point.val 0) < 0} := contMDiffOn_id
+lemma lowerInclusionNS : ∀ (x : Mobius'.Base) (v : EuclideanSpace ℝ (Fin 1)),
+    (x.point.val 0) < 0 → (χₙ.symm ≫ₕ χₛ) (x, v) = (x, -v) := by
+  intros x v ha
+  have hx : x ∈ { x | x.point.val 0 > 0 } ∪ { x | x.point.val 0 < 0 } := Or.inr ha
+  have hx'  : x ∈ (φN φₙ).source ∩ (φN φₛ).source := SulSource'.symm ▸ hx
+  have h1 : (χₙ.symm ≫ₕ χₛ) (x, v) = (x, Mobius'.coordChange north south x v) :=
+    localTrivTransition_eq_coordChange' north south hx'
+  have h2 : Mobius'.coordChange north south x v = if (x.point.val 0) > 0 then v else -v := rfl
+  have h3 : (χₙ.symm ≫ₕ χₛ) (x, v) = (x, if (x.point.val 0) > 0 then v else -v) := by
+      rw [h2] at h1
+      exact h1
+  have h4 : ¬ (x.point.val 0) > 0 → (if (x.point.val 0) > 0 then v else -v) = -v := by
+    intro h41
+    rw [if_neg h41]
+  rw [h3, h4]
+  exact not_lt_of_gt ha
 
-      let f1 : S1 × EuclideanSpace ℝ (Fin 1) → S1 × EuclideanSpace ℝ (Fin 1) :=
-        Prod.map id fun x ↦ -id x
-      let f2 : S1 × EuclideanSpace ℝ (Fin 1) → S1 × EuclideanSpace ℝ (Fin 1) :=
+lemma lowerContMDiffSN : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+  (χₛ.symm ≫ₕ χₙ) {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) < 0} := by
+  have h1a : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (fun x ↦ -id x) (univ : Set (EuclideanSpace ℝ (Fin 1))) := contMDiffOn_id.neg
+  have hz : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ id {x : S1 | (x.point.val 0) < 0} := contMDiffOn_id
+
+  let f1 : S1 × EuclideanSpace ℝ (Fin 1) → S1 × EuclideanSpace ℝ (Fin 1) :=
+    Prod.map id fun x ↦ -id x
+  let f2 : S1 × EuclideanSpace ℝ (Fin 1) → S1 × EuclideanSpace ℝ (Fin 1) :=
         fun x ↦ match x with
         | (x, v) => (x, -v)
+  have h2 : f1 = f2 := by
+    exact rfl
+  have h2c : ∀ y ∈ {x | x.point.val 0 < 0} ×ˢ univ, f1 y = Prod.map id (fun x ↦ -id x) y := by
+    intro y hy
+    dsimp at hy
+    exact rfl
+  have h3 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+    f1 ({x | x.point.val 0 < 0} ×ˢ univ) := ContMDiffOn.congr (hz.prodMap h1a) h2c
+  have h1 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+    (fun (x, v) => (x, -v)) {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) < 0} := by
+      rw [h2] at h3
+      have h1z :  ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤ f2 ({x | x.point.val 0 < 0} ×ˢ univ) := h3
+      have h1y : ContMDiffOn _ _ ⊤ f2 {x | x.1.point.val 0 < 0} :=
+        h1z.mono (by
+          intro x hx
+          exact ⟨hx, Set.mem_univ x.2⟩)
+      exact h1y
+  apply ContMDiffOn.congr
+  · exact h1
+  · intro y hy
+    obtain ⟨x, v⟩ := y
+    dsimp at hy
+    exact lowerInclusionSN x v hy
 
-      have h2 : f1 = f2 := by
-        exact rfl
+lemma lowerContMDiffNS : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+  (χₙ.symm ≫ₕ χₛ) {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) < 0} := by
+  have h1a : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (fun x ↦ -id x) (univ : Set (EuclideanSpace ℝ (Fin 1))) := contMDiffOn_id.neg
+  have hz : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ id {x : S1 | (x.point.val 0) < 0} := contMDiffOn_id
 
-      have h2c : ∀ y ∈ {x | x.point.val 0 < 0} ×ˢ univ, f1 y = Prod.map id (fun x ↦ -id x) y := by
-            intro y hy
-            dsimp at hy
-            exact rfl
+  let f1 : S1 × EuclideanSpace ℝ (Fin 1) → S1 × EuclideanSpace ℝ (Fin 1) :=
+    Prod.map id fun x ↦ -id x
+  let f2 : S1 × EuclideanSpace ℝ (Fin 1) → S1 × EuclideanSpace ℝ (Fin 1) :=
+        fun x ↦ match x with
+        | (x, v) => (x, -v)
+  have h2 : f1 = f2 := by
+    exact rfl
+  have h2c : ∀ y ∈ {x | x.point.val 0 < 0} ×ˢ univ, f1 y = Prod.map id (fun x ↦ -id x) y := by
+    intro y hy
+    dsimp at hy
+    exact rfl
+  have h3 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+    f1 ({x | x.point.val 0 < 0} ×ˢ univ) := ContMDiffOn.congr (hz.prodMap h1a) h2c
+  have h1 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+    (fun (x, v) => (x, -v)) {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) < 0} := by
+      rw [h2] at h3
+      have h1z :  ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤ f2 ({x | x.point.val 0 < 0} ×ˢ univ) := h3
+      have h1y : ContMDiffOn _ _ ⊤ f2 {x | x.1.point.val 0 < 0} :=
+        h1z.mono (by
+          intro x hx
+          exact ⟨hx, Set.mem_univ x.2⟩)
+      exact h1y
+  apply ContMDiffOn.congr
+  · exact h1
+  · intro y hy
+    obtain ⟨x, v⟩ := y
+    dsimp at hy
+    exact lowerInclusionNS x v hy
 
-      have h1b : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤ (Prod.map id fun x ↦ -id x)
-       ({x : S1 | (x.point.val 0) < 0} ×ˢ (univ : Set (EuclideanSpace ℝ (Fin 1)))) := hz.prodMap h1a
-
-      have h3 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤ f1 ({x | x.point.val 0 < 0} ×ˢ univ) := ContMDiffOn.congr h1b h2c
-
-      have h1 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
-        (fun (x, v) => (x, -v)) {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) < 0} := by
-          rw [h2] at h3
-          have h1z :  ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤ f2 ({x | x.point.val 0 < 0} ×ˢ univ) := h3
-
-          have h1y : ContMDiffOn _ _ ⊤ f2 {x | x.1.point.val 0 < 0} :=
-           h1z.mono (by
-            intro x hx
-            exact ⟨hx, Set.mem_univ x.2⟩)
-          exact h1y
-
-      apply ContMDiffOn.congr
-      · exact h1
-      · intro y hy
-        obtain ⟨x, v⟩ := y
-        dsimp at hy
-        exact lowerInclusion'' x v hy
-
-lemma bothContMDiff4 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+lemma bothContMDiffSN : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
  (χₛ.symm ≫ₕ χₙ)
  {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) > 0 ∨ (x.1.point.val 0) < 0} := by
-let U := {x : S1 × EuclideanSpace ℝ (Fin 1) | x.1.point.val 0 > 0}
-let V := {x : S1 × EuclideanSpace ℝ (Fin 1) | x.1.point.val 0 < 0}
-let f := (χₛ.symm ≫ₕ χₙ)
-have h1 : ContMDiffOn _ _ ⊤ f (U ∪ V) :=
- ContMDiffOn.union_of_isOpen upperContMDiff'' lowerContMDiff'' s1_is_open' s2_is_open'
-exact h1
+exact ContMDiffOn.union_of_isOpen upperContMDiffSN lowerContMDiffSN s1_is_open' s2_is_open'
+
+lemma bothContMDiffNS : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+ (χₙ.symm ≫ₕ χₛ)
+ {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) > 0 ∨ (x.1.point.val 0) < 0} := by
+exact ContMDiffOn.union_of_isOpen upperContMDiffNS lowerContMDiffNS s1_is_open' s2_is_open'
 
 lemma part2Pre : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ φₙ φₙ.source := contMDiffOn_chart
 
@@ -719,24 +768,6 @@ lemma part2 : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (⇑(φN φₙ)) (φN φₙ).sou
     simp
   rw [<-h1]
   exact contMDiffOn_chart
-
-lemma baz : -north_pt ≠ north_pt := by
-  intro heq
-  have hc : -!₂[(0 : ℝ), 1] = !₂[0, -1] := by rw [myNeg (0 : ℝ) (1 : ℝ)]; simp
-  have hd : -north_pt = -!₂[(0 : ℝ), 1] := rfl
-  have he : -north_pt = !₂[(0 : ℝ), -1] := by rw [hc] at hd; exact hd
-  have hf : north_pt = !₂[(0 : ℝ), 1] := rfl
-  rw [<-heq] at hf
-  have hg :  -north_pt = !₂[(0 : ℝ), 1] := hf
-  have h_eq : !₂[(0 : ℝ), 1] = !₂[(0 : ℝ), -1] := by rw [←hg, he]
-  have hh : !₂[(0 : ℝ), 1] 1 = !₂[(0 : ℝ), -1] 1 := congrFun h_eq 1
-  have hi : !₂[(0 : ℝ), 1] 1=  1 := rfl
-  have hj : !₂[(0 : ℝ), -1] 1 = -1 := rfl
-  have hk : (1 : ℝ) = -1 := by
-    rw [hi, hj] at hh
-    exact hh
-  have hl : (1 : ℝ) ≠ -1 := by norm_num
-  exact hl hh
 
 lemma prepart1 : chartAt (EuclideanSpace ℝ (Fin 1)) { point := south_pt } = φN φₛ := by
   have h1a : chartAt (EuclideanSpace ℝ (Fin 1)) (S1.mk south_pt)
@@ -1532,8 +1563,7 @@ lemma bothContMDiff'' : ContDiffOn ℝ ⊤ (ψₙ ∘ ψₛ.symm) (ψₛ.target 
 
   have h9pre : (ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source) ⊆ (φN φₛ).target ×ˢ univ := by
     have hf : (φN φₛ).target = univ := hφₛ.target
-    have hg : (φN φₛ).target ×ˢ (Set.univ : Set (EuclideanSpace ℝ (Fin 1))) =
-              Set.univ := by
+    have hg : (φN φₛ).target ×ˢ (Set.univ : Set (EuclideanSpace ℝ (Fin 1))) = Set.univ := by
       rw [hf, Set.univ_prod_univ]
     have hi : (ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source) ⊆ (φN φₛ).target ×ˢ (Set.univ : Set (EuclideanSpace ℝ (Fin 1))) := by
       rw [hg]
@@ -1544,7 +1574,7 @@ lemma bothContMDiff'' : ContDiffOn ℝ ⊤ (ψₙ ∘ ψₛ.symm) (ψₛ.target 
     f
     (ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source) :=
       ContMDiffOn.comp side1
-        (ContMDiffOn.comp bothContMDiff4
+        (ContMDiffOn.comp bothContMDiffSN
           (ContMDiffOn.mono side2 h9pre)
           (by rw [h9pre']))
         (by rw [h9pre''])
