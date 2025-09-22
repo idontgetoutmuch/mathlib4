@@ -758,32 +758,25 @@ lemma bothContMDiffNS : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (�
  {x : S1 × EuclideanSpace ℝ (Fin 1) | (x.1.point.val 0) > 0 ∨ (x.1.point.val 0) < 0} := by
 exact ContMDiffOn.union_of_isOpen upperContMDiffNS lowerContMDiffNS s1_is_open' s2_is_open'
 
-lemma part2Pre : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ φₙ φₙ.source := contMDiffOn_chart
-
-lemma part2 : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (⇑(φN φₙ)) (φN φₙ).source := by
-  have h1 : chartAt (EuclideanSpace ℝ (Fin 1)) { point := north_pt } = φN φₙ := by
-    have h1a : (chartAt (EuclideanSpace ℝ (Fin 1)) : S1 → PartialHomeomorph S1 (EuclideanSpace ℝ (Fin 1)))
+lemma φNφₙisChart : φN φₙ = chartAt (EuclideanSpace ℝ (Fin 1)) { point := north_pt }:= by
+  have h1a : (chartAt (EuclideanSpace ℝ (Fin 1)) : S1 → PartialHomeomorph S1 (EuclideanSpace ℝ (Fin 1)))
          = fun (x : S1) => if x.point = north_pt then φN φₙ else φN φₛ := rfl
-    rw [h1a]
-    simp
-  rw [<-h1]
+  rw [h1a]
+  simp
+
+lemma φNφₛisChart : φN φₛ = chartAt (EuclideanSpace ℝ (Fin 1)) { point := south_pt }:= by
+  have h1a : (chartAt (EuclideanSpace ℝ (Fin 1)) : S1 → PartialHomeomorph S1 (EuclideanSpace ℝ (Fin 1)))
+         = fun (x : S1) => if x.point = north_pt then φN φₙ else φN φₛ := rfl
+  rw [h1a]
+  simp
+  exact fun a ↦ congrArg φN (congrArg (chartAt (EuclideanSpace ℝ (Fin 1))) a)
+
+lemma φNφₙ_smooth : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (⇑(φN φₙ)) (φN φₙ).source := by
+  rw [φNφₙisChart]
   exact contMDiffOn_chart
 
-lemma prepart1 : chartAt (EuclideanSpace ℝ (Fin 1)) { point := south_pt } = φN φₛ := by
-  have h1a : chartAt (EuclideanSpace ℝ (Fin 1)) (S1.mk south_pt)
-         = (fun (x : S1) => if x.point = north_pt then φN φₙ else φN φₛ) (S1.mk south_pt) := rfl
-  have h1b : chartAt (EuclideanSpace ℝ (Fin 1)) (S1.mk south_pt)
-         = if south_pt = north_pt then φN φₙ else φN φₛ := rfl
-  have h1c : south_pt = north_pt ↔ north_pt = south_pt := eq_comm
-  rw [bar'] at h1b
-  have h2 :  (if -north_pt = north_pt then φN φₙ else φN φₛ) = φN φₛ := if_neg baz
-  have h3 : chartAt (EuclideanSpace ℝ (Fin 1)) { point := -north_pt } = if -north_pt = north_pt then φN φₙ else φN φₛ := h1b
-  have h4 : chartAt (EuclideanSpace ℝ (Fin 1)) { point := -north_pt } = φN φₛ := by rw [h2] at h3; exact h3
-  rw [bar']
-  exact h4
-
-lemma part1 : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (⇑((φN φₛ)).symm) (φN φₛ).target := by
-  rw [<-prepart1]
+lemma φNφₛ_symm_smooth : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (⇑((φN φₛ)).symm) (φN φₛ).target := by
+  rw [φNφₛisChart]
   exact contMDiffOn_chart_symm
 
 lemma side1 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
@@ -795,7 +788,7 @@ lemma side1 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
       exact ha
   have h2 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) (𝓡 1) ⊤ ((φN φₙ) ∘ Prod.fst)
     ((φN φₙ).source ×ˢ (univ : Set (EuclideanSpace ℝ (Fin 1)))) := by
-      exact ContMDiffOn.comp part2 contMDiffOn_fst h3
+      exact ContMDiffOn.comp φNφₙ_smooth contMDiffOn_fst h3
   apply (contMDiffOn_prod_iff _).mpr
   exact ⟨h2, by exact contMDiffOn_snd⟩
 
@@ -806,10 +799,9 @@ lemma side2 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
     by
       rintro ⟨a, b⟩ ⟨ha, _⟩
       exact ha
-  have ha : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (↑(φN φₛ).symm) (φN φₛ).target := part1
   have h2 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) (𝓡 1) ⊤ (↑(φN φₛ).symm ∘ Prod.fst)
     ((φN φₛ).target ×ˢ (univ : Set (EuclideanSpace ℝ (Fin 1)))) := by
-      exact ContMDiffOn.comp part1 contMDiffOn_fst h4
+      exact ContMDiffOn.comp φNφₛ_symm_smooth contMDiffOn_fst h4
   apply (contMDiffOn_prod_iff _).mpr
   exact ⟨h2, by exact contMDiffOn_snd⟩
 
@@ -886,9 +878,7 @@ lemma changeModelSpace
 open Bundle
 
 lemma mobius_preimage_fst (s : Set S1) :
-    (χₛ.symm ≫ₕ
-     χₙ) ⁻¹' (Prod.fst ⁻¹' s)
-      = s ×ˢ univ := by
+  (χₛ.symm ≫ₕ χₙ) ⁻¹' (Prod.fst ⁻¹' s) = s ×ˢ univ := by
   rw [χₛ, χₙ, τₙ, τₛ]
   apply Set.ext
   intro x
@@ -1116,19 +1106,13 @@ lemma hχₛ.target : χₛ.target = { p | p.point ≠ -south_pt } ×ˢ Set.univ
   rw [ltt_south, ltt2 south_pt]
 
 lemma ψₙ_source : ψₙ.source = τₙ.source := by
-  have h4 : τₙ.source ⊆ τₙ ⁻¹' τₙ.target :=
-    PartialHomeomorph.source_preimage_target χₙ
-  have h5 : τₙ.source ∩
-            χₙ ⁻¹' τₙ.target =
-    τₙ.source := Set.inter_eq_left.mpr h4
+  have h4 : τₙ.source ⊆ τₙ ⁻¹' τₙ.target := PartialHomeomorph.source_preimage_target χₙ
+  have h5 : τₙ.source ∩ χₙ ⁻¹' τₙ.target = τₙ.source := Set.inter_eq_left.mpr h4
   exact h5
 
 lemma ψₛ_source : ψₛ.source = τₛ.source := by
-  have h4 : τₛ.source ⊆ τₛ ⁻¹' τₛ.target :=
-    PartialHomeomorph.source_preimage_target χₛ
-  have h5 : τₛ.source ∩
-            χₛ ⁻¹' τₛ.target =
-    τₛ.source := Set.inter_eq_left.mpr h4
+  have h4 : τₛ.source ⊆ τₛ ⁻¹' τₛ.target := PartialHomeomorph.source_preimage_target χₛ
+  have h5 : τₛ.source ∩ χₛ ⁻¹' τₛ.target = τₛ.source := Set.inter_eq_left.mpr h4
   exact h5
 
 lemma hNφₙ.target : (φN φₙ).target = univ := hφₙ.target
@@ -1368,8 +1352,7 @@ lemma h9pre' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
     exact congrArg (preimage ↑ψₛ.symm) ψₙ_source
 
   have h1 :
-  ((χₛ).symm ⁻¹'
-    τₙ.source) =
+  ((χₛ).symm ⁻¹' τₙ.source) =
     { q | ((χₛ).symm q).1.point ≠ -north_pt } := by
       ext q
       simp [northTriv_source, Set.mem_setOf_eq]
