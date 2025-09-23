@@ -1303,6 +1303,60 @@ lemma φₛ_preimage_ne_zero :
     have hb :  (φₛ.symm x).val 0 ≠ 0 := hd.mpr h4
     exact hb
 
+lemma nn1 : φₙ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₙ.symm p ≠ -south_pt} := by
+  ext p
+  simp
+  have h2 : φₙ.symm.target = { x | x ≠ -north_pt } := hφₙ.source
+  have h5 : φₙ.symm.source = univ := hφₙ.target
+  have h6 : p ∈ φₙ.symm.source := h5 ▸ trivial
+  have h7 : φₙ.symm p ∈ φₙ.symm.target := PartialHomeomorph.map_source φₙ.symm h6
+  have h3 : φₙ.symm p ≠ -north_pt := by
+    rw [h2] at h7
+    exact h7
+  have h4 : (φₙ.symm p).val 0 = 0 ↔ φₙ.symm p = north_pt ∨ φₙ.symm p = south_pt := polePoints (φₙ.symm p)
+  have h8 : ¬ (φₙ.symm p = north_pt ∨ φₙ.symm p = south_pt) ↔ φₙ.symm p ≠ north_pt ∧ φₙ.symm p ≠ south_pt :=
+    not_or
+  have h9 : ¬ ((φₙ.symm p).val 0 = 0) ↔ ¬ (φₙ.symm p = north_pt ∨ φₙ.symm p = south_pt) := not_congr h4
+  have ha : (φₙ.symm p).val 0 ≠ 0 ↔  φₙ.symm p ≠ north_pt ∧ φₙ.symm p ≠ south_pt :=
+    Iff.symm (Iff.trans (id (Iff.symm h8)) (id (Iff.symm h9)))
+  constructor
+  · intro h
+    have : φₙ.symm p ≠ north_pt ∧ φₙ.symm p ≠ south_pt := ha.mp h
+    have : φₙ.symm p ≠ -south_pt := by rw [bar] at this; exact this.1
+    exact this
+  · intro h
+    have h1 : φₙ.symm p ≠ north_pt := by rw [<-bar] at h; exact h
+    have h2 : φₙ.symm p ≠ south_pt := by rw [<-bar'] at h3; exact h3
+    have h3 : (φₙ.symm p).val 0 ≠ 0 := ha.mpr (And.intro h1 h2)
+    exact h3
+
+lemma mm1 : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₛ.symm p ≠ -north_pt} := by
+  ext p
+  simp
+  have h2 : φₛ.symm.target = { x | x ≠ -south_pt } := hφₛ.source
+  have h5 : φₛ.symm.source = univ := hφₛ.target
+  have h6 : p ∈ φₛ.symm.source := h5 ▸ trivial
+  have h7 : φₛ.symm p ∈ φₛ.symm.target := PartialHomeomorph.map_source φₛ.symm h6
+  have h3 : φₛ.symm p ≠ -south_pt := by
+    rw [h2] at h7
+    exact h7
+  have h4 : (φₛ.symm p).val 0 = 0 ↔ φₛ.symm p = north_pt ∨ φₛ.symm p = south_pt := polePoints (φₛ.symm p)
+  have h8 : ¬ (φₛ.symm p = north_pt ∨ φₛ.symm p = south_pt) ↔ φₛ.symm p ≠ north_pt ∧ φₛ.symm p ≠ south_pt :=
+    not_or
+  have h9 : ¬ ((φₛ.symm p).val 0 = 0) ↔ ¬ (φₛ.symm p = north_pt ∨ φₛ.symm p = south_pt) := not_congr h4
+  have ha : (φₛ.symm p).val 0 ≠ 0 ↔  φₛ.symm p ≠ north_pt ∧ φₛ.symm p ≠ south_pt :=
+    Iff.symm (Iff.trans (id (Iff.symm h8)) (id (Iff.symm h9)))
+  constructor
+  · intro h
+    have : φₛ.symm p ≠ north_pt ∧ φₛ.symm p ≠ south_pt := ha.mp h
+    have : φₛ.symm p ≠ -north_pt := by rw [bar'] at this; exact this.2
+    exact this
+  · intro h
+    have h1 : φₛ.symm p ≠ south_pt := by rw [<-bar'] at h; exact h
+    have h2 : φₛ.symm p ≠ north_pt := by rw [<-bar] at h3; exact h3
+    have h3 : (φₛ.symm p).val 0 ≠ 0 := ha.mpr (And.intro h2 h1)
+    exact h3
+
 lemma ll1 : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₛ.symm p ≠ -north_pt} := by
   have h8 : ∀ (p : EuclideanSpace ℝ (Fin 1)), φₛ.symm p = -north_pt ↔ p = 0 := φs_symm_maps_neg_north_pt_eq_zero
   have h7 : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {x | x ≠ 0} := φₛ_preimage_ne_zero
@@ -1312,10 +1366,10 @@ lemma ll1 : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₛ.symm p ≠ -north
     ext x
     constructor
     · intro hx
-      have : φₛ.symm x ≠ -north_pt := by (expose_names; exact (Iff.ne (h8 x)).mpr hx)
+      have : φₛ.symm x ≠ -north_pt := (Iff.ne (h8 x)).mpr hx
       exact this
     · intro hx
-      have :  x ≠ 0 := by (expose_names; exact (Iff.ne (h8 x)).mp hx)
+      have :  x ≠ 0 := (Iff.ne (h8 x)).mp hx
       exact this
   exact this
 
