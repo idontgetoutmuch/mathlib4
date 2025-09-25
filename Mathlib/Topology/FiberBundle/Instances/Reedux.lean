@@ -775,6 +775,10 @@ lemma φNφₙ_smooth : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (⇑(φN φₙ)) (φN 
   rw [φNφₙisChart]
   exact contMDiffOn_chart
 
+lemma φNφₛ_smooth : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (⇑(φN φₛ)) (φN φₛ).source := by
+  rw [φNφₛisChart]
+  exact contMDiffOn_chart
+
 lemma φNφₛ_symm_smooth : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (⇑((φN φₛ)).symm) (φN φₛ).target := by
   rw [φNφₛisChart]
   exact contMDiffOn_chart_symm
@@ -783,7 +787,9 @@ lemma φNφₙ_symm_smooth : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (↑(φN φₙ).s
   rw [φNφₙisChart]
   exact contMDiffOn_chart_symm
 
-lemma side1 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+lemma side1 (φₙ : PartialHomeomorph { x // x ∈ Metric.sphere 0 1 } (EuclideanSpace ℝ (Fin 1)))
+  (φNφₙ_smooth : ContMDiffOn (𝓡 1) (𝓡 1) ⊤ (↑(φN φₙ)) (φN φₙ).source) :
+  ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
     ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1))))
     ((φN φₙ).source ×ˢ (univ : Set (EuclideanSpace ℝ (Fin 1)))) := by
   have h3 : (φN φₙ).source ×ˢ (univ : Set (EuclideanSpace ℝ (Fin 1))) ⊆ Prod.fst ⁻¹' (φN φₙ).source :=
@@ -1211,97 +1217,51 @@ lemma exΧₛ :
         exact h1
     exact hc
 
-lemma preimage_point_param
-    (φₙ : PartialHomeomorph ↑MobiusBase (EuclideanSpace ℝ (Fin 1))) (a : MobiusBase) :
-    (φN φₙ).symm ⁻¹' {x : S1 | x.point ≠ a} =
-      φₙ.symm ⁻¹' {x : MobiusBase | x ≠ a} := by
-  ext s
-  simp [φN]
-
 open Function
+open Metric
 
-lemma φs_symm_maps_neg_north_pt_eq_zero : ∀ p, φₛ.symm p = -north_pt ↔ p = 0 := by
-  intro p
-  have h7 : ((stereographic' 1 (-south_pt)).symm p).val 0 = 0 ↔ p 0 = 0 := by
-    rw [<-bar]
-    exact zerosAlignN p
-  have h8 : (φₛ.symm p).val 0 = 0 ↔ p 0 = 0 := h7
-  have h9 : (φₛ.symm p).val 0 = 0 ↔ (φₛ.symm p) = north_pt ∨ (φₛ.symm p) = south_pt :=
-    polePoints (φₛ.symm p)
-  have ha : φₛ.source = {x | x ≠ north_pt} := by
-    rw [bar]
-    exact hφₛ.source
-  have hb : φₛ.target = univ := hφₛ.target
-  have : p ∈ φₛ.target := by
-    have hb1 : p ∈ univ := trivial
-    rw [<-hb] at hb1
-    exact hb1
-  have hc : (φₛ.symm p) ∈ φₛ.source := φₛ.map_target this
-  have hd : (φₛ.symm p) ∈ {x | x ≠ north_pt} := by
-    rw [ha] at hc
-    exact hc
-  have he : (φₛ.symm p) ≠ north_pt := hd
-  have hf : (φₛ.symm p = north_pt ∨ φₛ.symm p = south_pt) ↔ (φₛ.symm p = south_pt) := by
-    apply or_iff_right_of_imp
-    intro h
-    exact (he h).elim
-  have hg : p 0 = 0 ↔ (φₛ.symm p = south_pt) := by
-    have : (φₛ.symm p).val 0 = 0 ↔ φₛ.symm p = south_pt := Iff.trans h9 hf
-    have :  p 0 = 0 ↔ φₛ.symm p = south_pt := Iff.trans h8.symm this
-    exact this
-  have hh : (φₛ.symm p = -north_pt) ↔ p 0 = 0 := by
-    rw [bar]
-    rw [InvolutiveNeg.neg_neg south_pt]
-    exact hg.symm
-
-  have hi : (p : EuclideanSpace ℝ (Fin 1)) 0 = 0 ↔ p = 0 := by
-    constructor
-    · intro h
-      funext i
-      fin_cases i
-      exact h
-    · intro h
-      rw [h]
-      exact rfl
-
-  exact Iff.symm (Iff.trans (id (Iff.symm hi)) (id (Iff.symm hh)))
+lemma chartAt_preimage_ne_zero (p : sphere (0 : EuclideanSpace ℝ (Fin 2)) 1) :
+  (chartAt (EuclideanSpace ℝ (Fin 1)) p).symm ⁻¹'
+    {y : sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 | y ≠ p ∧ y ≠ -p} =
+  {x : EuclideanSpace ℝ (Fin 1) | x ≠ 0} := sorry
 
 lemma φₛ_preimage_ne_zero :
-    φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {x | x ≠ 0} := by
-  ext x
-  have hg : φₛ.symm x = -north_pt ↔ x = 0 := φs_symm_maps_neg_north_pt_eq_zero x
-  have ha : (φₛ.symm x).val 0 = 0 ↔ φₛ.symm x = north_pt ∨ φₛ.symm x = south_pt := polePoints (φₛ.symm x)
-  have he : (φₛ.symm x).val 0 ≠ 0 ↔ ¬(φₛ.symm x = north_pt ∨ φₛ.symm x = south_pt) := not_iff_not.mpr ha
-  have hf : ¬(φₛ.symm x = north_pt ∨ φₛ.symm x = south_pt) ↔
-            (φₛ.symm x ≠ north_pt) ∧ (φₛ.symm x ≠ south_pt) := not_or
-  have hd : (φₛ.symm x).val 0 ≠ 0 ↔ φₛ.symm x ≠ north_pt ∧ φₛ.symm x ≠ south_pt :=
-    Iff.symm (Iff.trans (id (Iff.symm hf)) (id (Iff.symm he)))
-  have hc : φₛ.symm.target = {x | x ≠ -south_pt} := hφₛ.source
-  constructor
-  · intro hx
-    have h7 : φₛ.symm x ≠ north_pt ∧ φₛ.symm x ≠ south_pt := hd.mp hx
-    have h9 : φₛ.symm x ≠ south_pt := h7.2
-    have hu : φₛ.symm x ≠ -north_pt := by rw [bar'] at h9; exact h9
-    have hy : x ≠ 0 := by
-      intro h0
-      rw [hg.mpr h0] at hu
-      exact hu rfl
-    exact hy
-  · intro hx
-    have h1 : x ≠ 0 := hx
-    have h2 : φₛ.symm x ≠ -north_pt := by
-      intro h0
-      rw [hg.mp h0] at h1
-      exact h1 rfl
-    have h3 : φₛ.symm x ≠ south_pt := by rw [<-bar'] at h2; exact h2
-    have h6 : φₛ.symm.source = univ:= hφₛ.target
-    have h7 : x ∈ univ := trivial
-    have h5 : φₛ.symm x ∈ φₛ.symm.target := φₛ.symm.mapsTo (h6 ▸ h7)
-    have h9 : φₛ.symm x ≠ -south_pt := mem_of_mem_inter_left h5
-    have ha : φₛ.symm x ≠ north_pt := by rw [<-bar] at h9; exact h9
-    have h4 :(φₛ.symm x ≠ north_pt) ∧ (φₛ.symm x ≠ south_pt) := And.intro ha h3
-    have hb :  (φₛ.symm x).val 0 ≠ 0 := hd.mpr h4
-    exact hb
+    φₛ.symm ⁻¹' {y | y.val 0 ≠ 0} = {x | x ≠ 0} := by
+  have h2 : (chartAt (EuclideanSpace ℝ (Fin 1)) south_pt) = φₛ := rfl
+  have h3 : (stereographic' 1 (-south_pt)).symm 0 = -(-south_pt) := hf (-south_pt)
+  have h4 : (stereographic' 1 (-south_pt)) = (chartAt (EuclideanSpace ℝ (Fin 1)) south_pt) := rfl
+  have ha : φₛ.symm 0 = south_pt := by
+    rw [<-h2, <-h4, h3, InvolutiveNeg.neg_neg south_pt]
+  have hc : φₛ.symm.source = univ := hφₛ.target
+  have h3 : φₛ.symm.target = {x | x ≠ north_pt} := by rw [bar]; exact hφₛ.source
+  have h7 : (φₛ.symm 0).val 0 = 0 := (polePoints (φₛ.symm 0)).mpr (Or.inr ha)
+  have h8 : φₛ.symm ⁻¹' {y | y.val 0 = 0} = {x | x = 0} :=
+    by
+      ext x
+      simp only [mem_preimage, mem_setOf_eq]
+      constructor
+      · intro hx
+        have h2 : φₛ.symm x = north_pt ∨ φₛ.symm x = south_pt := (polePoints (φₛ.symm x)).mp hx
+        have h4 : x ∈ φₛ.symm.source := by
+          have hb : x ∈ univ := trivial
+          exact hc ▸ hb
+        have h5 : φₛ.symm x ∈ φₛ.symm.target := PartialHomeomorph.map_source φₛ.symm h4
+        have h6 : φₛ.symm x ≠ north_pt := by rw [h3] at h5; exact h5
+        have h7 : φₛ.symm x = south_pt := h2.resolve_left h6
+        have h8 : φₛ.symm x  = φₛ.symm 0 := by rw [<-ha] at h7; exact h7
+        have h9 : InjOn φₛ.symm φₛ.symm.source := PartialHomeomorph.injOn φₛ.symm
+        have hz : InjOn φₛ.symm univ := hc ▸ h9
+        exact h9 h4 h4 h8
+      · intro hx
+        rw [hx]
+        exact h7
+  have h9 : φₛ.symm ⁻¹' {y | y.val 0 ≠ 0} = {x | x ≠ 0} := by
+    have h9a : φₛ.symm ⁻¹' {y | y.val 0 = 0}ᶜ = (φₛ.symm ⁻¹' {y | y.val 0 = 0})ᶜ := Set.preimage_compl
+    have h9b : φₛ.symm ⁻¹' {y | y.val 0 = 0}ᶜ = ({x | x = 0})ᶜ := by rw [h8] at h9a; exact h9a
+    rw [<-Set.compl_setOf, Set.compl_setOf]
+    exact h9b
+
+  exact h9
 
 lemma nn1 : φₙ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₙ.symm p ≠ -south_pt} := by
   ext p
@@ -1357,22 +1317,6 @@ lemma mm1 : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₛ.symm p ≠ -north
     have h3 : (φₛ.symm p).val 0 ≠ 0 := ha.mpr (And.intro h2 h1)
     exact h3
 
-lemma ll1 : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₛ.symm p ≠ -north_pt} := by
-  have h8 : ∀ (p : EuclideanSpace ℝ (Fin 1)), φₛ.symm p = -north_pt ↔ p = 0 := φs_symm_maps_neg_north_pt_eq_zero
-  have h7 : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {x | x ≠ 0} := φₛ_preimage_ne_zero
-
-  have : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₛ.symm p ≠ -north_pt} := by
-    rw [h7]
-    ext x
-    constructor
-    · intro hx
-      have : φₛ.symm x ≠ -north_pt := (Iff.ne (h8 x)).mpr hx
-      exact this
-    · intro hx
-      have :  x ≠ 0 := (Iff.ne (h8 x)).mp hx
-      exact this
-  exact this
-
 lemma ll2 (h : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₛ.symm p ≠ -north_pt}) :
     (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {p | (φN φₛ).symm p ≠ S1.mk (-north_pt)} := by
   ext p
@@ -1393,6 +1337,26 @@ lemma ll2 (h : φₛ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₛ.symm p ≠ -no
     have ha :  p ∈ ↑φₛ.symm ⁻¹' {x | x.val 0 ≠ 0}  := h9.mp hx
     exact ha
 
+lemma ll2N (h : φₙ.symm ⁻¹' {x | x.val 0 ≠ 0} = {p | φₙ.symm p ≠ -south_pt}) :
+    (φN φₙ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {p | (φN φₙ).symm p ≠ S1.mk (-south_pt)} := by
+  ext p
+  constructor
+  · intro hx
+    have h1 : p ∈ {p | φₙ.symm p ≠ -south_pt} := h ▸ hx
+    have h2 : φₙ.symm p ≠ -south_pt := h1
+    have h3 : p ∈ {p | S1.mk (φₙ.symm p) ≠ S1.mk (-south_pt)} :=
+      (not_congr ((S1.mk_inj (φₙ.symm p) (-south_pt)))).mpr h2
+    exact h3
+  · intro hx
+    have h7 : p ∈  φₙ.symm ⁻¹' {x | x.val 0 ≠ 0} ↔ p ∈ {p | φₙ.symm p ≠ -south_pt} :=
+      Eq.to_iff (congrFun h p)
+    have h6 : (φN φₙ).symm p ≠ S1.mk (-south_pt) ↔ φₙ.symm p ≠ -south_pt :=
+      not_congr (S1.ext_iff ((φN φₙ).symm p) (S1.mk (-south_pt)))
+    have h9 : (φN φₙ).symm p ≠ S1.mk (-south_pt) ↔ p ∈  φₙ.symm ⁻¹' {x | x.val 0 ≠ 0} :=
+      Iff.symm (Iff.trans h7 (id (Iff.symm h6)))
+    have ha :  p ∈ ↑φₙ.symm ⁻¹' {x | x.val 0 ≠ 0}  := h9.mp hx
+    exact ha
+
 lemma ll3 (h : (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {p | (φN φₛ).symm p ≠ S1.mk (-north_pt)}) :
     ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' {x | x.1.point.val 0 ≠ 0} =
     { p | (φN φₛ).symm p.1 ≠ S1.mk (-north_pt)} := by
@@ -1403,6 +1367,18 @@ lemma ll3 (h : (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {p | (φN φ�
       exact this
     · intro hx
       have : p.1 ∈ (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} := by rwa [h]
+      exact this
+
+lemma ll3N (h : (φN φₙ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {p | (φN φₙ).symm p ≠ S1.mk (-south_pt)}) :
+    ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' {x | x.1.point.val 0 ≠ 0} =
+    { p | (φN φₙ).symm p.1 ≠ S1.mk (-south_pt)} := by
+    ext p
+    constructor
+    · intro hx
+      have : p.1 ∈ {p | (φN φₙ).symm p ≠ S1.mk (-south_pt)} := by rwa [← h]
+      exact this
+    · intro hx
+      have : p.1 ∈ (φN φₙ).symm ⁻¹' {x | x.point.val 0 ≠ 0} := by rwa [h]
       exact this
 
 lemma totalAtlasTarget
@@ -1437,7 +1413,7 @@ lemma h9preN' : ψₙ.target ∩ ↑ψₙ.symm ⁻¹' ψₛ.source =
   rw [h3]
   have h9 : ((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
            {x | x.1.point.val 0 ≠ 0}  =
-          {p | (φN φₙ).symm p.1 ≠ { point := -south_pt}} := sorry
+          {p | (φN φₙ).symm p.1 ≠ { point := -south_pt}} := ll3N (ll2N nn1)
   have hb : {p : EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1) |
           (φN φₙ).symm p.1 ≠ { point := -south_pt}} =
           {p | ((φN φₙ).symm p.1).point ≠ -south_pt} := by
@@ -1491,7 +1467,7 @@ lemma h9pre' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
 
   have h9 : ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
            {x | x.1.point.val 0 ≠ 0} =
-          {p | (φN φₛ).symm p.1 ≠ { point := -north_pt}} := ll3 (ll2 ll1)
+          {p | (φN φₛ).symm p.1 ≠ { point := -north_pt}} := ll3 (ll2 mm1)
 
   have hb : {p : EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1) |
           (φN φₛ).symm p.1 ≠ { point := -north_pt}} =
@@ -1573,6 +1549,27 @@ lemma kk3 (h : (φN φₛ).symm ⁻¹' {x | x.point.val 0 ≠ 0} = {x | x ≠ 0}
   have : ((φN φₛ).symm a).point.val 0 ≠ 0 ↔ a ≠ 0 := Eq.to_iff this
   exact this
 
+lemma h9preNN : ψₙ.target ∩ ↑ψₙ.symm ⁻¹' ψₛ.source =
+  (↑(χₙ.symm ≫ₕ χₛ) ∘
+      (↑((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm)) ⁻¹'
+    (φN φₛ).source ×ˢ univ := by
+  have h1 : ψₙ.target = univ := totalAtlasTarget ψₙ (Or.inl rfl)
+  rw [h1, inter_comm, inter_univ]
+  have h6 : ↑((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
+    (φN φₛ).source ×ˢ univ = {x | x.1 ≠ 0} := by sorry
+  have h9 : ↑ψₙ.symm ⁻¹' ψₛ.source =  {x | x.1 ≠ 0} := by sorry
+  rw [h9, <-h6]
+  have h2 : (↑(χₙ.symm ≫ₕ χₛ) ∘
+      (↑((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm)) ⁻¹'
+    (φN φₛ).source ×ˢ univ = (
+      (↑((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm)) ⁻¹'
+    (↑(χₙ.symm ≫ₕ χₛ) ⁻¹' (φN φₛ).source ×ˢ univ) := rfl
+  have h3 : (↑(χₙ.symm ≫ₕ χₛ) ⁻¹' (φN φₛ).source ×ˢ univ) = (φN φₛ).source ×ˢ univ := by
+    rw [χₙ, χₛ, τₙ, τₛ]
+    apply Set.ext
+    simp
+  rw [h2, h3]
+
 lemma h9pre'' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
   (↑(χₛ.symm ≫ₕ χₙ) ∘
       (↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm)) ⁻¹'
@@ -1593,9 +1590,6 @@ lemma h9pre'' : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
         ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
       (φN φₙ).source ×ˢ univ =
     ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹' (φN φₙ).source ×ˢ univ := by rw [h2] at h1; exact h1
-  have h4 : (χₛ.symm ≫ₕ χₙ) ∘
-        ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
-      (φN φₙ).source ×ˢ univ = {x | x.1 ≠ 0} := hh42 (hh41  hhh4)
 
   have h5 : ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source =
     ((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm ⁻¹'
@@ -1649,10 +1643,16 @@ example : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
     (↑((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm)
     (ψₙ.target ∩ ↑ψₙ.symm ⁻¹' ψₛ.source) := (ContMDiffOn.mono side2' h9preN)
 
-example :   ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+example : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
     (↑(χₙ.symm ≫ₕ χₛ) ∘ ↑((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm)
     (ψₙ.target ∩ ↑ψₙ.symm ⁻¹' ψₛ.source) :=
      (ContMDiffOn.comp bothContMDiffNS (ContMDiffOn.mono side2' h9preN) (by rw [h9preN']))
+
+example : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
+    ( ↑((φN φₛ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))) ∘ ↑(χₙ.symm ≫ₕ χₛ) ∘  ↑((φN φₙ).prod (PartialHomeomorph.refl (EuclideanSpace ℝ (Fin 1)))).symm)
+    (ψₙ.target ∩ ↑ψₙ.symm ⁻¹' ψₛ.source) :=
+     ContMDiffOn.comp (side1 φₛ φNφₛ_smooth)
+      (ContMDiffOn.comp bothContMDiffNS (ContMDiffOn.mono side2' h9preN) (by rw [h9preN'])) (by rw [h9preNN])
 
 lemma bothContMDiff'' : ContDiffOn ℝ ⊤ (ψₙ ∘ ψₛ.symm) (ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source):= by
 
@@ -1663,7 +1663,7 @@ lemma bothContMDiff'' : ContDiffOn ℝ ⊤ (ψₙ ∘ ψₛ.symm) (ψₛ.target 
   have h9 : ContMDiffOn ((𝓡 1).prod (𝓡 1)) ((𝓡 1).prod (𝓡 1)) ⊤
     f
     (ψₛ.target ∩ ↑ψₛ.symm ⁻¹' ψₙ.source) :=
-      ContMDiffOn.comp side1
+      ContMDiffOn.comp (side1 φₙ φNφₙ_smooth)
         (ContMDiffOn.comp bothContMDiffSN
           (ContMDiffOn.mono side2 h9pre)
           (by rw [h9pre']))
