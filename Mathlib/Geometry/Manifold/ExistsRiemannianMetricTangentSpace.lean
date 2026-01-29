@@ -39,7 +39,8 @@ variable
   {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
   {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
   {E : B → Type*} [TopologicalSpace (TotalSpace F E)]
-  [∀ x, TopologicalSpace (E x)] [∀ x, AddCommGroup (E x)] [∀ x, Module ℝ (E x)]
+  [∀ x, NormedAddCommGroup (E x)]
+  [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
   [IsManifold IB ω B] [ContMDiffVectorBundle ω F E IB]
 
@@ -136,10 +137,6 @@ instance (x : B) : ContinuousSMul ℝ (W E x) := by
   unfold W
   infer_instance
 
-instance (x : B) : IsTopologicalAddGroup (W E x) := by
-  unfold W
-  infer_instance
-
 end
 
 noncomputable instance (p : B) : NormedAddCommGroup (TangentSpace IB p) := by
@@ -158,16 +155,6 @@ function. The required properties of symmetry and positive definiteness are more
 using the second definition and showing that the definitions are essentially the same.
 -/
 noncomputable
-def g_bilin_1 (i b : B) :
- (TotalSpace (EB →L[ℝ] EB →L[ℝ] ℝ)
-             (fun (x : B) ↦ TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)) := by
-  let ψ := FiberBundle.trivializationAt (EB →L[ℝ] EB →L[ℝ] ℝ)
-    (fun (x : B) ↦ TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ) i
-  by_cases h : (b, (fun (x : B) ↦ innerSL ℝ) b) ∈ ψ.target
-  · exact ψ.invFun (b, (fun (x : B) ↦ innerSL ℝ) b)
-  · exact ⟨b, 0⟩
-
-noncomputable
 def g_bilin_1a (i b : B) :
  (TotalSpace (F →L[ℝ] F →L[ℝ] ℝ)
              (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ)) := by
@@ -178,32 +165,22 @@ def g_bilin_1a (i b : B) :
   · exact ⟨b, 0⟩
 
 noncomputable
-def g_bilin_2 (i p : B) :
-  (TangentSpace IB) p →L[ℝ]  ((TangentSpace IB) p →L[ℝ] ℝ) := by
-  let χ := trivializationAt EB (TangentSpace (M := B) IB) i
-  let inner := innerSL ℝ (E := EB)
+def g_bilin_1 (i b : B) :
+ (TotalSpace (EB →L[ℝ] EB →L[ℝ] ℝ)
+             (fun (x : B) ↦ TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)) :=
+  g_bilin_1a i b
+
+noncomputable
+def g_bilin_2d (i p : B) : E p →L[ℝ] (E p →L[ℝ] ℝ) := by
+  let χ := trivializationAt F E i
   by_cases h : p ∈ χ.baseSet
   · exact (innerSL ℝ).comp (χ.continuousLinearMapAt ℝ p) |>.flip.comp (χ.continuousLinearMapAt ℝ p)
   · exact 0
 
--- noncomputable
--- def g_bilin_2a (i p : B) : E p →L[ℝ] (E p →L[ℝ] ℝ) := by
---   let χ := trivializationAt F E i
---   by_cases hp : p ∈ χ.baseSet
---   · let φ := χ.continuousLinearMapAt ℝ p
---     let innerMap (u : E p) : E p →L[ℝ] ℝ :=
---       ContinuousLinearMap.mk
---         { toFun := fun v => innerSL ℝ (φ u) (φ v)
---           map_add' := by simp [inner_add_right]
---           map_smul' := by simp }
---         (by exact sorry)
---     refine ContinuousLinearMap.mk
---       { toFun := innerMap
---         map_add' := by intro x y; ext v; simp [innerMap, inner_add_left]
---         map_smul' := by intro x y; ext v; simp [innerMap, inner_smul_left] }
---       ?_
---     exact sorry
---   · exact 0
+noncomputable
+def g_bilin_2 (i p : B) :
+  (TangentSpace IB) p →L[ℝ]  ((TangentSpace IB) p →L[ℝ] ℝ) :=
+  g_bilin_2d (F := EB) i p
 
 /-
 Overloading the use of π, let
@@ -330,7 +307,7 @@ set_option maxHeartbeats 400000 in
 lemma g_bilin_eq (i b : B)
   (α β : TangentSpace IB b) :
   (g_bilin_1 (IB := IB) i b).snd.toFun α β = (g_bilin_2 i b).toFun α β := by
-  unfold g_bilin_1 g_bilin_2
+  unfold g_bilin_1 g_bilin_2 g_bilin_1a g_bilin_2d
   let ψ := FiberBundle.trivializationAt (EB →L[ℝ] EB →L[ℝ] ℝ)
     (fun (x : B) ↦ TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ) i
   let χ := trivializationAt EB (TangentSpace (M := B) IB) i
@@ -381,8 +358,8 @@ lemma g_bilin_eq (i b : B)
 
 lemma g_nonneg (j b : B) (v : (TangentSpace (M := B) IB) b) :
   0 ≤ ((((g_bilin_2 j b)).toFun v)).toFun v := by
-    unfold g_bilin_2
-    simp only [TangentBundle.trivializationAt_baseSet, dite_eq_ite, AddHom.toFun_eq_coe,
+    unfold g_bilin_2 g_bilin_2d
+    simp only [TangentBundle.trivializationAt_baseSet, AddHom.toFun_eq_coe,
     LinearMap.coe_toAddHom,
     ContinuousLinearMap.coe_coe]
     split_ifs with h
@@ -403,8 +380,8 @@ lemma g_nonneg (j b : B) (v : (TangentSpace (M := B) IB) b) :
 lemma g_pos (i b : B) (hp : b ∈ (extChartAt IB i).source)
             (v : (TangentSpace (M := B) IB) b) (hv : v ≠ 0) :
   0 < ((((g_bilin_2 i b)).toFun v)).toFun v := by
-  unfold g_bilin_2
-  simp only [TangentBundle.trivializationAt_baseSet, dite_eq_ite, AddHom.toFun_eq_coe,
+  unfold g_bilin_2 g_bilin_2d
+  simp only [TangentBundle.trivializationAt_baseSet, AddHom.toFun_eq_coe,
   LinearMap.coe_toAddHom,
   ContinuousLinearMap.coe_coe]
   split_ifs with hh1
@@ -844,7 +821,7 @@ theorem linear_flip_apply
 theorem g_bilin_symm_2 (i p : B) (v w : TangentSpace IB p) :
     ((g_bilin_2 i p).toFun v).toFun w =
     ((g_bilin_2 i p).toFun w).toFun v := by
-  unfold g_bilin_2
+  unfold g_bilin_2 g_bilin_2d
   simp only []
   split_ifs with h
   · simp only [ContinuousLinearMap.coe_comp, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom,
@@ -1080,7 +1057,7 @@ lemma g_bilin_1_smooth_on_chart (i : B) :
   ContMDiffOn IB (IB.prod 𝓘(ℝ, EB →L[ℝ] EB →L[ℝ] ℝ)) ∞
     (g_bilin_1 (EB := EB) (IB := IB) i)
     (extChartAt IB i).source := by
-  unfold g_bilin_1
+  unfold g_bilin_1 g_bilin_1a
   simp only [hom_trivializationAt_target, TangentBundle.trivializationAt_baseSet,
   hom_trivializationAt_baseSet,
   Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet, Set.inter_univ,
@@ -1187,7 +1164,7 @@ lemma g_global_bilin_1_smooth (f : SmoothPartitionOfUnity B IB B)
       · have : ∀ y ∈ (fun x ↦ (extChartAt IB x).source) i,
           TotalSpace.mk' (EB →L[ℝ] EB →L[ℝ] ℝ) y ((fun i b ↦ (g_bilin_1 (IB := IB) i b).snd) i y) =
           g_bilin_1 (IB := IB) i y := by
-          unfold g_bilin_1
+          unfold g_bilin_1 g_bilin_1a
           intro y hy
           simp only [PartialEquiv.invFun_as_coe, OpenPartialHomeomorph.coe_coe_symm, dite_eq_ite,
           Lean.Elab.WF.paramLet,
