@@ -44,100 +44,11 @@ variable
   [FiberBundle F E] [VectorBundle ℝ F E]
   [IsManifold IB ω B] [ContMDiffVectorBundle ω F E IB]
 
-variable [FiniteDimensional ℝ EB] [IsManifold IB ω B] [SigmaCompactSpace B] [T2Space B]
+variable [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
 variable [FiniteDimensional ℝ F]
 
 noncomputable instance : TopologicalSpace (TotalSpace EB (TangentSpace (M := B) IB)) :=
   inferInstanceAs (TopologicalSpace (TangentBundle IB B))
-
-section
-
-variable (E) in
-/-- This is the bundle `Hom_ℝ(E, T)`, where `T` is the rank one trivial bundle over `B`. -/
-private def V : (b : B) → Type _ := (fun b ↦ E b →L[ℝ] Trivial B ℝ b)
-
-noncomputable instance : (x : B) → TopologicalSpace (V E x) := by
-  unfold V
-  infer_instance
-
-noncomputable instance : (x : B) → AddCommGroup (V E x) := by
-  unfold V
-  infer_instance
-
-noncomputable instance (x : B) : Module ℝ (V E x) := by
-  unfold V
-  infer_instance
-
-noncomputable instance : TopologicalSpace (TotalSpace (F →L[ℝ] ℝ) (V E)) := by
-  unfold V
-  infer_instance
-
-noncomputable instance : FiberBundle (F →L[ℝ] ℝ) (V E) := by
-  unfold V
-  infer_instance
-
-noncomputable instance : VectorBundle ℝ (F →L[ℝ] ℝ) (V E) := by
-  unfold V
-  infer_instance
-
-noncomputable instance : ContMDiffVectorBundle n (F →L[ℝ] ℝ) (V E) IB := by
-  unfold V
-  infer_instance
-
-instance (x : B) : ContinuousAdd (V E x) := by
-  unfold V
-  infer_instance
-
-instance (x : B) : ContinuousSMul ℝ (V E x) := by
-  unfold V
-  infer_instance
-
-instance (x : B) : IsTopologicalAddGroup (V E x) := by
-  unfold V
-  infer_instance
-
-variable (E) in
-/-- The real vector bundle `Hom(E, Hom(E, T)) = Hom(E, V)`, whose fiber at `x` is
-(equivalent to) the space of continuous real bilinear maps `E x → E x → ℝ`. -/
-private def W : (b : B) → Type _ := fun b ↦ E b →L[ℝ] V E b
-
-noncomputable instance (x : B) : TopologicalSpace (W E x) := by
-  unfold W
-  infer_instance
-
-noncomputable instance (x : B) : AddCommGroup (W E x) := by
-  unfold W
-  infer_instance
-
-noncomputable instance (x : B) : Module ℝ (W E x) := by
-  unfold W
-  infer_instance
-
-noncomputable instance : TopologicalSpace (TotalSpace (F →L[ℝ] F →L[ℝ] ℝ) (W E)) := by
-  unfold W
-  infer_instance
-
-noncomputable instance : FiberBundle (F →L[ℝ] F →L[ℝ] ℝ) (W E) := by
-  unfold W
-  infer_instance
-
-noncomputable instance : VectorBundle ℝ (F →L[ℝ] F →L[ℝ] ℝ) (W E) := by
-  unfold W
-  infer_instance
-
-noncomputable instance : ContMDiffVectorBundle n (F →L[ℝ] F →L[ℝ] ℝ) (W E) IB := by
-  unfold W
-  infer_instance
-
-instance (x : B) : ContinuousAdd (W E x) := by
-  unfold W
-  infer_instance
-
-instance (x : B) : ContinuousSMul ℝ (W E x) := by
-  unfold W
-  infer_instance
-
-end
 
 noncomputable instance (p : B) : NormedAddCommGroup (TangentSpace IB p) := by
   change NormedAddCommGroup EB
@@ -154,11 +65,12 @@ The first definition is "obviously" smooth: it's a pair of the identity function
 function. The required properties of symmetry and positive definiteness are more easily proved
 using the second definition and showing that the definitions are essentially the same.
 -/
+
 noncomputable
 def g_bilin_1a (i b : B) :
  (TotalSpace (F →L[ℝ] F →L[ℝ] ℝ)
              (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ)) := by
-  let ψ := FiberBundle.trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
+  let ψ := trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
       (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
   by_cases h : (b, (fun (x : B) ↦ innerSL ℝ) b) ∈ ψ.target
   · exact ψ.invFun (b, (fun (x : B) ↦ innerSL ℝ) b)
@@ -301,6 +213,11 @@ lemma g_bilin_eq_00a (i b : B)
     rw [<-ht]
     exact hs
   exact hr
+
+-- lemma g_bilin_eq_b (i b : B)
+--   (α β : E (g_bilin_1a (F := F) i b).proj) :
+--   (g_bilin_1a i b).snd.toFun α β = (g_bilin_2d (F := F) i (g_bilin_1a i b).proj).toFun α β := by
+--   sorry
 
 set_option maxHeartbeats 400000 in
 -- comment explaining why this is necessary
@@ -834,19 +751,20 @@ theorem g_bilin_symm_2 (i p : B) (v w : TangentSpace IB p) :
 
 open SmoothPartitionOfUnity
 
-noncomputable instance (x : B) : NormedAddCommGroup (W (TangentSpace IB) x) :=
+noncomputable instance (x : B) :
+  NormedAddCommGroup (TangentSpace IB x →L[ℝ] (TangentSpace IB x →L[ℝ] ℝ)) :=
   show NormedAddCommGroup (TangentSpace IB x →L[ℝ] (TangentSpace IB x →L[ℝ] ℝ)) from
     inferInstance
 
 noncomputable instance :
   TopologicalSpace (TotalSpace (EB →L[ℝ] EB →L[ℝ] ℝ)
-                   (W (TangentSpace (M := B) IB))) := by
-    unfold W
-    infer_instance
+                   (fun b => TangentSpace (M := B) IB b →L[ℝ] TangentSpace IB b →L[ℝ] ℝ)) := by
+  infer_instance
 
 noncomputable
 def g_global_bilin_2 (f : SmoothPartitionOfUnity B IB B) (p : B) :
-    W (TangentSpace (M := B) IB) p := ∑ᶠ (j : B), (f j) p • g_bilin_2 j p
+    TangentSpace IB p →L[ℝ] (TangentSpace IB p →L[ℝ] ℝ) :=
+  ∑ᶠ (j : B), (f j) p • g_bilin_2 j p
 
 lemma finsum_image_eq_sum {B E F : Type*} [AddCommMonoid E] [AddCommMonoid F]
  (φ : E →+ F) (f : B → E) (h_fin : Finset B)
@@ -861,18 +779,17 @@ lemma finsum_image_eq_sum {B E F : Type*} [AddCommMonoid E] [AddCommMonoid F]
     simpa using (map_zero φ).symm ▸ congrArg φ hj
   exact h1 hf
 
-def evalAt (b : B) (v w : TangentSpace IB b) : W (TangentSpace IB) b →+ ℝ :=
+def evalAt (b : B) (v w : TangentSpace IB b) :
+    (TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ)) →+ ℝ :=
   {
     toFun := fun f => (f.toFun v).toFun w
-    map_zero' := by
-      simp
-    map_add' := by
-      intro f g
-      exact rfl
+    map_zero' := by simp
+    map_add' := by intro f g; exact rfl
   }
 
 lemma h_need (f : SmoothPartitionOfUnity B IB B) (b : B) (v w : TangentSpace IB b)
-  (h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2 j b) : W (TangentSpace IB) b)).Finite) :
+  (h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2 j b) :
+    TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ))).Finite) :
   ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun v).toFun w =
   ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun w).toFun v := by
     have ha : ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 j b).toFun v).toFun w =
@@ -883,7 +800,7 @@ lemma h_need (f : SmoothPartitionOfUnity B IB B) (b : B) (v w : TangentSpace IB 
               ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun w).toFun v := by
       simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
       rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
-    let h : (j : B) → W ((TangentSpace (M := B) IB)) b :=
+    let h : (j : B) → (TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ)) :=
       fun j ↦ (f j) b • g_bilin_2 j b
     have h_inc : (Function.support h) ⊆ h_fin.toFinset :=
       Set.Finite.toFinset_subset.mp fun ⦃a⦄ a ↦ a
@@ -914,7 +831,7 @@ lemma riemannian_metric_symm (f : SmoothPartitionOfUnity B IB B) (b : B) (v w : 
   unfold g_global_bilin_2
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
   have h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2 j b) :
-                  W (TangentSpace IB) b)).Finite := by
+    TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ))).Finite := by
       apply (f.locallyFinite'.point_finite b).subset
       intro i hi
       simp only [Function.mem_support, ne_eq, smul_eq_zero, not_or] at hi
@@ -940,13 +857,14 @@ lemma baseSet_eq_extChartAt_source (i : B) :
 lemma h_need' (f : SmoothPartitionOfUnity B IB B)
   (h_sub : f.IsSubordinate (fun x ↦ (extChartAt IB x).source))
   (b : B) (v : TangentSpace IB b)
-  (h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2 j b) : W (TangentSpace IB) b)).Finite) :
+  (h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2 j b) :
+    TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ))).Finite) :
   v ≠ 0 → 0 < ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun v).toFun v := by
   have ha : ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 j b).toFun v).toFun v =
             ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun v).toFun v := by
     simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
     rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
-  let h : (j : B) → W ((TangentSpace (M := B) IB)) b :=
+  let h : (j : B) → (TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ)) :=
     fun j ↦ (f j) b • g_bilin_2 j b
   let h' x := f x b * ((g_bilin_2 x b).toFun v).toFun v
   have h_inc : (Function.support h) ⊆ h_fin.toFinset :=
@@ -1000,7 +918,7 @@ lemma riemannian_metric_pos_def (f : SmoothPartitionOfUnity B IB B)
   intro hv
   unfold g_global_bilin_2
   have h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2 j b) :
-                W (TangentSpace IB) b)).Finite := by
+    TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ))).Finite := by
     apply (f.locallyFinite'.point_finite b).subset
     intro i hi
     simp only [Function.mem_support, ne_eq, smul_eq_zero, not_or] at hi
@@ -1137,7 +1055,7 @@ lemma g_bilin_1_smooth_on_chart (i : B) :
 
 noncomputable
 def g_global_bilin_1 (f : SmoothPartitionOfUnity B IB B) (p : B) :
-    W (TangentSpace (M := B) IB) p :=
+    TangentSpace IB p →L[ℝ] (TangentSpace IB p →L[ℝ] ℝ) :=
       ∑ᶠ (j : B), (f j) p • (g_bilin_1 (IB := IB) j p).snd
 
 lemma g_global_bilin_1_smooth (f : SmoothPartitionOfUnity B IB B)
@@ -1184,8 +1102,8 @@ noncomputable
 def g_global_smooth_section_1
     (f : SmoothPartitionOfUnity B IB B)
     (h_sub : f.IsSubordinate (fun x ↦ (extChartAt IB x).source)) :
-    ContMDiffSection (I := IB) (F := (EB →L[ℝ] EB →L[ℝ] ℝ)) (n := ∞)
-      (V := (W (TangentSpace (M := B) IB))) :=
+    ContMDiffSection (M := B) (I := IB) (F := (EB →L[ℝ] EB →L[ℝ] ℝ)) (n := ∞)
+      (V := (fun b => TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ))) :=
   { toFun := g_global_bilin_1 f
     contMDiff_toFun := g_global_bilin_1_smooth f h_sub}
 
@@ -1249,5 +1167,5 @@ def riemannian_metric_exists
       exact riemannian_metric_symm_1 f
     pos := riemannian_metric_pos_def_1 f h_sub
     isVonNBounded := riemannian_unit_ball_bounded_1 f h_sub
-    contMDiff := (g_global_bilin_1_smooth f h_sub)
+    contMDiff := g_global_bilin_1_smooth f h_sub
      }
