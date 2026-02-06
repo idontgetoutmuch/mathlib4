@@ -556,25 +556,8 @@ lemma seminormOfBilinearForm_sub_comm {x : B}
   seminormOfBilinearForm φ hpos hsymm (u.val - v.val) =
   seminormOfBilinearForm φ hpos hsymm (v.val - u.val) := by
   unfold seminormOfBilinearForm
-  have h1 : φ (u.val - v.val) (u.val - v.val) =
-         φ u.val u.val - φ u.val v.val - φ v.val u.val + φ v.val v.val := by
-    rw [φ.map_sub]
-    simp only [ContinuousLinearMap.coe_sub', Pi.sub_apply, map_sub]
-    rw [@sub_add]
-    exact sub_sub_sub_comm ((φ u.val) u.val) ((φ v.val) u.val) ((φ u.val) v.val) ((φ v.val) v.val)
-  have h2 : φ (v.val - u.val) (v.val - u.val) =
-         φ v.val v.val - φ v.val u.val - φ u.val v.val + φ u.val u.val := by
-    rw [φ.map_sub]
-    simp only [ContinuousLinearMap.coe_sub', Pi.sub_apply, map_sub]
-    rw [@sub_add]
-    exact sub_sub_sub_comm ((φ v.val) v.val) ((φ u.val) v.val) ((φ v.val) u.val) ((φ u.val) u.val)
-  have h3 :  φ u.val u.val - φ u.val v.val - φ v.val u.val + φ v.val v.val =
-             φ v.val v.val - φ v.val u.val - φ u.val v.val + φ u.val u.val := by ring
-  have : ((φ (u.val - v.val)) (u.val - v.val)) = ((φ (v.val - u.val)) (v.val - u.val)) := by
-    rw [h1, h2]
-    exact h3
   have : √((φ (u.val - v.val)) (u.val - v.val)) =  √((φ (v.val - u.val)) (v.val - u.val)) := by
-    exact congrArg Real.sqrt this
+    grind
   exact this
 
 lemma my_eq_of_dist_eq_zero {x : B}
@@ -585,10 +568,7 @@ lemma my_eq_of_dist_eq_zero {x : B}
     intro u v h
     rw [seminormOfBilinearForm] at h
     have h1 : √((φ (u.val - v.val)) (u.val - v.val)) = 0 := h
-    have h2 : ((φ (u.val - v.val)) (u.val - v.val)) = 0 :=
-      (Real.sqrt_eq_zero (hpos (u.val - v.val))).mp h
-    have h3 : u.val - v.val = 0 := (hdef (u.val - v.val)) h2
-    have h4 : u.val = v.val := sub_eq_zero.mp h3
+    have h4 : u.val = v.val := by grind
     exact (TangentSpaceAux.ext_iff φ hpos hsymm hdef u v).mpr h4
 
 lemma my_dist_triangle {x : B}
