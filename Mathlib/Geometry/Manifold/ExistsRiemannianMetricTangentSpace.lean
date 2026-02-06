@@ -58,6 +58,10 @@ noncomputable instance (p : B) : NormedSpace ℝ (TangentSpace IB p) := by
   change NormedSpace ℝ EB
   infer_instance
 
+noncomputable instance (b : B) : SigmaCompactSpace (TangentSpace IB b) := by
+  change SigmaCompactSpace EB
+  infer_instance
+
 /-
 We have two definitions of a local section of bilinear forms.
 Well the second is the fiber component at a point.
@@ -215,49 +219,50 @@ lemma g_bilin_eq_00a_pre (i b : B)
     exact hs
   exact hr
 
-lemma g_bilin_eq_00a (i b : B)
-  (hhz : ∀ x, (trivializationAt EB (TangentSpace IB) x).baseSet = (chartAt HB (M := B) x).source)
+lemma g_bilin_eq_00a' (i b : B)
+  (hhz : ∀ x, (trivializationAt F E x).baseSet = (chartAt HB (M := B) x).source)
   (hha : (b, innerSL ℝ) ∈
-        (trivializationAt (EB →L[ℝ] EB →L[ℝ] ℝ)
-         (fun x ↦ TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ) i).target)
-  (hhb : (b, innerSL (E := EB) ℝ) ∈
+        (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
+         (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).target)
+  (hhb : (b, innerSL (E := F) ℝ) ∈
         ((chartAt HB i).source ∩ ((chartAt HB i).source ∩ Set.univ)) ×ˢ Set.univ)
-  (α β : TangentSpace IB b) :
-  (g_bilin_1 (IB := IB) i b).snd.toFun α β = (g_bilin_2 i b).toFun α β := by
-unfold g_bilin_1 g_bilin_2 g_bilin_1g g_bilin_2g
-let ψ := FiberBundle.trivializationAt (EB →L[ℝ] EB →L[ℝ] ℝ)
-    (fun (x : B) ↦ TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ) i
-let χ := trivializationAt EB (TangentSpace (M := B) IB) i
-simp only []
-simp only [hom_trivializationAt_target,
+  (α β : E b) :
+    (g_bilin_1g (E := E) (F := F) i b).snd.toFun α  β
+  = (g_bilin_2g (F := F) i b).toFun α β := by
+  unfold g_bilin_1g g_bilin_2g
+  let ψ := FiberBundle.trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
+    (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
+  let χ := trivializationAt F E i
+  simp only []
+  simp only [hom_trivializationAt_target,
     hom_trivializationAt_baseSet,
     Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet,
     PartialEquiv.invFun_as_coe, OpenPartialHomeomorph.coe_coe_symm,
     dite_eq_ite,
     AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
-have hhc : b ∈ (trivializationAt EB (TangentSpace IB) i).baseSet := by
-  rw [hhz i]
-  exact Set.mem_of_mem_inter_left hhb.1
-have hhb' : (b, innerSL (E := EB) ℝ) ∈
-    ((trivializationAt EB (TangentSpace IB) i).baseSet ∩
-     ((trivializationAt EB (TangentSpace IB) i).baseSet ∩ Set.univ)) ×ˢ Set.univ := by
-  rw [hhz i]
-  exact hhb
-have hha' : b ∈ (trivializationAt (EB →L[ℝ] EB →L[ℝ] ℝ)
-    (fun x ↦ TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ) i).baseSet := by
-  have : (trivializationAt (EB →L[ℝ] EB →L[ℝ] ℝ)
-    (fun x ↦ TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ) i).target =
-    (trivializationAt (EB →L[ℝ] EB →L[ℝ] ℝ)
-    (fun x ↦ TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ) i).baseSet ×ˢ Set.univ :=
+  have hhc : b ∈ (trivializationAt F E i).baseSet := by
+    rw [hhz i]
+    exact Set.mem_of_mem_inter_left hhb.1
+  have hhb' : (b, innerSL (E := F) ℝ) ∈
+    ((trivializationAt F E i).baseSet ∩
+     ((trivializationAt F E i).baseSet ∩ Set.univ)) ×ˢ Set.univ := by
+    rw [hhz i]
+    exact hhb
+  have hha' : b ∈ (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
+    (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).baseSet := by
+    have : (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
+    (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).target =
+    (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
+    (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).baseSet ×ˢ Set.univ :=
     Trivialization.target_eq _
-  rw [this] at hha
-  exact hha.1
-have hhd : ((ψ.toOpenPartialHomeomorph.symm (b, innerSL ℝ)).snd α) β =
+    rw [this] at hha
+    exact hha.1
+  have hhd : ((ψ.toOpenPartialHomeomorph.symm (b, innerSL ℝ)).snd α) β =
         ((innerSL ℝ) ((Trivialization.linearMapAt ℝ χ b) β))
                      ((Trivialization.linearMapAt ℝ χ b) α) :=
-  g_bilin_eq_00a_pre (HB := HB) i b hhc hha' α β
-rw [if_pos hhc, if_pos hhb']
-exact hhd
+    g_bilin_eq_00a_pre (HB := HB) i b hhc hha' α β
+  rw [if_pos hhc, if_pos hhb']
+  exact hhd
 
 lemma g_bilin_eq_01aa (i b : B)
   (hh1 : (b, innerSL ℝ) ∈
@@ -301,31 +306,44 @@ lemma g_bilin_eq_11aa (i b : B)
   rw [if_neg hb]
   exact Real.ext_cauchy rfl
 
-lemma g_bilin_eq (i b : B)
-  (α β : TangentSpace IB b) :
-  (g_bilin_1 (IB := IB) i b).snd.toFun α β = (g_bilin_2 i b).toFun α β := by
+lemma g_bilin_eq' (i b : B)
+  (α β : E b)
+  {HB : Type*} [TopologicalSpace HB] [ChartedSpace HB B]
+  (hhz : ∀ x, (trivializationAt F E x).baseSet = (chartAt HB (M := B) x).source) :
+  (g_bilin_1g (F := F) i b).snd.toFun α β = (g_bilin_2g (F := F) i b).toFun α β := by
   by_cases hha : (b, innerSL ℝ) ∈
-    (trivializationAt (EB →L[ℝ] EB →L[ℝ] ℝ)
-     (fun x ↦ TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ) i).target
+    (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
+     (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).target
   case pos =>
-    by_cases hhb : (b, innerSL (E := EB) ℝ) ∈
+    by_cases hhb : (b, innerSL (E := F) ℝ) ∈
       ((chartAt HB i).source ∩ ((chartAt HB i).source ∩ Set.univ)) ×ˢ Set.univ
     case pos =>
-      exact g_bilin_eq_00a i b TangentBundle.trivializationAt_baseSet hha hhb α β
+      exact g_bilin_eq_00a' i b hhz hha hhb α β
     case neg =>
-      exact g_bilin_eq_01aa i b hha hhb α β
+      have hhy : (b, innerSL (E := F) ℝ) ∉ ((trivializationAt F E i).baseSet ∩
+                              ((trivializationAt F E i).baseSet ∩ Set.univ)) ×ˢ Set.univ := by
+        rw [hhz]
+        exact (Set.mem_compl_iff (((chartAt HB i).source ∩
+                                 ((chartAt HB i).source ∩ Set.univ)) ×ˢ Set.univ)
+          (b, innerSL ℝ)).mp hhb
+      exact g_bilin_eq_01aa i b hha hhy α β
   case neg =>
-    by_cases hhb : (b, innerSL (E := EB) ℝ) ∈
-      ((trivializationAt EB (TangentSpace IB) i).baseSet ∩
-       ((trivializationAt EB (TangentSpace IB) i).baseSet ∩ Set.univ)) ×ˢ Set.univ
+    by_cases hhb : (b, innerSL (E := F) ℝ) ∈
+      ((trivializationAt F E i).baseSet ∩
+       ((trivializationAt F E i).baseSet ∩ Set.univ)) ×ˢ Set.univ
     case pos =>
       exact g_bilin_eq_10aa i b hha hhb α β
     case neg =>
-      have hb : b ∉ (trivializationAt EB (TangentSpace IB) i).baseSet := by
+      have hb : b ∉ (trivializationAt F E i).baseSet := by
         intro h
         apply hhb
         exact ⟨⟨h, h, trivial⟩, trivial⟩
       exact g_bilin_eq_11aa i b hb hha α β
+
+lemma g_bilin_eq (i b : B)
+  (α β : TangentSpace IB b) :
+  (g_bilin_1 (IB := IB) i b).snd.toFun α β = (g_bilin_2 i b).toFun α β :=
+    g_bilin_eq' i b α β TangentBundle.trivializationAt_baseSet
 
 lemma g_nonneg (j b : B) (v : (TangentSpace (M := B) IB) b) :
   0 ≤ ((((g_bilin_2 j b)).toFun v)).toFun v := by
@@ -415,15 +433,7 @@ noncomputable def seminormOfBilinearForm {x : B}
     rw [@Real.sqrt_le_iff]
     · have : ((φ r) s) * ((φ s) r) ≤ ((φ r) r) * ((φ s) s) :=
         LinearMap.BilinForm.apply_mul_apply_le_of_forall_zero_le φ.toLinearMap₁₂ hpos r s
-      have h0 : φ (r + s) (r + s) = (φ r) r + (φ r) s + (φ s) r + (φ s) s := by
-        calc φ (r + s) (r + s) = φ (r + s) r +  φ (r + s) s :=
-          ContinuousLinearMap.map_add (φ (r + s)) r s
-        _ = φ r r + φ s r + φ (r + s) s := by rw [ContinuousLinearMap.map_add₂ φ r s r]
-        _ = φ r r + φ s r +  φ r s + φ s s := by
-          rw [ContinuousLinearMap.map_add₂ φ r s s]
-          exact Eq.symm (add_assoc ((φ r) r + (φ s) r) ((φ r) s) ((φ s) s))
-        _ = (φ r) r + (φ r) s + (φ s) r + (φ s) s :=
-          add_add_add_comm' ((φ r) r) ((φ s) r) ((φ r) s) ((φ s) s)
+      have h0 : φ (r + s) (r + s) = (φ r) r + (φ r) s + (φ s) r + (φ s) s := by grind
       have h1 : φ (r + s) (r + s) ≤ (Real.sqrt ((φ r) r) + Real.sqrt ((φ s) s)) ^ 2 :=
         calc φ (r + s) (r + s)
           = (φ r) r + (φ r) s + (φ s) r + (φ s) s := h0
@@ -634,14 +644,10 @@ noncomputable instance {x : B}
       rfl
     have hc : (φ u.val) (a • u.val) = a * (φ u.val u.val) :=
       (φ u.val).map_smul a u.val
-    have hd : φ (a • u.val) (a • u.val) = a * a * φ u.val u.val := by
-      rw [hb, hc]
-      ring
+    have hd : φ (a • u.val) (a • u.val) = a * a * φ u.val u.val := by grind
     have h3 : norm (a • u) = seminormOfBilinearForm φ hpos hsymm (a • u).val := rfl
     have h7 : norm (a • u) = Real.sqrt (φ (a • u.val) (a • u.val)) := h3
-    have h8 : norm (a • u) = Real.sqrt ( a * a * φ u.val u.val) := by
-      rw [hd] at h7
-      exact h7
+    have h8 : norm (a • u) = Real.sqrt ( a * a * φ u.val u.val) := by grind
     have h9 : norm (a • u) = |a| * Real.sqrt (φ u.val u.val) := by
       rw [h8]
       rw [Real.sqrt_mul' (a * a) (hpos u.val)]
@@ -730,7 +736,7 @@ lemma withSeminormsOfBilinearForm {x : B}
                ≤ C * ‖tangentSpaceEquiv φ hpos hsymm hdef v‖ := hC.2 ⟨v⟩
       simp only [tangentSpaceEquiv, LinearEquiv.coe_mk, LinearMap.coe_mk, AddHom.coe_mk,
                  LinearEquiv.coe_symm_mk'] at hhave
-      have :   ‖v‖ ≤ max C 1 * (aux φ hpos hsymm j) v :=
+      have :   ‖v‖ ≤ max C 1 * (aux φ hpos hsymm j) v := by
          calc ‖v‖ ≤ C * seminormOfBilinearForm φ hpos hsymm v := hhave
               _ ≤ max C 1 * seminormOfBilinearForm φ hpos hsymm v := by
                 gcongr; exact le_max_left C 1
