@@ -368,14 +368,15 @@ lemma g_nonneg (j b : B) (v : E b) {HB : Type*} [TopologicalSpace HB] [ChartedSp
     · simp
 
 lemma g_pos (i b : B) (hp : b ∈ (extChartAt IB i).source)
-            (v : (TangentSpace (M := B) IB) b) (hv : v ≠ 0) :
-  0 < ((((g_bilin_2 i b)).toFun v)).toFun v := by
-  unfold g_bilin_2 g_bilin_2g
-  simp only [TangentBundle.trivializationAt_baseSet, AddHom.toFun_eq_coe,
+            (v : E b) (hv : v ≠ 0)
+  (hhz : ∀ x, (trivializationAt F E x).baseSet = (chartAt HB (M := B) x).source) :
+  0 < ((((g_bilin_2g (F := F) i b)).toFun v)).toFun v := by
+  unfold g_bilin_2g
+  simp only [AddHom.toFun_eq_coe,
   LinearMap.coe_toAddHom,
   ContinuousLinearMap.coe_coe]
   split_ifs with hh1
-  · let χ := (trivializationAt EB (TangentSpace IB) i)
+  · let χ := (trivializationAt F E i)
     have h1 : ((innerSL ℝ).comp (continuousLinearMapAt ℝ χ b)).flip.comp
                                (continuousLinearMapAt ℝ χ b) v v =
              innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
@@ -399,6 +400,7 @@ lemma g_pos (i b : B) (hp : b ∈ (extChartAt IB i).source)
     exact Std.lt_of_le_of_ne h6 (id (Ne.symm h5))
   · exfalso
     apply hh1
+    rw [hhz]
     exact Set.mem_of_mem_inter_left hp
 
 /-- The seminorm induced by a positive semi-definite symmetric bilinear form.
@@ -425,9 +427,9 @@ with the φ-induced norm, then prove the two are equivalent via finite-dimension
 The triangle inequality follows from the Cauchy-Schwarz inequality for bilinear forms.
 -/
 noncomputable def seminormOfBilinearForm {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) :
-    Seminorm ℝ (TangentSpace IB x) where
+    Seminorm ℝ (E x) where
   toFun v := Real.sqrt (φ v v)
   map_zero' := by simp
   add_le' r s := by
@@ -487,73 +489,73 @@ In classical mathematics, "all norms on a finite-dimensional space are equivalen
 one-line citation. In mathlib, making this work requires explicit construction and proof.
 -/
 structure TangentSpaceAux
-  (x : B) (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (x : B) (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) where
-  val : TangentSpace IB x
+  val : E x
 
 lemma TangentSpaceAux.ext_iff {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0)
   (u v : TangentSpaceAux x φ hpos hsymm hdef) :
-  u = v ↔ u.val = (v.val : TangentSpace IB x) := by
+  u = v ↔ u.val = (v.val : E x) := by
   cases u; cases v; simp
 
 instance {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  Zero (@TangentSpaceAux EB _ _ _ _ IB B _ _ x φ hpos hsymm hdef) where
+  Zero (TangentSpaceAux x φ hpos hsymm hdef) where
   zero := ⟨0⟩
 
 instance {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  Add (@TangentSpaceAux EB _ _ _ _ IB B _ _ x φ hpos hsymm hdef) where
+  Add (TangentSpaceAux x φ hpos hsymm hdef) where
   add u v := ⟨u.val + v.val⟩
 
 instance {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  Neg (@TangentSpaceAux EB _ _ _ _ IB B _ _ x φ hpos hsymm hdef) where
+  Neg (TangentSpaceAux x φ hpos hsymm hdef) where
   neg u := ⟨-u.val⟩
 
 noncomputable
 instance {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  Sub (@TangentSpaceAux EB _ _ _ _ IB B _ _ x φ hpos hsymm hdef) where
+  Sub (TangentSpaceAux x φ hpos hsymm hdef) where
   sub u v := ⟨u.val - v.val⟩
 
 noncomputable
 instance {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  SMul ℝ (@TangentSpaceAux EB _ _ _ _ IB B _ _ x φ hpos hsymm hdef) where
+  SMul ℝ (TangentSpaceAux x φ hpos hsymm hdef) where
   smul a u := ⟨a • u.val⟩
 
 noncomputable instance {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  Norm (@TangentSpaceAux EB _ _ _ _ IB B _ _ x φ hpos hsymm hdef) where
+  Norm (TangentSpaceAux x φ hpos hsymm hdef) where
   norm v := seminormOfBilinearForm φ hpos hsymm v.val
 
 lemma seminormOfBilinearForm_sub_self {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
   (v : TangentSpaceAux x φ hpos hsymm hdef) :
   seminormOfBilinearForm φ hpos hsymm (v.val - v.val) = 0 := by
@@ -561,7 +563,7 @@ lemma seminormOfBilinearForm_sub_self {x : B}
   simp
 
 lemma seminormOfBilinearForm_sub_comm {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
   (u v : TangentSpaceAux x φ hpos hsymm hdef) :
   seminormOfBilinearForm φ hpos hsymm (u.val - v.val) =
@@ -572,18 +574,21 @@ lemma seminormOfBilinearForm_sub_comm {x : B}
   exact this
 
 lemma my_eq_of_dist_eq_zero {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   ∀ {u v: TangentSpaceAux x φ hpos hsymm hdef},
     (seminormOfBilinearForm φ hpos hsymm) (u.val - v.val) = 0 → u = v := by
     intro u v h
     rw [seminormOfBilinearForm] at h
     have h1 : √((φ (u.val - v.val)) (u.val - v.val)) = 0 := h
-    have h4 : u.val = v.val := by grind
+    have h2 : ((φ (u.val - v.val)) (u.val - v.val)) = 0 :=
+      (Real.sqrt_eq_zero (hpos (u.val - v.val))).mp h
+    have h3 : u.val - v.val = 0 := (hdef (u.val - v.val)) h2
+    have h4 : u.val = v.val := sub_eq_zero.mp h3
     exact (TangentSpaceAux.ext_iff φ hpos hsymm hdef u v).mpr h4
 
 lemma my_dist_triangle {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   ∀ (x_1 y z : TangentSpaceAux x φ hpos hsymm hdef),
     (seminormOfBilinearForm φ hpos hsymm) (x_1.val - z.val) ≤
@@ -600,9 +605,9 @@ lemma my_dist_triangle {x : B}
   exact h1
 
 noncomputable instance {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
-  NormedAddCommGroup (@TangentSpaceAux EB _ _ _ _ IB B _ _ x φ hpos hsymm hdef) where
+  NormedAddCommGroup (TangentSpaceAux x φ hpos hsymm hdef) where
   norm := fun v => seminormOfBilinearForm φ hpos hsymm v.val
   dist_eq := by intros; rfl
   add_assoc := fun u v w => TangentSpaceAux.ext_iff _ _ _ _ _ _|>.mpr (add_assoc u.val v.val w.val)
@@ -621,11 +626,11 @@ noncomputable instance {x : B}
 
 noncomputable
 instance {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  Module ℝ (@TangentSpaceAux EB _ _ _ _ IB B _ _ x φ hpos hsymm hdef) where
+  Module ℝ (TangentSpaceAux x φ hpos hsymm hdef) where
   one_smul u := TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (one_smul ℝ u.val)
   mul_smul a b u := TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (mul_smul a b u.val)
   smul_add a u v := TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (smul_add a u.val v.val)
@@ -634,9 +639,9 @@ instance {x : B}
   add_smul a b u := TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_smul a b u.val)
 
 noncomputable instance {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
-  NormedSpace ℝ (@TangentSpaceAux EB _ _ _ _ IB B _ _ x φ hpos hsymm hdef) where
+  NormedSpace ℝ (TangentSpaceAux x φ hpos hsymm hdef) where
   norm_smul_le := by
     intro a u
     have ha : φ (a • u.val) = a • φ u.val := φ.map_smul a u.val
@@ -646,8 +651,7 @@ noncomputable instance {x : B}
     have hc : (φ u.val) (a • u.val) = a * (φ u.val u.val) :=
       (φ u.val).map_smul a u.val
     have hd : φ (a • u.val) (a • u.val) = a * a * φ u.val u.val := by grind
-    have h3 : norm (a • u) = seminormOfBilinearForm φ hpos hsymm (a • u).val := rfl
-    have h7 : norm (a • u) = Real.sqrt (φ (a • u.val) (a • u.val)) := h3
+    have h7 : norm (a • u) = Real.sqrt (φ (a • u.val) (a • u.val)) := rfl
     have h8 : norm (a • u) = Real.sqrt ( a * a * φ u.val u.val) := by grind
     have h9 : norm (a • u) = |a| * Real.sqrt (φ u.val u.val) := by
       rw [h8]
@@ -657,11 +661,11 @@ noncomputable instance {x : B}
     exact le_of_eq h9
 
 def tangentSpaceEquiv {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  TangentSpace IB x ≃ₗ[ℝ] TangentSpaceAux x φ hpos hsymm hdef where
+  E x ≃ₗ[ℝ] TangentSpaceAux x φ hpos hsymm hdef where
   toFun v := ⟨v⟩
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
@@ -680,15 +684,24 @@ instance {x : B} (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] �
   FiniteDimensional ℝ (TangentSpaceAux x φ hpos hsymm hdef) := by
   exact LinearEquiv.finiteDimensional (tangentSpaceEquiv φ hpos hsymm hdef)
 
-noncomputable def aux {x : B} (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+noncomputable def aux {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) :
-  SeminormFamily ℝ (TangentSpace IB x) (Fin 1) := fun _ ↦ seminormOfBilinearForm φ hpos hsymm
+  SeminormFamily ℝ (E x) (Fin 1) := fun _ ↦ seminormOfBilinearForm φ hpos hsymm
 
-lemma withSeminormsOfBilinearForm {x : B}
-  (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
+instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
-  (hdef : ∀ v, φ v v = 0 → v = 0) :
+  (hdef : ∀ v, φ v v = 0 → v = 0)
+  [FiniteDimensional ℝ (E x)] :
+  FiniteDimensional ℝ (TangentSpaceAux x φ hpos hsymm hdef) := by
+  exact LinearEquiv.finiteDimensional (tangentSpaceEquiv φ hpos hsymm hdef)
+
+lemma withSeminormsOfBilinearForm {x : B}
+  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
+  (hpos : ∀ v, 0 ≤ φ v v)
+  (hsymm : ∀ u v, φ u v = φ v u)
+  (hdef : ∀ v, φ v v = 0 → v = 0)
+  [FiniteDimensional ℝ (E x)] :
   WithSeminorms (aux φ hpos hsymm) := by
     have h1 : WithSeminorms fun x_1 ↦ normSeminorm ℝ (TangentSpaceAux x φ hpos hsymm hdef) :=
       norm_withSeminorms ℝ (TangentSpaceAux x φ hpos hsymm hdef)
@@ -698,7 +711,7 @@ lemma withSeminormsOfBilinearForm {x : B}
       simp [aux, seminormOfBilinearForm]
       rfl
     let e := tangentSpaceEquiv φ hpos hsymm hdef
-    apply WithSeminorms.congr (norm_withSeminorms ℝ (TangentSpace IB x))
+    apply WithSeminorms.congr (norm_withSeminorms ℝ (E x))
     · have e_cont : Continuous (tangentSpaceEquiv φ hpos hsymm hdef).toLinearMap :=
       LinearMap.continuous_of_finiteDimensional _
       have : IsBoundedLinearMap ℝ (tangentSpaceEquiv φ hpos hsymm hdef).toLinearMap := by
@@ -933,7 +946,8 @@ lemma h_need' (f : SmoothPartitionOfUnity B IB B)
     exact Function.mem_support.mpr hi_pos.ne'
   have h1 : ∀ j, 0 ≤ h' j := fun j =>
     mul_nonneg (h_nonneg j) (g_nonneg j b v TangentBundle.trivializationAt_baseSet)
-  have h2 : ∃ j, 0 < h' j := ⟨i, mul_pos hi_pos (g_pos i b hi_chart v hv)⟩
+  have h2 : ∃ j, 0 < h' j :=
+    ⟨i, mul_pos hi_pos (g_pos i b hi_chart v hv TangentBundle.trivializationAt_baseSet)⟩
   have h3 : (Function.support h').Finite := by
     apply (f.locallyFinite'.point_finite b).subset
     intro x hx
