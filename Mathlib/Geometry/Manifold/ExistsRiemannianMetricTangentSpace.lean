@@ -976,21 +976,22 @@ lemma h_need'' (f : SmoothPartitionOfUnity B IB B)
 
 lemma riemannian_metric_pos_def (f : SmoothPartitionOfUnity B IB B)
   (h_sub : f.IsSubordinate (fun x ↦ (extChartAt IB x).source))
-  (b : B) (v : TangentSpace IB b) :
-  v ≠ 0 → 0 < ((g_global_bilin_2 f b).toFun v).toFun v := by
+  (b : B) (v : E b)
+    (hhz : ∀ x, (trivializationAt F E x).baseSet = (chartAt HB (M := B) x).source) :
+  v ≠ 0 → 0 < ((g_global_bilin_2' (F := F ) f b).toFun v).toFun v := by
   intro hv
-  unfold g_global_bilin_2
-  have h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2 j b) :
-    TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ))).Finite := by
+  unfold g_global_bilin_2'
+  have h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2g (F := F) j b) :
+    E b →L[ℝ] (E b →L[ℝ] ℝ))).Finite := by
     apply (f.locallyFinite'.point_finite b).subset
     intro i hi
     simp only [Function.mem_support, ne_eq, smul_eq_zero, not_or] at hi
     simp only [Set.mem_setOf_eq, Function.mem_support, ne_eq]
     exact hi.1
-  have h6a : (∑ᶠ (j : B), (f j) b • g_bilin_2 j b) =
-            ∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b := finsum_eq_sum _ h_fin
+  have h6a : (∑ᶠ (j : B), (f j) b • g_bilin_2g (F := F) j b) =
+            ∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2g (F := F) j b := finsum_eq_sum _ h_fin
   rw [h6a]
-  exact h_need'' f h_sub b v h_fin TangentBundle.trivializationAt_baseSet hv
+  exact h_need'' f h_sub b v h_fin hhz hv
 
 lemma riemannian_metric_def (f : SmoothPartitionOfUnity B IB B)
   (h_sub : f.IsSubordinate (fun x ↦ (extChartAt IB x).source))
@@ -998,7 +999,7 @@ lemma riemannian_metric_def (f : SmoothPartitionOfUnity B IB B)
   ((g_global_bilin_2 f b).toFun v).toFun v = 0 → v = 0 := by
   intro h
   have hpos :  v ≠ 0 → 0 < ((((g_global_bilin_2 f b)).toFun v)).toFun v :=
-    riemannian_metric_pos_def f h_sub b v
+    riemannian_metric_pos_def f h_sub b v TangentBundle.trivializationAt_baseSet
   have h0 : ((((g_global_bilin_2 f b)).toFun v)).toFun v = 0 := h
   by_cases h : v = 0
   · exact h
@@ -1017,7 +1018,8 @@ lemma riemannian_unit_ball_bounded (f : SmoothPartitionOfUnity B IB B)
     intro v
     rcases eq_or_ne v 0 with rfl | hv
     · simp
-    · exact le_of_lt (riemannian_metric_pos_def f h_sub b v hv)
+    · exact le_of_lt
+        (riemannian_metric_pos_def f h_sub b v TangentBundle.trivializationAt_baseSet hv)
   have h2 : ∀ (u v : TangentSpace IB b),
     ((g_global_bilin_2 f b).toFun u).toFun v = ((g_global_bilin_2 f b).toFun v).toFun u := by
     exact fun u v ↦ riemannian_metric_symm f b u v
@@ -1195,7 +1197,7 @@ lemma riemannian_metric_pos_def_1 (f : SmoothPartitionOfUnity B IB B)
   (b : B) (v : TangentSpace IB b) :
   v ≠ 0 → 0 < ((g_global_bilin_1 f b).toFun v).toFun v := by
   have hz : v ≠ 0 → 0 < ((g_global_bilin_2 f b).toFun v).toFun v :=
-    riemannian_metric_pos_def f h_sub b v
+    riemannian_metric_pos_def f h_sub b v TangentBundle.trivializationAt_baseSet
   have hy : g_global_bilin_1 f b = g_global_bilin_2 f b :=
     g_global_bilin_eq f b
   rw [<-hy] at hz
