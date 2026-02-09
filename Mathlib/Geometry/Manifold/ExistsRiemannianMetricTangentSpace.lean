@@ -220,7 +220,6 @@ lemma g_bilin_eq_00a_pre (i b : B)
   exact hr
 
 lemma g_bilin_eq_00a' (i b : B)
-  (hhz : ∀ x, (trivializationAt F E x).baseSet = (chartAt HB (M := B) x).source)
   (hha : (b, innerSL ℝ) ∈
         (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
          (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).target)
@@ -240,14 +239,6 @@ lemma g_bilin_eq_00a' (i b : B)
     PartialEquiv.invFun_as_coe, OpenPartialHomeomorph.coe_coe_symm,
     dite_eq_ite,
     AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
-  have hhc : b ∈ (trivializationAt F E i).baseSet := by
-    rw [hhz i]
-    exact Set.mem_of_mem_inter_left hhb.1
-  have hhb' : (b, innerSL (E := F) ℝ) ∈
-    ((trivializationAt F E i).baseSet ∩
-     ((trivializationAt F E i).baseSet ∩ Set.univ)) ×ˢ Set.univ := by
-    rw [hhz i]
-    exact hhb
   have hha' : b ∈ (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
     (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).baseSet := by
     have : (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
@@ -257,6 +248,27 @@ lemma g_bilin_eq_00a' (i b : B)
     target_eq _
     rw [this] at hha
     exact hha.1
+  have baseSet_eq : (trivializationAt F E i).baseSet =
+    (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ) (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).baseSet := by
+    simp only [hom_trivializationAt_baseSet, Trivial.fiberBundle_trivializationAt',
+               Trivial.trivialization_baseSet, Set.inter_univ, Set.inter_self]
+  have hhc : b ∈ (trivializationAt F E i).baseSet := by
+    rw [baseSet_eq]
+    exact hha'
+  have hbi : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source := by
+    constructor
+    · exact hhc
+    · exact Set.mem_of_mem_inter_left hhb.1
+  have hhb' : (b, innerSL (E := F) ℝ) ∈
+    ((trivializationAt F E i).baseSet ∩
+     ((trivializationAt F E i).baseSet ∩ Set.univ)) ×ˢ Set.univ := by
+    constructor
+    · constructor
+      · exact hbi.1
+      · constructor
+        · exact hbi.1
+        · trivial
+    · trivial
   have hhd : ((ψ.toOpenPartialHomeomorph.symm (b, innerSL ℝ)).snd α) β =
         ((innerSL ℝ) ((Trivialization.linearMapAt ℝ χ b) β))
                      ((Trivialization.linearMapAt ℝ χ b) α) :=
@@ -318,7 +330,7 @@ lemma g_bilin_eq' (i b : B)
     by_cases hhb : (b, innerSL (E := F) ℝ) ∈
       ((chartAt HB i).source ∩ ((chartAt HB i).source ∩ Set.univ)) ×ˢ Set.univ
     case pos =>
-      exact g_bilin_eq_00a' i b hhz hha hhb α β
+      exact g_bilin_eq_00a' i b hha hhb α β
     case neg =>
       have hhy : (b, innerSL (E := F) ℝ) ∉ ((trivializationAt F E i).baseSet ∩
                               ((trivializationAt F E i).baseSet ∩ Set.univ)) ×ˢ Set.univ := by
