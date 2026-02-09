@@ -757,8 +757,9 @@ lemma withSeminormsOfBilinearForm {x : B}
               _ = max C 1 * aux φ hpos hsymm j v := rfl
       exact this
 
-lemma aux_tvs {x : B} (φ : TangentSpace IB x →L[ℝ] TangentSpace IB x →L[ℝ] ℝ)
-   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
+lemma aux_tvs {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
+   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
+   [FiniteDimensional ℝ (E x)] :
     Bornology.IsVonNBounded ℝ {v | (φ v) v < 1} := by
   rw [WithSeminorms.isVonNBounded_iff_finset_seminorm_bounded
         (p := aux φ hpos hsymm) (withSeminormsOfBilinearForm φ hpos hsymm hdef)]
@@ -789,10 +790,10 @@ theorem linear_flip_apply
   (f : E →L[𝕜] F →L[𝕜] G) (x : F) (y : E) :
   f.flip x y = f y x := rfl
 
-theorem g_bilin_symm_2 (i p : B) (v w : TangentSpace IB p) :
-    ((g_bilin_2 i p).toFun v).toFun w =
-    ((g_bilin_2 i p).toFun w).toFun v := by
-  unfold g_bilin_2 g_bilin_2g
+theorem g_bilin_symm_2 (i p : B) (v w : E p) :
+    ((g_bilin_2g (F := F) i p).toFun v).toFun w =
+    ((g_bilin_2g (F := F) i p).toFun w).toFun v := by
+  unfold g_bilin_2g
   simp only []
   split_ifs with h
   · simp only [ContinuousLinearMap.coe_comp, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom,
@@ -816,6 +817,11 @@ noncomputable instance :
   infer_instance
 
 noncomputable
+def g_global_bilin_2' (f : SmoothPartitionOfUnity B IB B) (p : B) :
+    E p →L[ℝ] (E p →L[ℝ] ℝ) :=
+  ∑ᶠ (j : B), (f j) p • g_bilin_2g (F := F) j p
+
+noncomputable
 def g_global_bilin_2 (f : SmoothPartitionOfUnity B IB B) (p : B) :
     TangentSpace IB p →L[ℝ] (TangentSpace IB p →L[ℝ] ℝ) :=
   ∑ᶠ (j : B), (f j) p • g_bilin_2 j p
@@ -833,69 +839,73 @@ lemma finsum_image_eq_sum {B E F : Type*} [AddCommMonoid E] [AddCommMonoid F]
     simpa using (map_zero φ).symm ▸ congrArg φ hj
   exact h1 hf
 
-def evalAt (b : B) (v w : TangentSpace IB b) :
-    (TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ)) →+ ℝ :=
+def evalAt (b : B) (v w : E b) :
+    (E b →L[ℝ] (E b →L[ℝ] ℝ)) →+ ℝ :=
   {
     toFun := fun f => (f.toFun v).toFun w
     map_zero' := by simp
     map_add' := by intro f g; exact rfl
   }
 
-lemma h_need (f : SmoothPartitionOfUnity B IB B) (b : B) (v w : TangentSpace IB b)
-  (h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2 j b) :
-    TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ))).Finite) :
-  ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun v).toFun w =
-  ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun w).toFun v := by
-    have ha : ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 j b).toFun v).toFun w =
-              ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun v).toFun w := by
-      simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
-      rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
-    have ha' : ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 j b).toFun w).toFun v =
-              ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun w).toFun v := by
-      simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
-      rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
-    let h : (j : B) → (TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ)) :=
-      fun j ↦ (f j) b • g_bilin_2 j b
-    have h_inc : (Function.support h) ⊆ h_fin.toFinset :=
+lemma h_need (f : SmoothPartitionOfUnity B IB B) (b : B) (v w : E b)
+  (h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2g (F := F) j b) :
+    E b →L[ℝ] (E b →L[ℝ] ℝ))).Finite) :
+  ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2g (F := F) j b).toFun v).toFun w =
+  ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2g (F := F) j b).toFun w).toFun v := by
+  have ha : ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2g (F := F) j b).toFun v).toFun w =
+            ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2g (F := F) j b).toFun v).toFun w := by
+    simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
+    rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  have ha' : ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2g (F := F) j b).toFun w).toFun v =
+            ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2g (F := F) j b).toFun w).toFun v := by
+    simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
+    rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  let h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) :=
+    fun j ↦ (f j) b • g_bilin_2g (F := F) j b
+  have h_inc : (Function.support h) ⊆ h_fin.toFinset :=
       Set.Finite.toFinset_subset.mp fun ⦃a⦄ a ↦ a
-    have hb : ∑ᶠ (j : B), (((f j) b • g_bilin_2 j b).toFun v).toFun w =
-           ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 j b).toFun v).toFun w :=
-      finsum_image_eq_sum (evalAt b v w) h h_fin.toFinset h_inc
-    have hb' : ∑ᶠ (j : B), (((f j) b • g_bilin_2 j b).toFun w).toFun v =
-           ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 j b).toFun w).toFun v :=
-      finsum_image_eq_sum (evalAt b w v) h h_fin.toFinset h_inc
-    have h_gbilin_symm : ∑ᶠ (j : B), (((f j) b • g_bilin_2 j b).toFun v).toFun w =
-                         ∑ᶠ (j : B), (((f j) b • g_bilin_2 j b).toFun w).toFun v := by
-      have h5 : ∀ (j : B), (((g_bilin_2 j b)).toFun v).toFun w =
-                           (((g_bilin_2 j b)).toFun w).toFun v := fun j => g_bilin_symm_2 j b v w
-      have h6 : ∀ (j : B), (f j b) * ((g_bilin_2 j b).toFun v).toFun w =
-                           (f j b) * ((g_bilin_2 j b).toFun w).toFun v :=
-        fun j ↦ congrArg (HMul.hMul ((f j) b)) (h5 j)
-      exact finsum_congr h6
-    calc
-        ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun v).toFun w
-          = ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 j b).toFun v).toFun w := ha.symm
-        _ = ∑ᶠ (j : B), (((f j) b • g_bilin_2 j b).toFun v).toFun w := hb.symm
-        _ = ∑ᶠ (j : B), (((f j) b • g_bilin_2 j b).toFun w).toFun v := h_gbilin_symm
-        _ = ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 j b).toFun w).toFun v := hb'
-        _ = ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun w).toFun v := ha'
+  have hb : ∑ᶠ (j : B), (((f j) b • g_bilin_2g (F := F) j b).toFun v).toFun w =
+            ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2g (F := F) j b).toFun v).toFun w :=
+    finsum_image_eq_sum (evalAt b v w) h h_fin.toFinset h_inc
+  have hb' : ∑ᶠ (j : B), (((f j) b • g_bilin_2g j b).toFun w).toFun v =
+            ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2g j b).toFun w).toFun v :=
+    finsum_image_eq_sum (evalAt b w v) h h_fin.toFinset h_inc
+  have h_gbilin_symm : ∑ᶠ (j : B), (((f j) b • g_bilin_2g (F := F) j b).toFun v).toFun w =
+                       ∑ᶠ (j : B), (((f j) b • g_bilin_2g (F := F) j b).toFun w).toFun v := by
+    have h5 : ∀ (j : B), (((g_bilin_2g (F := F) j b)).toFun v).toFun w =
+                         (((g_bilin_2g (F := F) j b)).toFun w).toFun v :=
+      fun j => g_bilin_symm_2 j b v w
+    have h6 : ∀ (j : B), (f j b) * ((g_bilin_2g j b).toFun v).toFun w =
+                         (f j b) * ((g_bilin_2g j b).toFun w).toFun v :=
+      fun j ↦ congrArg (HMul.hMul ((f j) b)) (h5 j)
+    exact finsum_congr h6
+  calc
+      ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2g (F := F) j b).toFun v).toFun w
+        = ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2g (F := F) j b).toFun v).toFun w := ha.symm
+      _ = ∑ᶠ (j : B), (((f j) b • g_bilin_2g j b).toFun v).toFun w := hb.symm
+      _ = ∑ᶠ (j : B), (((f j) b • g_bilin_2g j b).toFun w).toFun v := h_gbilin_symm
+      _ = ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2g j b).toFun w).toFun v := hb'
+      _ = ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2g j b).toFun w).toFun v := ha'
 
-lemma riemannian_metric_symm (f : SmoothPartitionOfUnity B IB B) (b : B) (v w : TangentSpace IB b) :
-  ((g_global_bilin_2 f b).toFun v).toFun w = ((g_global_bilin_2 f b).toFun w).toFun v := by
-  unfold g_global_bilin_2
+lemma riemannian_metric_symm (f : SmoothPartitionOfUnity B IB B) (b : B)
+  (v w : E b) :
+  ((g_global_bilin_2' (F := F) f b).toFun v).toFun w
+   =
+  ((g_global_bilin_2' (F := F) f b).toFun w).toFun v := by
+  unfold g_global_bilin_2'
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
-  have h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2 j b) :
-    TangentSpace IB b →L[ℝ] (TangentSpace IB b →L[ℝ] ℝ))).Finite := by
+  have h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2g (F := F) j b) :
+    E b →L[ℝ] (E b →L[ℝ] ℝ))).Finite := by
       apply (f.locallyFinite'.point_finite b).subset
       intro i hi
       simp only [Function.mem_support, ne_eq, smul_eq_zero, not_or] at hi
       simp only [Set.mem_setOf_eq, Function.mem_support, ne_eq]
       exact hi.1
-  have h6a : (∑ᶠ (j : B), (f j) b • g_bilin_2 j b) =
-            ∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b := finsum_eq_sum _ h_fin
+  have h6a : (∑ᶠ (j : B), (f j) b • g_bilin_2g j b) =
+            ∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2g j b := finsum_eq_sum _ h_fin
   rw [h6a]
-  have : ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun v).toFun w =
-         ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun w).toFun v :=
+  have : ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2g j b).toFun v).toFun w =
+         ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2g j b).toFun w).toFun v :=
     h_need f b v w h_fin
   exact this
 
