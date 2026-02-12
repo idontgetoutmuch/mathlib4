@@ -1241,6 +1241,42 @@ def g_global_bilin_1 (f : SmoothPartitionOfUnity B IB B) (p : B) :
     TangentSpace IB p →L[ℝ] (TangentSpace IB p →L[ℝ] ℝ) :=
       ∑ᶠ (j : B), (f j) p • (g_bilin_1 (IB := IB) j p).snd
 
+lemma g_global_bilin_1_smooth' (f : SmoothPartitionOfUnity B IB B)
+  (h_sub : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source)) :
+  ContMDiff IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
+    (fun x ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) x (g_global_bilin_1' (F := F) (E := E) f x)) := by
+  have h1 := contMDiff_totalSpace_weighted_sum_of_local_sections
+    (E := EB) (I := IB) (M := B)
+    (V := fun b => E b →L[ℝ] (E b →L[ℝ] Trivial B ℝ b))
+    (F_fiber := F →L[ℝ] (F →L[ℝ] ℝ))
+    (n := (⊤ : ℕ∞)) (ι := B)
+    (ρ := f)
+    (s_loc := fun (i b : B) => (g_bilin_1g (F := F) i b).snd)
+    (U := fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source)
+    (hU_isOpen := by
+      intro i
+      simp only
+      exact IsOpen.inter (trivializationAt F E i).open_baseSet (chartAt HB i).open_source)
+    (hρ_subord := h_sub)
+    (h_smooth_s_loc := by
+      intro i
+      apply ContMDiffOn.congr
+      · have : ContMDiffOn IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞ (g_bilin_1g i)
+                ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) :=
+          g_bilin_1g_smooth_on_chart i
+        exact this
+      · have h1 : ∀ y ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source,
+          TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) y ((g_bilin_1g (F := F) (E := E) i y).snd) =
+          g_bilin_1g (F := F) i y := by
+          unfold g_bilin_1g
+          simp only [Set.mem_inter_iff, hom_trivializationAt_target, hom_trivializationAt_baseSet,
+            Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet, Set.inter_univ,
+            Set.inter_self, Set.mem_prod,
+            Set.mem_univ, and_true, PartialEquiv.invFun_as_coe,
+            OpenPartialHomeomorph.coe_coe_symm, dite_eq_ite, implies_true]
+        exact h1)
+  exact h1
+
 lemma g_global_bilin_1_smooth (f : SmoothPartitionOfUnity B IB B)
   (h_sub : f.IsSubordinate (fun x ↦ (extChartAt IB x).source)) :
   ContMDiff IB (IB.prod 𝓘(ℝ, EB →L[ℝ] EB →L[ℝ] ℝ)) ∞
@@ -1276,6 +1312,9 @@ lemma g_global_bilin_1_smooth (f : SmoothPartitionOfUnity B IB B)
         exact this)
   exact h1
 
+/-
+Not apparently needed but maybe a result in its own right?
+-/
 noncomputable
 def g_global_smooth_section_1
     (f : SmoothPartitionOfUnity B IB B)
@@ -1362,10 +1401,13 @@ lemma exists_partition_subordinate_to_intersection :
     · exact FiberBundle.mem_baseSet_trivializationAt' b
     · exact mem_chart_source HB b
 
+/-
+This checks but has sorrys so CI will fail thus commented out for now
+-/
 -- public noncomputable
 -- def riemannian_metric_exists'
 --     (f : SmoothPartitionOfUnity B IB B)
---     (h_sub : f.IsSubordinate (fun x ↦ (extChartAt IB x).source)) :
+--     (h_sub : f.IsSubordinate fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source) :
 --     ContMDiffRiemannianMetric (IB := IB) (n := ∞) (F := F)
 --      (E := E) :=
 --   { inner := g_global_bilin_1' (F := F) f
@@ -1373,5 +1415,5 @@ lemma exists_partition_subordinate_to_intersection :
 --       exact sorry
 --     pos := sorry
 --     isVonNBounded := sorry
---     contMDiff := sorry
+--     contMDiff := g_global_bilin_1_smooth' f h_sub
 --      }
