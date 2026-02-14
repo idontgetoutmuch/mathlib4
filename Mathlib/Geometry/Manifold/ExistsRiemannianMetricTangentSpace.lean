@@ -227,19 +227,19 @@ def seminormOfBilinearForm {x : B}
   neg' r := by simp
   smul' a v := by simp [← mul_assoc, ← Real.sqrt_mul_self_eq_abs, Real.sqrt_mul (mul_self_nonneg a)]
 
-structure TangentSpaceAux
+structure VectorSpaceAux
   (x : B) (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) where
   val : E x
 
-lemma TangentSpaceAux.ext_iff {x : B}
+lemma VectorSpaceAux.ext_iff {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0)
-  (u v : TangentSpaceAux x φ hpos hsymm hdef) :
+  (u v : VectorSpaceAux x φ hpos hsymm hdef) :
   u = v ↔ u.val = (v.val : E x) := by
   cases u; cases v; simp
 
@@ -248,7 +248,7 @@ instance {x : B}
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  Zero (TangentSpaceAux x φ hpos hsymm hdef) where
+  Zero (VectorSpaceAux x φ hpos hsymm hdef) where
   zero := ⟨0⟩
 
 instance {x : B}
@@ -256,7 +256,7 @@ instance {x : B}
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  Add (TangentSpaceAux x φ hpos hsymm hdef) where
+  Add (VectorSpaceAux x φ hpos hsymm hdef) where
   add u v := ⟨u.val + v.val⟩
 
 instance {x : B}
@@ -264,7 +264,7 @@ instance {x : B}
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  Neg (TangentSpaceAux x φ hpos hsymm hdef) where
+  Neg (VectorSpaceAux x φ hpos hsymm hdef) where
   neg u := ⟨-u.val⟩
 
 instance {x : B}
@@ -272,7 +272,7 @@ instance {x : B}
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  Sub (TangentSpaceAux x φ hpos hsymm hdef) where
+  Sub (VectorSpaceAux x φ hpos hsymm hdef) where
   sub u v := ⟨u.val - v.val⟩
 
 instance {x : B}
@@ -280,7 +280,7 @@ instance {x : B}
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  SMul ℝ (TangentSpaceAux x φ hpos hsymm hdef) where
+  SMul ℝ (VectorSpaceAux x φ hpos hsymm hdef) where
   smul a u := ⟨a • u.val⟩
 
 instance {x : B}
@@ -288,13 +288,13 @@ instance {x : B}
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  Norm (TangentSpaceAux x φ hpos hsymm hdef) where
+  Norm (VectorSpaceAux x φ hpos hsymm hdef) where
   norm v := seminormOfBilinearForm φ hpos hsymm v.val
 
 lemma seminormOfBilinearForm_sub_self {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
-  (v : TangentSpaceAux x φ hpos hsymm hdef) :
+  (v : VectorSpaceAux x φ hpos hsymm hdef) :
   seminormOfBilinearForm φ hpos hsymm (v.val - v.val) = 0 := by
   unfold seminormOfBilinearForm
   simp
@@ -302,7 +302,7 @@ lemma seminormOfBilinearForm_sub_self {x : B}
 lemma seminormOfBilinearForm_sub_comm {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
-  (u v : TangentSpaceAux x φ hpos hsymm hdef) :
+  (u v : VectorSpaceAux x φ hpos hsymm hdef) :
   seminormOfBilinearForm φ hpos hsymm (u.val - v.val) =
   seminormOfBilinearForm φ hpos hsymm (v.val - u.val) := by
   unfold seminormOfBilinearForm
@@ -313,7 +313,7 @@ lemma seminormOfBilinearForm_sub_comm {x : B}
 lemma my_eq_of_dist_eq_zero {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
-  ∀ {u v: TangentSpaceAux x φ hpos hsymm hdef},
+  ∀ {u v: VectorSpaceAux x φ hpos hsymm hdef},
     (seminormOfBilinearForm φ hpos hsymm) (u.val - v.val) = 0 → u = v := by
     intro u v h
     rw [seminormOfBilinearForm] at h
@@ -322,12 +322,12 @@ lemma my_eq_of_dist_eq_zero {x : B}
       (Real.sqrt_eq_zero (hpos (u.val - v.val))).mp h
     have h3 : u.val - v.val = 0 := (hdef (u.val - v.val)) h2
     have h4 : u.val = v.val := sub_eq_zero.mp h3
-    exact (TangentSpaceAux.ext_iff φ hpos hsymm hdef u v).mpr h4
+    exact (VectorSpaceAux.ext_iff φ hpos hsymm hdef u v).mpr h4
 
 lemma my_dist_triangle {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
-  ∀ (x_1 y z : TangentSpaceAux x φ hpos hsymm hdef),
+  ∀ (x_1 y z : VectorSpaceAux x φ hpos hsymm hdef),
     (seminormOfBilinearForm φ hpos hsymm) (x_1.val - z.val) ≤
       (seminormOfBilinearForm φ hpos hsymm) (x_1.val - y.val) +
       (seminormOfBilinearForm φ hpos hsymm) (y.val - z.val) := by
@@ -344,18 +344,18 @@ lemma my_dist_triangle {x : B}
 instance {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
-  NormedAddCommGroup (TangentSpaceAux x φ hpos hsymm hdef) where
+  NormedAddCommGroup (VectorSpaceAux x φ hpos hsymm hdef) where
   norm := fun v => seminormOfBilinearForm φ hpos hsymm v.val
   dist_eq := by intros; rfl
-  add_assoc := fun u v w => TangentSpaceAux.ext_iff _ _ _ _ _ _|>.mpr (add_assoc u.val v.val w.val)
-  zero_add := fun u => TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (zero_add u.val)
-  add_zero := fun u => TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_zero u.val)
+  add_assoc := fun u v w => VectorSpaceAux.ext_iff _ _ _ _ _ _|>.mpr (add_assoc u.val v.val w.val)
+  zero_add := fun u => VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (zero_add u.val)
+  add_zero := fun u => VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_zero u.val)
   nsmul := nsmulRec
   zsmul := zsmulRec
-  neg_add_cancel := fun u => TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (neg_add_cancel u.val)
-  add_comm := fun u v => TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_comm u.val v.val)
+  neg_add_cancel := fun u => VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (neg_add_cancel u.val)
+  add_comm := fun u v => VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_comm u.val v.val)
   sub_eq_add_neg :=
-    fun u v => TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (sub_eq_add_neg u.val v.val)
+    fun u v => VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (sub_eq_add_neg u.val v.val)
   dist_self := seminormOfBilinearForm_sub_self φ hpos hsymm hdef
   dist_comm := seminormOfBilinearForm_sub_comm φ hpos hsymm hdef
   dist_triangle := my_dist_triangle φ hpos hsymm hdef
@@ -366,18 +366,18 @@ instance {x : B}
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  Module ℝ (TangentSpaceAux x φ hpos hsymm hdef) where
-  one_smul u := TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (one_smul ℝ u.val)
-  mul_smul a b u := TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (mul_smul a b u.val)
-  smul_add a u v := TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (smul_add a u.val v.val)
-  smul_zero a := TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (smul_zero a)
-  zero_smul u := TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (zero_smul ℝ u.val)
-  add_smul a b u := TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_smul a b u.val)
+  Module ℝ (VectorSpaceAux x φ hpos hsymm hdef) where
+  one_smul u := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (one_smul ℝ u.val)
+  mul_smul a b u := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (mul_smul a b u.val)
+  smul_add a u v := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (smul_add a u.val v.val)
+  smul_zero a := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (smul_zero a)
+  zero_smul u := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (zero_smul ℝ u.val)
+  add_smul a b u := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_smul a b u.val)
 
 instance {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
-  NormedSpace ℝ (TangentSpaceAux x φ hpos hsymm hdef) where
+  NormedSpace ℝ (VectorSpaceAux x φ hpos hsymm hdef) where
   norm_smul_le := by
     intro a u
     have ha : φ (a • u.val) = a • φ u.val := φ.map_smul a u.val
@@ -401,7 +401,7 @@ def tangentSpaceEquiv {x : B}
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0) :
-  E x ≃ₗ[ℝ] TangentSpaceAux x φ hpos hsymm hdef where
+  E x ≃ₗ[ℝ] VectorSpaceAux x φ hpos hsymm hdef where
   toFun v := ⟨v⟩
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
@@ -418,7 +418,7 @@ instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0)
   [FiniteDimensional ℝ (E x)] :
-  FiniteDimensional ℝ (TangentSpaceAux x φ hpos hsymm hdef) := by
+  FiniteDimensional ℝ (VectorSpaceAux x φ hpos hsymm hdef) := by
   exact LinearEquiv.finiteDimensional (tangentSpaceEquiv φ hpos hsymm hdef)
 
 lemma withSeminormsOfBilinearForm {x : B}
@@ -428,10 +428,10 @@ lemma withSeminormsOfBilinearForm {x : B}
   (hdef : ∀ v, φ v v = 0 → v = 0)
   [FiniteDimensional ℝ (E x)] :
   WithSeminorms (aux φ hpos hsymm) := by
-    have h1 : WithSeminorms fun x_1 ↦ normSeminorm ℝ (TangentSpaceAux x φ hpos hsymm hdef) :=
-      norm_withSeminorms ℝ (TangentSpaceAux x φ hpos hsymm hdef)
+    have h1 : WithSeminorms fun x_1 ↦ normSeminorm ℝ (VectorSpaceAux x φ hpos hsymm hdef) :=
+      norm_withSeminorms ℝ (VectorSpaceAux x φ hpos hsymm hdef)
     have h_eq : ∀ i v, aux φ hpos hsymm i v =
-                       normSeminorm ℝ (TangentSpaceAux x φ hpos hsymm hdef) ⟨v⟩ := by
+                       normSeminorm ℝ (VectorSpaceAux x φ hpos hsymm hdef) ⟨v⟩ := by
       intro i v
       simp [aux, seminormOfBilinearForm]
       rfl
