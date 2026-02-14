@@ -73,24 +73,6 @@ def g_bilin_2g (i p : B) : E p →L[ℝ] (E p →L[ℝ] ℝ) := by
   · exact (innerSL ℝ).comp (χ.continuousLinearMapAt ℝ p) |>.flip.comp (χ.continuousLinearMapAt ℝ p)
   · exact 0
 
-/-
-Overloading the use of π, let
-
-* `φ : π⁻¹(U) → U × F` be a local trivialization of the vector bundle `E : B → Type*`
-with fiber `F`, and
-* `ψ : π⁻¹(U) → U × (F →L[ℝ] F →L[ℝ] ℝ)` be the induced local trivialization of the
-bundle of bilinear forms on `E`.
-
-Then for any `w ∈ π⁻¹(U)` and `u, v ∈ F`, if `(x, u)` and `(x, v)` denote coordinates
-in `U × F`, we have
-
-```lean
-ψ(w)(u, v) = w(φ.symm (x, u), φ.symm (x, v))
-```
-
-That is, evaluating the bilinear form in coordinates is the same as pulling back
-along the trivialization.
--/
 lemma trivializationAt_vectorBundle_bilinearForm_apply
     {HB : Type*} [TopologicalSpace HB] [ChartedSpace HB B]
     (x₀ x : B)
@@ -101,34 +83,20 @@ lemma trivializationAt_vectorBundle_bilinearForm_apply
                     (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) x₀).continuousLinearMapAt ℝ x w u v =
     w ((trivializationAt F E x₀).symm x u)
       ((trivializationAt F E x₀).symm x v) := by
-  rw [continuousLinearMapAt_apply]
-  rw [@linearMapAt_apply]
-  simp only [hom_trivializationAt_baseSet,
-             Trivial.fiberBundle_trivializationAt',
-             Trivial.trivialization_baseSet,
-             Set.inter_univ,
-             Set.inter_self]
+  rw [continuousLinearMapAt_apply, @linearMapAt_apply]
+  simp only [hom_trivializationAt_baseSet, Trivial.fiberBundle_trivializationAt',
+             Trivial.trivialization_baseSet, Set.inter_univ, Set.inter_self]
   rw [@hom_trivializationAt_apply]
   have hx' : x ∈ (trivializationAt F E x₀).baseSet ∩
     ((trivializationAt F E x₀).baseSet ∩ Set.univ) := by
     exact ⟨hx, ⟨hx, trivial⟩⟩
   rw [if_pos hx']
   rw [inCoordinates_apply_eq₂ hx hx (by simp : x ∈ (trivializationAt ℝ (fun _ ↦ ℝ) x₀).baseSet)]
-  simp only [Trivial.fiberBundle_trivializationAt',
-             Trivial.linearMapAt_trivialization,
-             LinearMap.id_coe,
-             id_eq]
+  simp only [Trivial.fiberBundle_trivializationAt', Trivial.linearMapAt_trivialization,
+             LinearMap.id_coe, id_eq]
 
-/-
-We are going to show that `(g_bilin_1 (IB := IB) i b).snd.toFun α β = (g_bilin_2 i b).toFun α β`
-and given that both of these are defined by two cases (effectively if b is in the source of the
-trivialisation at i) then we need 4 different cases. This is the essential case.
--/
 lemma g_bilin_eq_00a_pre (i b : B)
-  {HB : Type*} [TopologicalSpace HB] [ChartedSpace HB B]
-  (hb : b ∈ (trivializationAt F E i).baseSet)
-  (hc : b ∈ (FiberBundle.trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
-    (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).baseSet)
+  (hb : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source)
   (α β : E b) :
   (((FiberBundle.trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
   (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).toOpenPartialHomeomorph.symm
@@ -141,10 +109,15 @@ lemma g_bilin_eq_00a_pre (i b : B)
       (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
   let χ := trivializationAt F E i
   let w := ψ.symm b (innerSL ℝ)
+  have hc : b ∈ ψ.baseSet := by
+    rw [hom_trivializationAt_baseSet]
+    simp only [hom_trivializationAt_baseSet, Trivial.fiberBundle_trivializationAt',
+               Trivial.trivialization_baseSet, Set.inter_univ, Set.inter_self]
+    exact hb.1
   have h1 : ∀ u v,
       (((continuousLinearMapAt ℝ ψ b) w) u) v =
       w (χ.symm b u) (χ.symm b v)
-       := fun u v ↦ trivializationAt_vectorBundle_bilinearForm_apply (HB := HB) i b w u v hb
+       := fun u v ↦ trivializationAt_vectorBundle_bilinearForm_apply (HB := HB) i b w u v hb.1
   have h4 : ∀ u v,
       (((continuousLinearMapAt ℝ ψ b) (ψ.symmL ℝ b (innerSL ℝ))) u) v =
       innerSL ℝ u v := by
@@ -155,91 +128,37 @@ lemma g_bilin_eq_00a_pre (i b : B)
     rw [<-h4]
     exact h1 u v
   have ha : χ.symm b (χ.continuousLinearMapAt ℝ b α) = α :=
-      symmL_continuousLinearMapAt
-        (trivializationAt F E i) hb α
+      symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 α
   have hb' : χ.symm b (χ.continuousLinearMapAt ℝ b β) = β :=
-      symmL_continuousLinearMapAt
-        (trivializationAt F E i) hb β
+      symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 β
   have hp : (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) α)
                        ((continuousLinearMapAt ℝ χ b) β) =
   w (χ.symm b ((continuousLinearMapAt ℝ χ b) α))
         (χ.symm b ((continuousLinearMapAt ℝ χ b) β)) :=
   h3 (χ.continuousLinearMapAt ℝ b α) (χ.continuousLinearMapAt ℝ b β)
   rw [ha, hb'] at hp
-  have hd : (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) α)
-                          ((continuousLinearMapAt ℝ χ b) β) =
-  w α β := hp
-  have he : ψ.symm b (innerSL ℝ) =
-              (ψ.toOpenPartialHomeomorph.symm (b, innerSL ℝ)).snd := by
+  have he : (ψ.toOpenPartialHomeomorph.symm (b, innerSL ℝ)).snd = ψ.symm b (innerSL ℝ) := by
     rw [symm_apply ψ hc (innerSL ℝ)]
-    exact rfl
-  have hf : (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) α)
-                          ((continuousLinearMapAt ℝ χ b) β) =
-  ψ.symm b (innerSL ℝ) α β := hp
-  rw [he] at hf
-  have hs : (ψ.toOpenPartialHomeomorph.symm (b, innerSL ℝ)).snd α β =
-    (innerSL ℝ) ((Trivialization.linearMapAt ℝ χ b) α)
-                 ((Trivialization.linearMapAt ℝ χ b) β) := id (Eq.symm hf)
-  have ht : (innerSL ℝ) ((Trivialization.linearMapAt ℝ χ b) α)
-                          ((Trivialization.linearMapAt ℝ χ b) β) =
-              (innerSL ℝ) ((Trivialization.linearMapAt ℝ χ b) β)
-                          ((Trivialization.linearMapAt ℝ χ b) α) := by
-    exact real_inner_comm ((Trivialization.linearMapAt ℝ χ b) β)
-                            ((Trivialization.linearMapAt ℝ χ b) α)
-  have hr : (ψ.toOpenPartialHomeomorph.symm (b, innerSL ℝ)).snd α β =
-    (innerSL ℝ) ((Trivialization.linearMapAt ℝ χ b) β)
-                ((Trivialization.linearMapAt ℝ χ b) α) := by
-    rw [<-ht]
-    exact hs
-  exact hr
+    simp only [cast_eq]
+  rw [he]
+  calc w α β
+      = (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) α) ((continuousLinearMapAt ℝ χ b) β) := hp.symm
+    _ = (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) β) ((continuousLinearMapAt ℝ χ b) α) :=
+      real_inner_comm _ _
 
 lemma g_bilin_eq'' (i b : B)
   (hb : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source)
   (α β : E b) :
   (g_bilin_1g (F := F) i b).snd.toFun α β = (g_bilin_2g (F := F) i b).toFun α β := by
   unfold g_bilin_1g g_bilin_2g
-  let ψ := FiberBundle.trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
-    (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
-  let χ := trivializationAt F E i
-  simp only []
-  simp only [hom_trivializationAt_target,
-    hom_trivializationAt_baseSet,
-    Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet,
-    PartialEquiv.invFun_as_coe, OpenPartialHomeomorph.coe_coe_symm,
-    dite_eq_ite,
-    AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
-  have : (FiberBundle.trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
-      (fun b ↦ E b →L[ℝ] E b →L[ℝ] ℝ) i).baseSet =
-    (FiberBundle.trivializationAt F E i).baseSet := by
-    simp
-  have hha : (b, innerSL ℝ) ∈
-        (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
-         (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).target := by
-    have h1 := hb.1
-    rw [<-this] at h1
-    exact (mk_mem_target
-            (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ) (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i)).mpr h1
-  have hha' : b ∈ (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
-    (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).baseSet :=
-     (mk_mem_target (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ) (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i)).mp hha
-  have hhd : ((ψ.toOpenPartialHomeomorph.symm (b, innerSL ℝ)).snd α) β =
-        ((innerSL ℝ) ((Trivialization.linearMapAt ℝ χ b) β))
-                     ((Trivialization.linearMapAt ℝ χ b) α) :=
-    g_bilin_eq_00a_pre (HB := HB) i b hb.1 hha' α β
-  have hhc : b ∈ (trivializationAt F E i).baseSet := hb.1
-  rw [if_pos hhc]
-  have hhb' : (b, innerSL (E := F) ℝ) ∈
-    ((trivializationAt F E i).baseSet ∩
-     ((trivializationAt F E i).baseSet ∩ Set.univ)) ×ˢ Set.univ := by
-    constructor
-    · constructor
-      · exact hb.1
-      · constructor
-        · exact hb.1
-        · trivial
-    · trivial
-  rw [if_pos hhb']
-  exact hhd
+  simp only [PartialEquiv.invFun_as_coe, OpenPartialHomeomorph.coe_coe_symm, dite_eq_ite,
+             Lean.Elab.WF.paramLet, hom_trivializationAt_target, hom_trivializationAt_baseSet,
+             Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet,
+             Set.inter_univ, Set.inter_self, Set.mem_prod, hb.1, Set.mem_univ, and_self,
+             ↓reduceDIte, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe,
+             ContinuousLinearMap.coe_comp, LinearMap.coe_comp, continuousLinearMapAt_apply,
+             Function.comp_apply]
+  exact g_bilin_eq_00a_pre i b hb α β
 
 lemma g_nonneg' (j b : B) (v : E b) :
     0 ≤ ((g_bilin_2g (F := F) j b).toFun v).toFun v := by
@@ -288,29 +207,6 @@ lemma g_pos' (i b : B)
   · exfalso
     exact hh1 hb.1
 
-/-- The seminorm induced by a positive semi-definite symmetric bilinear form.
-
-Given a bilinear form `φ : TₓB →L[ℝ] TₓB →L[ℝ] ℝ` that is positive semi-definite and symmetric,
-we define the associated seminorm by `‖v‖_φ := √(φ(v,v))`.
-
-**Why do we need this?**
-
-To show that a Riemannian metric is smooth, we need to verify that it's compatible with
-the bornology (bounded sets) of the tangent space. In mathlib, the dependency chain is:
-
-  Norm → Bounded sets → Bornology → Smoothness works → Riemannian metric can be defined
-
-So we need to connect our bilinear form to the existing norm structure.
-
-**Why not just use the existing norm on `TangentSpace IB x`?**
-
-Because we need to work with the geometry induced by `φ`, not the ambient geometry.
-However, mathlib's type system doesn't let us "change" the norm on an existing type.
-The solution (see `TangentSpaceAux` below) is to create a copy of the tangent space
-with the φ-induced norm, then prove the two are equivalent via finite-dimensionality.
-
-The triangle inequality follows from the Cauchy-Schwarz inequality for bilinear forms.
--/
 noncomputable def seminormOfBilinearForm {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) :
@@ -347,32 +243,6 @@ noncomputable def seminormOfBilinearForm {x : B}
   neg' r := by simp
   smul' a v := by simp [← mul_assoc, ← Real.sqrt_mul_self_eq_abs, Real.sqrt_mul (mul_self_nonneg a)]
 
-/-- Auxiliary tangent space with norm induced by a bilinear form.
-
-This is a copy of `TangentSpace IB x` with the norm `‖v‖_φ := √(φ(v,v))` from `mynorm`.
-
-**Why create a new type?**
-
-Mathlib's type class system doesn't support having multiple norm structures on the same type.
-As the mathlib documentation states (Analysis.NormedSpace.FiniteDimension):
-
-> "The fact that all norms are equivalent is not written explicitly, as it would mean having
-> two norms on a single space, which is not the way type classes work. However, if one has a
-> finite-dimensional vector space `E` with a norm, and a copy `E'` of this type with another
-> norm, then the identities from `E` to `E'` and from `E'` to `E` are continuous thanks to
-> `LinearMap.continuous_of_finiteDimensional`. This gives the desired norm equivalence."
-
-See
-https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/Normed/Module/FiniteDimension.html
-
-What this description elides is that "this gives the desired norm equivalence" requires
-creating this auxiliary type plus substantial additional work (see `tangentSpaceEquiv`,
-`withSeminormsOfBilinearForm`, and `aux_tvs`) to establish the equivalence and derive the needed
-`WithSeminorms` and `IsVonNBounded` properties.
-
-In classical mathematics, "all norms on a finite-dimensional space are equivalent" is a
-one-line citation. In mathlib, making this work requires explicit construction and proof.
--/
 structure TangentSpaceAux
   (x : B) (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
