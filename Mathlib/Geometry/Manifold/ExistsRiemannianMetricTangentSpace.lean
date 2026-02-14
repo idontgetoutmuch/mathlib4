@@ -44,7 +44,8 @@ variable
 variable [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
 variable [FiniteDimensional ℝ F]
 
-noncomputable
+noncomputable section
+
 def g_bilin_1 (i b : B) :
  (TotalSpace (F →L[ℝ] F →L[ℝ] ℝ)
              (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ)) :=
@@ -55,7 +56,6 @@ def g_bilin_1 (i b : B) :
     · exact (ψ.invFun (b, (fun (x : B) ↦ innerSL ℝ) b)).snd
     · exact 0⟩
 
-noncomputable
 def g_bilin_2 (i p : B) : E p →L[ℝ] (E p →L[ℝ] ℝ) := by
   let χ := trivializationAt F E i
   by_cases h : p ∈ χ.baseSet
@@ -196,7 +196,7 @@ lemma g_pos (i b : B)
   · exfalso
     exact hh1 hb.1
 
-noncomputable def seminormOfBilinearForm {x : B}
+def seminormOfBilinearForm {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) :
     Seminorm ℝ (E x) where
@@ -272,7 +272,6 @@ instance {x : B}
   Neg (TangentSpaceAux x φ hpos hsymm hdef) where
   neg u := ⟨-u.val⟩
 
-noncomputable
 instance {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
@@ -281,7 +280,6 @@ instance {x : B}
   Sub (TangentSpaceAux x φ hpos hsymm hdef) where
   sub u v := ⟨u.val - v.val⟩
 
-noncomputable
 instance {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
@@ -290,7 +288,7 @@ instance {x : B}
   SMul ℝ (TangentSpaceAux x φ hpos hsymm hdef) where
   smul a u := ⟨a • u.val⟩
 
-noncomputable instance {x : B}
+instance {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
   (hsymm : ∀ u v, φ u v = φ v u)
@@ -348,7 +346,7 @@ lemma my_dist_triangle {x : B}
   rw [h2] at h1
   exact h1
 
-noncomputable instance {x : B}
+instance {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   NormedAddCommGroup (TangentSpaceAux x φ hpos hsymm hdef) where
@@ -368,7 +366,6 @@ noncomputable instance {x : B}
   dist_triangle := my_dist_triangle φ hpos hsymm hdef
   eq_of_dist_eq_zero := my_eq_of_dist_eq_zero φ hpos hsymm hdef
 
-noncomputable
 instance {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v)
@@ -382,7 +379,7 @@ instance {x : B}
   zero_smul u := TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (zero_smul ℝ u.val)
   add_smul a b u := TangentSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_smul a b u.val)
 
-noncomputable instance {x : B}
+instance {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   NormedSpace ℝ (TangentSpaceAux x φ hpos hsymm hdef) where
@@ -417,7 +414,7 @@ def tangentSpaceEquiv {x : B}
   left_inv _ := rfl
   right_inv _ := rfl
 
-noncomputable def aux {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
+def aux {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) :
   SeminormFamily ℝ (E x) (Fin 1) := fun _ ↦ seminormOfBilinearForm φ hpos hsymm
 
@@ -537,7 +534,6 @@ theorem g_bilin_symm_2 (i p : B) (v w : E p) :
     rw [real_inner_comm]
   · simp
 
-noncomputable
 def g_global_bilin_2 (f : SmoothPartitionOfUnity B IB B) (p : B) :
     E p →L[ℝ] (E p →L[ℝ] ℝ) :=
   ∑ᶠ (j : B), (f j) p • g_bilin_2 (F := F) j p
@@ -805,7 +801,6 @@ lemma g_bilin_1g_smooth_on_chart (i : B) :
     simp only [if_pos this]
     rfl
 
-noncomputable
 def g_global_bilin_1 (f : SmoothPartitionOfUnity B IB B) (p : B) :
     E p →L[ℝ] (E p →L[ℝ] ℝ) :=
       ∑ᶠ (j : B), (f j) p • (g_bilin_1 (F := F) j p).snd
@@ -912,8 +907,7 @@ lemma riemannian_unit_ball_bounded_1 (f : SmoothPartitionOfUnity B IB B)
 /--
 Existence of a smooth Riemannian metric on a manifold.
 -/
-public noncomputable
-def riemannian_metric_exists
+public def riemannian_metric_exists
     (f : SmoothPartitionOfUnity B IB B)
     (h_sub : f.IsSubordinate fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source)
     [∀ x, FiniteDimensional ℝ (E x)] :
