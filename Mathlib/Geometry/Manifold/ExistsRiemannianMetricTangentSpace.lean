@@ -107,10 +107,9 @@ lemma g_bilin_eq_00a_pre (i b : B)
       (((continuousLinearMapAt ℝ ψ b) w) u) v =
       w (χ.symm b u) (χ.symm b v)
        := fun u v ↦ trivializationAt_vectorBundle_bilinearForm_apply (HB := HB) i b w u v hb.1
-  have h4 : ∀ u v,
+  have h4 u v :
       (((continuousLinearMapAt ℝ ψ b) (ψ.symmL ℝ b (innerSL ℝ))) u) v =
       innerSL ℝ u v := by
-    intro u v
     rw [continuousLinearMapAt_symmL ψ hc]
   have h3 : ∀ u v, innerSL ℝ u v = w (χ.symm b u) (χ.symm b v) := by
     intro u v
