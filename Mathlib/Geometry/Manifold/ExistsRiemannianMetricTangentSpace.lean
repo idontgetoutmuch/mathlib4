@@ -103,10 +103,6 @@ lemma g_bilin_eq_00a_pre (i b : B)
     simp only [hom_trivializationAt_baseSet, Trivial.fiberBundle_trivializationAt',
                Trivial.trivialization_baseSet, Set.inter_univ, Set.inter_self]
     exact hb.1
-  have h1 : ∀ u v,
-      (((continuousLinearMapAt ℝ ψ b) w) u) v =
-      w (χ.symm b u) (χ.symm b v)
-       := fun u v ↦ trivializationAt_vectorBundle_bilinearForm_apply (HB := HB) i b w u v hb.1
   have h4 u v :
       (((continuousLinearMapAt ℝ ψ b) (ψ.symmL ℝ b (innerSL ℝ))) u) v =
       innerSL ℝ u v := by
@@ -114,7 +110,7 @@ lemma g_bilin_eq_00a_pre (i b : B)
   have h3 : ∀ u v, innerSL ℝ u v = w (χ.symm b u) (χ.symm b v) := by
     intro u v
     rw [<-h4]
-    exact h1 u v
+    exact trivializationAt_vectorBundle_bilinearForm_apply (HB := HB) i b w u v hb.1
   have ha : χ.symm b (χ.continuousLinearMapAt ℝ b α) = α :=
       symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 α
   have hb' : χ.symm b (χ.continuousLinearMapAt ℝ b β) = β :=
