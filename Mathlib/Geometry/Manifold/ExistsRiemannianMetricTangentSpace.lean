@@ -50,7 +50,7 @@ def g_bilin_1 (i b : B) :
  (TotalSpace (F →L[ℝ] F →L[ℝ] ℝ)
              (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ)) :=
   ⟨b, by
-    let ψ := trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
+    letI ψ := trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
         (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
     by_cases h : (b, (fun (x : B) ↦ innerSL ℝ) b) ∈ ψ.target
     · exact (ψ.invFun (b, (fun (x : B) ↦ innerSL ℝ) b)).snd
@@ -141,7 +141,7 @@ lemma g_bilin_eq (i b : B)
   (g_bilin_1 (F := F) i b).snd.toFun α β = (g_bilin_2 (F := F) i b).toFun α β := by
   unfold g_bilin_1 g_bilin_2
   simp only [PartialEquiv.invFun_as_coe, OpenPartialHomeomorph.coe_coe_symm, dite_eq_ite,
-             Lean.Elab.WF.paramLet, hom_trivializationAt_target, hom_trivializationAt_baseSet,
+            hom_trivializationAt_target, hom_trivializationAt_baseSet,
              Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet,
              Set.inter_univ, Set.inter_self, Set.mem_prod, hb.1, Set.mem_univ, and_self,
              ↓reduceDIte, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe,
