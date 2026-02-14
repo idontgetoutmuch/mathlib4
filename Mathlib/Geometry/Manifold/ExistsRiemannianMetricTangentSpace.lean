@@ -1196,6 +1196,19 @@ lemma riemannian_metric_def' (f : SmoothPartitionOfUnity B IB B)
     have h3 : (0 : ℝ) < 0 := by rw [h2] at h1; exact h1
     exact lt_irrefl 0 (h1.trans_eq h2)
 
+lemma riemannian_metric_def'' (f : SmoothPartitionOfUnity B IB B)
+  (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
+  (b : B) (v : E b) :
+  g_global_bilin_2' (F := F) f b v v = 0 → v = 0 := by
+  intro h
+  by_cases hv : v = 0
+  · exact hv
+  · exfalso
+    have hpos : 0 < g_global_bilin_2' f b v v :=
+      riemannian_metric_pos_def' f hf b v hv
+    rw [h] at hpos
+    exact lt_irrefl 0 hpos
+
 lemma riemannian_metric_def (f : SmoothPartitionOfUnity B IB B)
   (h_sub : f.IsSubordinate (fun x ↦ (extChartAt IB x).source))
   (b : B) (v : TangentSpace IB b) :
@@ -1211,6 +1224,24 @@ lemma riemannian_metric_def (f : SmoothPartitionOfUnity B IB B)
     have h2 : ((((g_global_bilin_2 f b)).toFun v)).toFun v = 0 := h0
     have h3 : (0 : ℝ) < 0 := by rw [h2] at h1; exact h1
     exact lt_irrefl 0 (h1.trans_eq h2)
+
+lemma riemannian_unit_ball_bounded'' (f : SmoothPartitionOfUnity B IB B)
+  (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
+  [∀ x, FiniteDimensional ℝ (E x)] :
+  ∀ (b : B), Bornology.IsVonNBounded ℝ
+    {v : E b | g_global_bilin_2' (F := F) f b v v < 1} := by
+  intro b
+  have h1 : ∀ (v : E b), 0 ≤ g_global_bilin_2' (F := F) f b v v := by
+    intro v
+    rcases eq_or_ne v 0 with rfl | hv
+    · simp
+    · exact le_of_lt (riemannian_metric_pos_def' f hf b v hv)
+  have h2 : ∀ (u v : E b),
+    g_global_bilin_2' (F := F) f b u v = g_global_bilin_2' (F := F) f b v u := by
+    exact fun u v ↦ riemannian_metric_symm f b u v
+  have h3 : ∀ (v : E b), g_global_bilin_2' f b v v = 0 → v = 0 :=
+    fun v => riemannian_metric_def'' f hf b v
+  exact aux_tvs (g_global_bilin_2' f b) h1 h2 h3
 
 lemma riemannian_unit_ball_bounded' (f : SmoothPartitionOfUnity B IB B)
   (h_sub : f.IsSubordinate (fun x ↦ (extChartAt IB x).source))
@@ -1585,6 +1616,18 @@ lemma riemannian_metric_pos_def_1'
   rw [h1]
   exact riemannian_metric_pos_def' f hf b v hv
 
+lemma riemannian_unit_ball_bounded_1' (f : SmoothPartitionOfUnity B IB B)
+  (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
+  [∀ x, FiniteDimensional ℝ (E x)] :
+  ∀ (b : B), Bornology.IsVonNBounded ℝ
+    {v : E b | g_global_bilin_1' (F := F) (E := E) f b v v < 1} := by
+  intro b
+  have hy : ∀ v, g_global_bilin_1' (F := F) (E := E) f b v v =
+                  g_global_bilin_2' (F := F) f b v v :=
+    fun v => g_global_bilin_eq' f hf b v v
+  simp_rw [hy]
+  exact riemannian_unit_ball_bounded'' f hf b
+
 lemma riemannian_unit_ball_bounded_1 (f : SmoothPartitionOfUnity B IB B)
   (h_sub : f.IsSubordinate (fun x ↦ (extChartAt IB x).source)) :
   ∀ (b : B), Bornology.IsVonNBounded ℝ
@@ -1634,12 +1677,13 @@ This checks but has sorrys so CI will fail thus commented out for now
 public noncomputable
 def riemannian_metric_exists'
     (f : SmoothPartitionOfUnity B IB B)
-    (h_sub : f.IsSubordinate fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source) :
+    (h_sub : f.IsSubordinate fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source)
+    [∀ x, FiniteDimensional ℝ (E x)] :
     ContMDiffRiemannianMetric (IB := IB) (n := ∞) (F := F)
      (E := E) :=
   { inner := g_global_bilin_1' (F := F) f
     symm := riemannian_metric_symm_1' f h_sub
     pos := riemannian_metric_pos_def_1' f h_sub
-    isVonNBounded := sorry
+    isVonNBounded := riemannian_unit_ball_bounded_1' f h_sub
     contMDiff := g_global_bilin_1_smooth' f h_sub
      }
