@@ -7,26 +7,12 @@ module
 
 public import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 public import Mathlib.Geometry.Manifold.PartitionOfUnity
-public import Mathlib.Geometry.Manifold.Instances.Real
-public import Mathlib.Geometry.Manifold.VectorBundle.Tangent
-public import Mathlib.Geometry.Manifold.MFDeriv.Atlas
-public import Mathlib.Topology.Algebra.Module.Equiv
-public import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
-public import Mathlib.Analysis.Distribution.SchwartzSpace
-public import Mathlib.Analysis.Normed.Group.Basic
-public import Mathlib.Analysis.InnerProductSpace.Defs
-public import Mathlib.Geometry.Manifold.IsManifold.Basic
-public import Mathlib.Topology.FiberBundle.Basic
-public import Mathlib.Topology.VectorBundle.Basic
-public import Mathlib.Geometry.Manifold.VectorBundle.Basic
 
 /-! ## Existence of a Riemannian bundle metric
 
 Using a partition of unity, we prove the existence of a smooth Riemannian metric.
 
 -/
-
-set_option linter.unusedSectionVars false
 
 open Bundle ContDiff Manifold Trivialization SmoothPartitionOfUnity
 
@@ -39,10 +25,7 @@ variable
   [∀ x, NormedAddCommGroup (E x)]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
-  [IsManifold IB ω B] [ContMDiffVectorBundle ω F E IB]
 
-variable [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
-variable [FiniteDimensional ℝ F]
 
 noncomputable section
 
@@ -725,6 +708,9 @@ lemma riemannian_unit_ball_bounded (f : SmoothPartitionOfUnity B IB B)
     fun v => riemannian_metric_def f hf b v
   exact aux_tvs (g_global_bilin_2 f b) h1 h2 h3
 
+
+section Smooth
+
 lemma g_bilin_1g_smooth_on_chart (i : B) :
   ContMDiffOn IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
     (g_bilin_1 (F := F) (E := E) i)
@@ -795,6 +781,8 @@ lemma g_bilin_1g_smooth_on_chart (i : B) :
     have : y ∈ (trivializationAt F E i).baseSet := hy.1
     simp only [if_pos this]
     rfl
+
+end Smooth
 
 def g_global_bilin_1 (f : SmoothPartitionOfUnity B IB B) (p : B) :
     E p →L[ℝ] (E p →L[ℝ] ℝ) :=
@@ -915,6 +903,10 @@ public def riemannian_metric_exists
     contMDiff := g_global_bilin_1_smooth f h_sub
      }
 
+section SigmaCompactSpace
+variable [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
+         [IsManifold IB ω B]
+
 lemma exists_partition_subordinate_to_intersection :
   ∃ (f : SmoothPartitionOfUnity B IB B),
     f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source) := by
@@ -928,3 +920,19 @@ lemma exists_partition_subordinate_to_intersection :
     constructor
     · exact FiberBundle.mem_baseSet_trivializationAt' b
     · exact mem_chart_source HB b
+
+end SigmaCompactSpace
+
+section FiniteDimensional
+
+variable [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
+         [IsManifold IB ω B]
+
+theorem exists_riemannian_metric
+  [FiniteDimensional ℝ F]
+  [∀ x, FiniteDimensional ℝ (E x)] :
+    Nonempty (ContMDiffRiemannianMetric (IB := IB) (n := ∞) (F := F) (E := E)) :=
+  let ⟨f, hf⟩ := exists_partition_subordinate_to_intersection (F := F)
+  ⟨riemannian_metric_exists f hf⟩
+
+end FiniteDimensional
