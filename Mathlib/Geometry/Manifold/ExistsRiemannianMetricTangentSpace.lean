@@ -246,15 +246,19 @@ def tangentSpaceEquiv {x : B}
 
 end tangentSpaceEquiv
 
+variable
+[NormedAddCommGroup EB]
+[NormedAddCommGroup F]
+[TopologicalSpace (TotalSpace F E)]
+[∀ x, NormedAddCommGroup (E x)]
+
 noncomputable section section1
 
 variable
-[NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
+[InnerProductSpace ℝ EB]
 [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
 [TopologicalSpace B] [ChartedSpace HB B]
-[NormedAddCommGroup F] [InnerProductSpace ℝ F]
-[TopologicalSpace (TotalSpace F E)]
-[∀ x, NormedAddCommGroup (E x)]
+[InnerProductSpace ℝ F]
 [∀ x, NormedSpace ℝ (E x)]
 [FiberBundle F E] [VectorBundle ℝ F E]
 [IsManifold IB ω B] [ContMDiffVectorBundle ω F E IB]
@@ -343,7 +347,6 @@ variable
 [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
 [NormedAddCommGroup F] [InnerProductSpace ℝ F]
 [TopologicalSpace (TotalSpace F E)]
-[∀ x, NormedAddCommGroup (E x)]
 [∀ x, NormedSpace ℝ (E x)]
 
 lemma withSeminormsOfBilinearForm {x : B}
@@ -445,12 +448,10 @@ end section2
 noncomputable section section3
 
 variable
- [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
+[InnerProductSpace ℝ EB]
 [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
-[NormedAddCommGroup F] [InnerProductSpace ℝ F]
-  [TopologicalSpace (TotalSpace F E)]
-  [∀ x, NormedAddCommGroup (E x)]
+[InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
 
@@ -666,12 +667,10 @@ end section3
 section section4
 
 variable
- [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
+[InnerProductSpace ℝ EB]
 [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
-[NormedAddCommGroup F] [InnerProductSpace ℝ F]
-  [TopologicalSpace (TotalSpace F E)]
-  [∀ x, NormedAddCommGroup (E x)]
+[InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
   [ContMDiffVectorBundle ω F E IB]
@@ -745,12 +744,10 @@ end section4
 noncomputable section section5
 
 variable
- [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
+[InnerProductSpace ℝ EB]
 [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
-[NormedAddCommGroup F] [InnerProductSpace ℝ F]
-  [TopologicalSpace (TotalSpace F E)]
-  [∀ x, NormedAddCommGroup (E x)]
+[InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
 [ContMDiffVectorBundle ω F E IB]
@@ -797,12 +794,10 @@ end section5
 section section6
 
 variable
- [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
+[InnerProductSpace ℝ EB]
 [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
-[NormedAddCommGroup F] [InnerProductSpace ℝ F]
-  [TopologicalSpace (TotalSpace F E)]
-  [∀ x, NormedAddCommGroup (E x)]
+[InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
 
@@ -987,12 +982,9 @@ end section7
 section section8
 
 variable
- [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
+[InnerProductSpace ℝ EB]
 [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
-[NormedAddCommGroup F]
-  [TopologicalSpace (TotalSpace F E)]
-  [∀ x, NormedAddCommGroup (E x)]
   [FiberBundle F E]
   [IsManifold IB ω B]
 
@@ -1017,12 +1009,10 @@ end section8
 section section9
 
 variable
- [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
+[InnerProductSpace ℝ EB]
 [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
-[NormedAddCommGroup F] [InnerProductSpace ℝ F]
-  [TopologicalSpace (TotalSpace F E)]
-  [∀ x, NormedAddCommGroup (E x)]
+[InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
   [IsManifold IB ω B] [ContMDiffVectorBundle ω F E IB]
