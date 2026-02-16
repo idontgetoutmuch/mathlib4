@@ -112,8 +112,7 @@ noncomputable def seminormOfBilinearForm {x : B}
               exact Real.le_sqrt_of_sq_le h2
         _ = (√((φ r) r) + √((φ s) s)) ^ 2 := by
                 rw [add_sq]
-                rw [Real.sq_sqrt (hpos r), Real.sq_sqrt (hpos s)]
-                rw [Real.sqrt_mul (hpos r) ((φ s) s)]
+                rw [Real.sq_sqrt (hpos r), Real.sq_sqrt (hpos s), Real.sqrt_mul (hpos r) ((φ s) s)]
                 ring
       have h2 : 0 ≤ √((φ r) r) + √((φ s) s) :=
         add_nonneg (Real.sqrt_nonneg ((φ r) r)) (Real.sqrt_nonneg ((φ s) s))
@@ -176,8 +175,7 @@ lemma my_dist_triangle {x : B}
     := (seminormOfBilinearForm φ hpos hsymm).add_le' (u.val - v.val) (v.val - w.val)
   have h2 : (u.val - v.val) + (v.val - w.val) = u.val - w.val :=
     sub_add_sub_cancel u.val v.val w.val
-  rw [h2] at h1
-  exact h1
+  exact h2 ▸ h1
 
 noncomputable instance {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
@@ -228,8 +226,7 @@ instance {x : B}
     have h7 : norm (a • u) = Real.sqrt (φ (a • u.val) (a • u.val)) := rfl
     have h8 : norm (a • u) = Real.sqrt ( a * a * φ u.val u.val) := by grind
     have h9 : norm (a • u) = |a| * Real.sqrt (φ u.val u.val) := by
-      rw [h8]
-      rw [Real.sqrt_mul' (a * a) (hpos u.val)]
+      rw [h8, Real.sqrt_mul' (a * a) (hpos u.val)]
       have : √(a * a) = |a| := Real.sqrt_mul_self_eq_abs a
       rw [this]
     exact le_of_eq h9
@@ -292,8 +289,7 @@ lemma g_nonneg (j b : B) (v : E b) :
     have h2 : 0 ≤ innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
                      ((continuousLinearMapAt ℝ χ b) v) := by
       exact @inner_self_nonneg ℝ _ _ _ _ _
-    rw [<-h1] at h2
-    exact h2
+    exact h1 ▸ h2
   · simp
 
 lemma g_pos (i b : B)
@@ -611,12 +607,10 @@ lemma sum_bilinear_form_pos (f : SmoothPartitionOfUnity B IB B)
   have h5 : ∑ᶠ i, h' i  = ∑ᶠ i, (((f i) b • g_bilin_2 (F := F) i b).toFun v).toFun v := rfl
   have h6 : ∑ᶠ i, h' i  =
             ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v := by
-    rw [hb] at h5
-    exact h5
+    exact hb ▸ h5
   have h7 : ∑ᶠ i, h' i =
             ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v := by
-    rw [ha] at h6
-    exact h6
+    exact ha ▸ h6
   exact lt_of_lt_of_eq h4 h7
 
 lemma riemannian_metric_pos_def (f : SmoothPartitionOfUnity B IB B)
@@ -732,23 +726,16 @@ lemma g_bilin_1g_smooth_on_chart (i : B) :
      ((trivializationAt F E i).baseSet ∩ (extChartAt IB i).source) := h2.comp h4 this
   have h6 : (extChartAt IB i).source = (chartAt HB i).source := extChartAt_source IB i
   rw [<-h6]
-  have h7 : b ∈ (chartAt HB i).source := hb.2
-  have : b ∈ (extChartAt IB i).source := by
-    rw [<-h6] at h7
-    exact h7
-  have : b ∈ (trivializationAt F E i).baseSet ∩ (extChartAt IB i).source := by
-    have h1 : b ∈ (trivializationAt F E i).baseSet := hb.1
-    exact Set.mem_inter h1 this
+  have : b ∈ (trivializationAt F E i).baseSet ∩ (extChartAt IB i).source :=
+    Set.mem_inter hb.1 (h6 ▸ hb.2)
   refine (ContMDiffOn.congr h5 ?_) b this
   intro y hy
   simp only [Function.comp_apply]
   rw [h6] at hy
   ext
   · rfl
-  · simp only [innerAtP]
-    simp only [Set.inter_univ, Set.inter_self, Set.mem_prod, Set.mem_univ, and_true,
-      OpenPartialHomeomorph.coe_coe_symm,
-      heq_eq_eq]
+  · simp only [innerAtP, Set.inter_univ, Set.inter_self, Set.mem_prod, Set.mem_univ, and_true,
+               OpenPartialHomeomorph.coe_coe_symm, heq_eq_eq]
     have : y ∈ (trivializationAt F E i).baseSet := hy.1
     simp only [if_pos this]
     rfl
@@ -777,11 +764,8 @@ lemma g_global_bilin_1_smooth (f : SmoothPartitionOfUnity B IB B)
   ContMDiff IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
     (fun x ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) x (g_global_bilin_1 (F := F) (E := E) f x)) := by
   have h1 := contMDiff_totalSpace_weighted_sum_of_local_sections
-    (E := EB) (I := IB) (M := B)
     (V := fun b => E b →L[ℝ] (E b →L[ℝ] Trivial B ℝ b))
     (F_fiber := F →L[ℝ] (F →L[ℝ] ℝ))
-    (n := (⊤ : ℕ∞)) (ι := B)
-    (ρ := f)
     (s_loc := fun (i b : B) => (g_bilin_1 (F := F) i b).snd)
     (U := fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source)
     (hU_isOpen := by
@@ -823,7 +807,6 @@ variable
   [FiberBundle F E] [VectorBundle ℝ F E]
 
 lemma trivializationAt_vectorBundle_bilinearForm_apply
-    {HB : Type*} [TopologicalSpace HB] [ChartedSpace HB B]
     (x₀ x : B)
     (w : E x →L[ℝ] E x →L[ℝ] ℝ)
     (u v : F)
@@ -839,8 +822,8 @@ lemma trivializationAt_vectorBundle_bilinearForm_apply
   have hx' : x ∈ (trivializationAt F E x₀).baseSet ∩
     ((trivializationAt F E x₀).baseSet ∩ Set.univ) := by
     exact ⟨hx, ⟨hx, trivial⟩⟩
-  rw [if_pos hx']
-  rw [inCoordinates_apply_eq₂ hx hx (by simp : x ∈ (trivializationAt ℝ (fun _ ↦ ℝ) x₀).baseSet)]
+  rw [if_pos hx',
+      inCoordinates_apply_eq₂ hx hx (by simp : x ∈ (trivializationAt ℝ (fun _ ↦ ℝ) x₀).baseSet)]
   simp only [Trivial.fiberBundle_trivializationAt', Trivial.linearMapAt_trivialization,
              LinearMap.id_coe, id_eq]
 
@@ -870,7 +853,7 @@ lemma g_bilin_eq_00a_pre (i b : B)
   have h3 : ∀ u v, innerSL ℝ u v = w (χ.symm b u) (χ.symm b v) := by
     intro u v
     rw [<-h4]
-    exact trivializationAt_vectorBundle_bilinearForm_apply (HB := HB) i b w u v hb.1
+    exact trivializationAt_vectorBundle_bilinearForm_apply i b w u v hb.1
   have ha : χ.symm b (χ.continuousLinearMapAt ℝ b α) = α :=
       symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 α
   have hb' : χ.symm b (χ.continuousLinearMapAt ℝ b β) = β :=
