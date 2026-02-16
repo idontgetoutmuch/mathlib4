@@ -274,7 +274,7 @@ def g_bilin_1 (i b : B) :
     · exact 0⟩
 
 def g_bilin_2 (i p : B) : E p →L[ℝ] (E p →L[ℝ] ℝ) := by
-  let χ := trivializationAt F E i
+  letI χ := trivializationAt F E i
   by_cases h : p ∈ χ.baseSet
   · exact (innerSL ℝ).comp (χ.continuousLinearMapAt ℝ p) |>.flip.comp (χ.continuousLinearMapAt ℝ p)
   · exact 0
@@ -284,7 +284,7 @@ lemma g_nonneg (j b : B) (v : E b) :
   unfold g_bilin_2
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
   split_ifs with h
-  · let χ := (trivializationAt F E j)
+  · letI χ := (trivializationAt F E j)
     have h1 : ((innerSL ℝ).comp (continuousLinearMapAt ℝ χ b)).flip.comp
                              (continuousLinearMapAt ℝ χ b) v v =
            innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
@@ -303,7 +303,7 @@ lemma g_pos (i b : B)
   unfold g_bilin_2
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
   split_ifs with hh1
-  · let χ := (trivializationAt F E i)
+  · letI χ := (trivializationAt F E i)
     have h1 : ((innerSL ℝ).comp (continuousLinearMapAt ℝ χ b)).flip.comp
                                (continuousLinearMapAt ℝ χ b) v v =
              innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
@@ -364,7 +364,7 @@ lemma withSeminormsOfBilinearForm {x : B}
       intro i v
       simp [aux, seminormOfBilinearForm]
       rfl
-    let e := tangentSpaceEquiv φ hpos hsymm hdef
+    letI e := tangentSpaceEquiv φ hpos hsymm hdef
     apply WithSeminorms.congr (norm_withSeminorms ℝ (E x))
     · have e_cont : Continuous (tangentSpaceEquiv φ hpos hsymm hdef).toLinearMap :=
       LinearMap.continuous_of_finiteDimensional _
@@ -446,7 +446,7 @@ theorem linear_flip_apply
 
 end section2
 
-section section3
+noncomputable section section3
 
 variable
  [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
@@ -462,7 +462,6 @@ theorem g_bilin_symm_2 (i p : B) (v w : E p) :
     ((g_bilin_2 (F := F) i p).toFun v).toFun w =
     ((g_bilin_2 (F := F) i p).toFun w).toFun v := by
   unfold g_bilin_2
-  simp only []
   split_ifs with h
   · simp only [ContinuousLinearMap.coe_comp, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom,
     LinearMap.coe_comp,
@@ -472,7 +471,7 @@ theorem g_bilin_symm_2 (i p : B) (v w : E p) :
     rw [real_inner_comm]
   · simp
 
-noncomputable def g_global_bilin_2 (f : SmoothPartitionOfUnity B IB B) (p : B) :
+def g_global_bilin_2 (f : SmoothPartitionOfUnity B IB B) (p : B) :
     E p →L[ℝ] (E p →L[ℝ] ℝ) :=
   ∑ᶠ (j : B), (f j) p • g_bilin_2 (F := F) j p
 
@@ -510,7 +509,7 @@ lemma h_need (f : SmoothPartitionOfUnity B IB B) (b : B) (v w : E b)
             ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 (F := F) j b).toFun w).toFun v := by
     simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
     rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
-  let h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) :=
+  letI h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) :=
     fun j ↦ (f j) b • g_bilin_2 (F := F) j b
   have h_inc : (Function.support h) ⊆ h_fin.toFinset :=
       Set.Finite.toFinset_subset.mp fun ⦃a⦄ a ↦ a
@@ -570,9 +569,9 @@ lemma sum_bilinear_form_pos (f : SmoothPartitionOfUnity B IB B)
             ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v := by
     simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
     rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
-  let h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) :=
+  letI h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) :=
     fun j ↦ (f j) b • g_bilin_2 (F := F) j b
-  let h' x := f x b * ((g_bilin_2 (F := F) x b).toFun v).toFun v
+  letI h' x := f x b * ((g_bilin_2 (F := F) x b).toFun v).toFun v
   have h_inc : (Function.support h) ⊆ h_fin.toFinset :=
       Set.Finite.toFinset_subset.mp fun ⦃a⦄ a ↦ a
   have hb : ∑ᶠ (j : B), (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v =
@@ -695,7 +694,7 @@ lemma g_bilin_1g_smooth_on_chart (i : B) :
   dite_eq_ite]
   intro b hb
   classical
-  let ψ := trivializationAt (F →L[ℝ] F →L[ℝ] ℝ) (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
+  letI ψ := trivializationAt (F →L[ℝ] F →L[ℝ] ℝ) (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
   have heq : ∀ x ∈ (chartAt HB i).source,
     (if (x, ((innerSL ℝ) : (F →L[ℝ] F →L[ℝ] ℝ))) ∈ (chartAt HB i).source ×ˢ Set.univ
       then
@@ -710,7 +709,7 @@ lemma g_bilin_1g_smooth_on_chart (i : B) :
     exact if_pos this
   have h2 : ContMDiffOn (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
     ψ.toPartialEquiv.symm ψ.target := contMDiffOn_symm _
-  let innerAtP : B → F →L[ℝ] F →L[ℝ] ℝ := fun x ↦ innerSL ℝ
+  letI innerAtP : B → F →L[ℝ] F →L[ℝ] ℝ := fun x ↦ innerSL ℝ
   have h4 : ContMDiffOn IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
     (fun c => (c, innerAtP c)) ((trivializationAt F E i).baseSet ∩ (extChartAt IB i).source) := by
       apply ContMDiffOn.prodMk
@@ -756,7 +755,7 @@ lemma g_bilin_1g_smooth_on_chart (i : B) :
 
 end section4
 
-section section5
+noncomputable section section5
 
 variable
  [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
@@ -769,7 +768,7 @@ variable
   [FiberBundle F E] [VectorBundle ℝ F E]
 [ContMDiffVectorBundle ω F E IB]
 
-noncomputable def g_global_bilin_1 (f : SmoothPartitionOfUnity B IB B) (p : B) :
+def g_global_bilin_1 (f : SmoothPartitionOfUnity B IB B) (p : B) :
     E p →L[ℝ] (E p →L[ℝ] ℝ) :=
       ∑ᶠ (j : B), (f j) p • (g_bilin_1 (F := F) j p).snd
 
@@ -855,10 +854,10 @@ lemma g_bilin_eq_00a_pre (i b : B)
       ((Trivialization.linearMapAt ℝ (trivializationAt F E i) b) β))
       ((Trivialization.linearMapAt ℝ (trivializationAt F E i) b) α) := by
   simp only [innerSL_apply_apply]
-  let ψ := FiberBundle.trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
+  letI ψ := FiberBundle.trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
       (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
-  let χ := trivializationAt F E i
-  let w := ψ.symm b (innerSL ℝ)
+  letI χ := trivializationAt F E i
+  letI w := ψ.symm b (innerSL ℝ)
   have hc : b ∈ ψ.baseSet := by
     rw [hom_trivializationAt_baseSet]
     simp only [hom_trivializationAt_baseSet, Trivial.fiberBundle_trivializationAt',
@@ -970,7 +969,7 @@ lemma riemannian_unit_ball_bounded_1 (f : SmoothPartitionOfUnity B IB B)
 
 end section6
 
-section section7
+noncomputable section section7
 
 variable
  [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
@@ -989,7 +988,7 @@ variable [FiniteDimensional ℝ F]
 /--
 Existence of a smooth Riemannian metric on a manifold.
 -/
-public noncomputable def riemannian_metric_exists
+public def riemannian_metric_exists
     (f : SmoothPartitionOfUnity B IB B)
     (h_sub : f.IsSubordinate fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source)
     [∀ x, FiniteDimensional ℝ (E x)] :
