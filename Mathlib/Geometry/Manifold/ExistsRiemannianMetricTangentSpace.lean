@@ -111,8 +111,8 @@ noncomputable def seminormOfBilinearForm {x : B}
                 exact le_of_eq_of_le (congrFun (congrArg HMul.hMul (hsymm s r)) ((φ s) r)) this
               exact Real.le_sqrt_of_sq_le h2
         _ = (√((φ r) r) + √((φ s) s)) ^ 2 := by
-                rw [add_sq]
-                rw [Real.sq_sqrt (hpos r), Real.sq_sqrt (hpos s), Real.sqrt_mul (hpos r) ((φ s) s)]
+                rw [add_sq, Real.sq_sqrt (hpos r), Real.sq_sqrt (hpos s),
+                    Real.sqrt_mul (hpos r) ((φ s) s)]
                 ring
       have h2 : 0 ≤ √((φ r) r) + √((φ s) s) :=
         add_nonneg (Real.sqrt_nonneg ((φ r) r)) (Real.sqrt_nonneg ((φ s) s))
@@ -975,14 +975,12 @@ public def riemannian_metric_exists
     (f : SmoothPartitionOfUnity B IB B)
     (h_sub : f.IsSubordinate fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source)
     [∀ x, FiniteDimensional ℝ (E x)] :
-    ContMDiffRiemannianMetric (IB := IB) (n := ∞) (F := F)
-     (E := E) :=
-  { inner := g_global_bilin_1 (F := F) f
-    symm := riemannian_metric_symm_1 f h_sub
-    pos := riemannian_metric_pos_def_1 f h_sub
-    isVonNBounded := riemannian_unit_ball_bounded_1 f h_sub
-    contMDiff := g_global_bilin_1_smooth f h_sub
-     }
+    ContMDiffRiemannianMetric (IB := IB) (n := ∞) (F := F) (E := E) where
+  inner := g_global_bilin_1 (F := F) f
+  symm := riemannian_metric_symm_1 f h_sub
+  pos := riemannian_metric_pos_def_1 f h_sub
+  isVonNBounded := riemannian_unit_ball_bounded_1 f h_sub
+  contMDiff := g_global_bilin_1_smooth f h_sub
 
 end section7
 
