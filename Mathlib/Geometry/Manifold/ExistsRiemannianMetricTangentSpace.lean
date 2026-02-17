@@ -342,13 +342,10 @@ lemma withSeminormsOfBilinearForm {x : B}
       intro i v
       simp [aux, seminormOfBilinearForm]
       rfl
-    letI e := tangentSpaceEquiv φ hpos hsymm hdef
     apply WithSeminorms.congr (norm_withSeminorms ℝ (E x))
-    · have e_cont : Continuous (tangentSpaceEquiv φ hpos hsymm hdef).toLinearMap :=
-      LinearMap.continuous_of_finiteDimensional _
-      have : IsBoundedLinearMap ℝ (tangentSpaceEquiv φ hpos hsymm hdef).toLinearMap := by
+    · have : IsBoundedLinearMap ℝ (tangentSpaceEquiv φ hpos hsymm hdef).toLinearMap := by
         rw [← IsBoundedLinearMap.isLinearMap_and_continuous_iff_isBoundedLinearMap]
-        exact ⟨LinearMap.isLinear _, e_cont⟩
+        exact ⟨LinearMap.isLinear _, LinearMap.continuous_of_finiteDimensional _⟩
       obtain ⟨C, hC⟩ := this.bound
       intro i
       use {0}, ⟨max C 1, by positivity⟩
@@ -366,11 +363,9 @@ lemma withSeminormsOfBilinearForm {x : B}
         _ ≤ C * ‖v‖ := hhave
         _ ≤ max C 1 * ‖v‖ := by gcongr; exact le_max_left C 1
       exact this
-    · have e_cont : Continuous (tangentSpaceEquiv φ hpos hsymm hdef).symm.toLinearMap :=
-      LinearMap.continuous_of_finiteDimensional _
-      have : IsBoundedLinearMap ℝ (tangentSpaceEquiv φ hpos hsymm hdef).symm.toLinearMap := by
+    · have : IsBoundedLinearMap ℝ (tangentSpaceEquiv φ hpos hsymm hdef).symm.toLinearMap := by
         rw [← IsBoundedLinearMap.isLinearMap_and_continuous_iff_isBoundedLinearMap]
-        exact ⟨LinearMap.isLinear _, e_cont⟩
+        exact ⟨LinearMap.isLinear _, LinearMap.continuous_of_finiteDimensional _⟩
       obtain ⟨C, hC⟩ := this.bound
       intro j
       use {0}, ⟨max C 1, by positivity⟩
@@ -378,8 +373,9 @@ lemma withSeminormsOfBilinearForm {x : B}
       simp only [Seminorm.comp_id, coe_normSeminorm, Fin.isValue, Finset.sup_singleton,
                  Seminorm.smul_apply]
       have hhave :
-       ‖(tangentSpaceEquiv φ hpos hsymm hdef).symm (tangentSpaceEquiv φ hpos hsymm hdef v)‖
-               ≤ C * ‖tangentSpaceEquiv φ hpos hsymm hdef v‖ := hC.2 ⟨v⟩
+        ‖(tangentSpaceEquiv φ hpos hsymm hdef).symm (tangentSpaceEquiv φ hpos hsymm hdef v)‖
+        ≤
+        C * ‖tangentSpaceEquiv φ hpos hsymm hdef v‖ := hC.2 ⟨v⟩
       simp only [tangentSpaceEquiv, LinearEquiv.coe_mk, LinearMap.coe_mk, AddHom.coe_mk,
                  LinearEquiv.coe_symm_mk'] at hhave
       have :   ‖v‖ ≤ max C 1 * (aux φ hpos hsymm j) v := by
@@ -439,12 +435,7 @@ theorem g_bilin_symm_2 (i p : B) (v w : E p) :
     ((g_bilin_2 (F := F) i p).toFun w).toFun v := by
   unfold g_bilin_2
   split_ifs with h
-  · simp only [ContinuousLinearMap.coe_comp, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom,
-    LinearMap.coe_comp,
-    ContinuousLinearMap.coe_coe, continuousLinearMapAt_apply, Function.comp_apply,
-    linear_flip_apply,
-    ContinuousLinearMap.coe_comp', coe_innerSL_apply]
-    rw [real_inner_comm]
+  · simp [real_inner_comm]
   · simp
 
 def g_global_bilin_2 (f : SmoothPartitionOfUnity B IB B) (p : B) :
@@ -456,9 +447,8 @@ lemma finsum_image_eq_sum {B E F : Type*} [AddCommMonoid E] [AddCommMonoid F]
  (h1 : Function.support f ⊆ h_fin) :
     ∑ᶠ j, φ (f j) = ∑ j ∈ h_fin, φ (f j) := by
   apply finsum_eq_sum_of_support_subset
-  have : Function.support f ⊆ ↑h_fin := h1
   intro j hj
-  simp only [Function.mem_support, ne_eq] at hj ⊢
+  simp only [Function.mem_support, ne_eq] at hj
   have hf : f j ≠ 0 := by
     contrapose! hj
     simpa using (map_zero φ).symm ▸ congrArg φ hj
