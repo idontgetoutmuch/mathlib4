@@ -18,12 +18,11 @@ open Bundle ContDiff Manifold Trivialization SmoothPartitionOfUnity
 
 variable
 {B : Type*}
-{E : B → Type*}
+{E : B → Type*} [∀ x, NormedAddCommGroup (E x)]
 
 section tangentSpaceEquiv
 
 variable
-  [∀ x, NormedAddCommGroup (E x)]
   [∀ x, NormedSpace ℝ (E x)]
 
 structure VectorSpaceAux
@@ -244,25 +243,21 @@ def tangentSpaceEquiv {x : B}
 end tangentSpaceEquiv
 
 variable
-{EB : Type*}
+{EB : Type*} [NormedAddCommGroup EB]
 {HB : Type*}
-{F : Type*}
-[NormedAddCommGroup EB]
-[NormedAddCommGroup F]
-[TopologicalSpace (TotalSpace F E)]
-[∀ x, NormedAddCommGroup (E x)]
+{F : Type*} [NormedAddCommGroup F] [TopologicalSpace (TotalSpace F E)]
 
 noncomputable section section1
 
 variable
-[InnerProductSpace ℝ EB]
-[TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
-[TopologicalSpace B] [ChartedSpace HB B]
-[InnerProductSpace ℝ F]
-[∀ x, NormedSpace ℝ (E x)]
-[FiberBundle F E] [VectorBundle ℝ F E]
-[IsManifold IB ω B] [ContMDiffVectorBundle ω F E IB]
-[FiniteDimensional ℝ EB]
+  [InnerProductSpace ℝ EB]
+  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  [TopologicalSpace B] [ChartedSpace HB B]
+  [InnerProductSpace ℝ F]
+  [∀ x, NormedSpace ℝ (E x)]
+  [FiberBundle F E] [VectorBundle ℝ F E]
+  [IsManifold IB ω B] [ContMDiffVectorBundle ω F E IB]
+  [FiniteDimensional ℝ EB]
 
 def g_bilin_1 (i b : B) :
  (TotalSpace (F →L[ℝ] F →L[ℝ] ℝ)
@@ -343,11 +338,11 @@ end section1
 section section2
 
 variable
-[NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
-[TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
-[NormedAddCommGroup F] [InnerProductSpace ℝ F]
-[TopologicalSpace (TotalSpace F E)]
-[∀ x, NormedSpace ℝ (E x)]
+  [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
+  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+  [TopologicalSpace (TotalSpace F E)]
+  [∀ x, NormedSpace ℝ (E x)]
 
 lemma withSeminormsOfBilinearForm {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
@@ -448,10 +443,10 @@ end section2
 noncomputable section section3
 
 variable
-[InnerProductSpace ℝ EB]
-[TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  [InnerProductSpace ℝ EB]
+  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
-[InnerProductSpace ℝ F]
+  [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
 
@@ -667,10 +662,10 @@ end section3
 section section4
 
 variable
-[InnerProductSpace ℝ EB]
-[TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  [InnerProductSpace ℝ EB]
+  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
-[InnerProductSpace ℝ F]
+  [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
   [ContMDiffVectorBundle ω F E IB]
@@ -744,13 +739,13 @@ end section4
 noncomputable section section5
 
 variable
-[InnerProductSpace ℝ EB]
-[TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  [InnerProductSpace ℝ EB]
+  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
-[InnerProductSpace ℝ F]
+  [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
-[ContMDiffVectorBundle ω F E IB]
+  [ContMDiffVectorBundle ω F E IB]
 
 def g_global_bilin_1 (f : SmoothPartitionOfUnity B IB B) (p : B) :
     E p →L[ℝ] (E p →L[ℝ] ℝ) :=
@@ -794,10 +789,10 @@ end section5
 section section6
 
 variable
-[InnerProductSpace ℝ EB]
-[TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  [InnerProductSpace ℝ EB]
+  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
-[InnerProductSpace ℝ F]
+  [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
 
@@ -950,18 +945,17 @@ end section6
 noncomputable section section7
 
 variable
- [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
-[TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
+  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
-[NormedAddCommGroup F] [InnerProductSpace ℝ F]
+  [NormedAddCommGroup F] [InnerProductSpace ℝ F]
   [TopologicalSpace (TotalSpace F E)]
   [∀ x, NormedAddCommGroup (E x)]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
   [IsManifold IB ω B] [ContMDiffVectorBundle ω F E IB]
-
-variable [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
-variable [FiniteDimensional ℝ F]
+  [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
+  [FiniteDimensional ℝ F]
 
 /--
 Existence of a smooth Riemannian metric on a manifold.
@@ -982,13 +976,12 @@ end section7
 section section8
 
 variable
-[InnerProductSpace ℝ EB]
-[TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  [InnerProductSpace ℝ EB]
+  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
   [FiberBundle F E]
   [IsManifold IB ω B]
-
-variable [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
+  [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
 
 lemma exists_partition_subordinate_to_intersection :
   ∃ (f : SmoothPartitionOfUnity B IB B),
@@ -1009,15 +1002,14 @@ end section8
 section section9
 
 variable
-[InnerProductSpace ℝ EB]
-[TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  [InnerProductSpace ℝ EB]
+  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
-[InnerProductSpace ℝ F]
+  [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
   [IsManifold IB ω B] [ContMDiffVectorBundle ω F E IB]
-
-variable [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
+  [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
 
 theorem exists_riemannian_metric
   [FiniteDimensional ℝ F]
