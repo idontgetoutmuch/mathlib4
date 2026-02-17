@@ -19,9 +19,6 @@ open Bundle ContDiff Manifold Trivialization SmoothPartitionOfUnity
 variable
 {B : Type*}
 {E : B → Type*}
-{EB : Type*}
-{HB : Type*}
-{F : Type*}
 
 section tangentSpaceEquiv
 
@@ -247,6 +244,9 @@ def tangentSpaceEquiv {x : B}
 end tangentSpaceEquiv
 
 variable
+{EB : Type*}
+{HB : Type*}
+{F : Type*}
 [NormedAddCommGroup EB]
 [NormedAddCommGroup F]
 [TopologicalSpace (TotalSpace F E)]
