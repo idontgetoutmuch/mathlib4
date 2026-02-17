@@ -314,8 +314,8 @@ instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0)
   [FiniteDimensional ℝ (E x)] :
-  FiniteDimensional ℝ (VectorSpaceAux x φ hpos hsymm hdef) := by
-  exact LinearEquiv.finiteDimensional (tangentSpaceEquiv φ hpos hsymm hdef)
+    FiniteDimensional ℝ (VectorSpaceAux x φ hpos hsymm hdef) := by
+      exact LinearEquiv.finiteDimensional (tangentSpaceEquiv φ hpos hsymm hdef)
 
 end section1
 
