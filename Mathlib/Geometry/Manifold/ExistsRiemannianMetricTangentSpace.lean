@@ -282,15 +282,7 @@ lemma g_nonneg (j b : B) (v : E b) :
   unfold g_bilin_2
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
   split_ifs with h
-  · letI χ := (trivializationAt F E j)
-    have h1 : ((innerSL ℝ).comp (continuousLinearMapAt ℝ χ b)).flip.comp
-                             (continuousLinearMapAt ℝ χ b) v v =
-           innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
-                     ((continuousLinearMapAt ℝ χ b) v) := rfl
-    have h2 : 0 ≤ innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
-                     ((continuousLinearMapAt ℝ χ b) v) := by
-      exact @inner_self_nonneg ℝ _ _ _ _ _
-    exact h1 ▸ h2
+  · exact (inner_self_nonneg (𝕜 := ℝ))
   · simp
 
 lemma g_pos (i b : B)
@@ -301,25 +293,15 @@ lemma g_pos (i b : B)
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
   split_ifs with hh1
   · letI χ := (trivializationAt F E i)
-    have h1 : ((innerSL ℝ).comp (continuousLinearMapAt ℝ χ b)).flip.comp
-                               (continuousLinearMapAt ℝ χ b) v v =
-             innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
-                       ((continuousLinearMapAt ℝ χ b) v) := rfl
-    have h2 : innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
-                       ((continuousLinearMapAt ℝ χ b) v) ≠ 0 ↔
-                       ((continuousLinearMapAt ℝ χ b) v) ≠ 0 := inner_self_ne_zero
     have h3 : ((continuousLinearMapAt ℝ χ b) v ≠ 0 ↔ v ≠ 0) := by
       have : ((continuousLinearEquivAt ℝ χ b hh1) v) =
              ((continuousLinearMapAt ℝ χ b) v) :=
               congrArg (fun f => f v) (coe_continuousLinearEquivAt_eq χ hh1)
       rw [<-this]
       exact AddEquivClass.map_ne_zero_iff
-    have h4 : ((continuousLinearMapAt ℝ χ b) v) ≠ 0 := h3.mpr hv
     have h5 : innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
-                       ((continuousLinearMapAt ℝ χ b) v) ≠ 0 := h2.mpr h4
-    have h6 : 0 ≤ innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
-                       ((continuousLinearMapAt ℝ χ b) v) := @inner_self_nonneg ℝ _ _ _ _ _
-    exact Std.lt_of_le_of_ne h6 (id (Ne.symm h5))
+                       ((continuousLinearMapAt ℝ χ b) v) ≠ 0 := inner_self_ne_zero.mpr (h3.mpr hv)
+    exact Std.lt_of_le_of_ne (inner_self_nonneg (𝕜 := ℝ)) (id (Ne.symm h5))
   · exfalso
     exact hh1 hb.1
 
@@ -540,9 +522,7 @@ lemma riemannian_metric_symm (f : SmoothPartitionOfUnity B IB B) (b : B)
       simp only [Function.mem_support, ne_eq, smul_eq_zero, not_or] at hi
       simp only [Set.mem_setOf_eq, Function.mem_support, ne_eq]
       exact hi.1
-  have h6a : (∑ᶠ (j : B), (f j) b • g_bilin_2 j b) =
-            ∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b := finsum_eq_sum _ h_fin
-  rw [h6a]
+  rw [finsum_eq_sum _ h_fin]
   have : ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun v).toFun w =
          ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun w).toFun v :=
     h_need f b v w h_fin
