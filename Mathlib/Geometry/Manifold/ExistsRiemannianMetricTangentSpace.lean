@@ -656,11 +656,11 @@ lemma g_bilin_1g_smooth_on_chart (i : B) :
     ψ.toPartialEquiv.symm ψ.target := contMDiffOn_symm _
   letI innerAtP : B → F →L[ℝ] F →L[ℝ] ℝ := fun x ↦ innerSL ℝ
   have h4 : ContMDiffOn IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
-    (fun c => (c, innerAtP c)) ((trivializationAt F E i).baseSet ∩ (extChartAt IB i).source) := by
+    (fun c => (c, innerAtP c)) ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) := by
       apply ContMDiffOn.prodMk
       · exact contMDiffOn_id
       · exact contMDiffOn_const
-  have : (trivializationAt F E i).baseSet ∩ (extChartAt IB i).source ⊆
+  have : (trivializationAt F E i).baseSet ∩ (chartAt HB i).source ⊆
   (fun c ↦ (c, innerAtP c)) ⁻¹' ψ.target := by
     intro c hc
     simp only [Set.mem_preimage]
@@ -674,15 +674,11 @@ lemma g_bilin_1g_smooth_on_chart (i : B) :
     exact hc.1
   have h5 : ContMDiffOn IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
     (ψ.toPartialEquiv.symm ∘ fun c ↦ (c, innerAtP c))
-     ((trivializationAt F E i).baseSet ∩ (extChartAt IB i).source) := h2.comp h4 this
-  have h6 : (extChartAt IB i).source = (chartAt HB i).source := extChartAt_source IB i
-  rw [<-h6]
-  have : b ∈ (trivializationAt F E i).baseSet ∩ (extChartAt IB i).source :=
-    Set.mem_inter hb.1 (h6 ▸ hb.2)
+     ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) := h2.comp h4 this
+  have : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source := hb
   refine (ContMDiffOn.congr h5 ?_) b this
   intro y hy
   simp only [Function.comp_apply]
-  rw [h6] at hy
   ext
   · rfl
   · simp only [innerAtP, Set.inter_univ, Set.inter_self, Set.mem_prod, Set.mem_univ, and_true,
