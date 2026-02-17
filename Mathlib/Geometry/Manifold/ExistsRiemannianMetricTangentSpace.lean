@@ -269,11 +269,13 @@ def g_bilin_1 (i b : B) :
     · exact (ψ.invFun (b, (fun (x : B) ↦ innerSL ℝ) b)).snd
     · exact 0⟩
 
-def g_bilin_2 (i p : B) : E p →L[ℝ] (E p →L[ℝ] ℝ) := by
+open Classical in
+def g_bilin_2 (i p : B) : E p →L[ℝ] (E p →L[ℝ] ℝ) :=
   letI χ := trivializationAt F E i
-  by_cases h : p ∈ χ.baseSet
-  · exact (innerSL ℝ).comp (χ.continuousLinearMapAt ℝ p) |>.flip.comp (χ.continuousLinearMapAt ℝ p)
-  · exact 0
+  if p ∈ χ.baseSet then
+    (innerSL ℝ).comp (χ.continuousLinearMapAt ℝ p) |>.flip.comp (χ.continuousLinearMapAt ℝ p)
+  else
+    0
 
 lemma g_nonneg (j b : B) (v : E b) :
     0 ≤ ((g_bilin_2 (F := F) j b).toFun v).toFun v := by
@@ -872,9 +874,7 @@ lemma g_bilin_eq (i b : B)
             hom_trivializationAt_target, hom_trivializationAt_baseSet,
              Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet,
              Set.inter_univ, Set.inter_self, Set.mem_prod, hb.1, Set.mem_univ, and_self,
-             ↓reduceDIte, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe,
-             ContinuousLinearMap.coe_comp, LinearMap.coe_comp, continuousLinearMapAt_apply,
-             Function.comp_apply]
+             ↓reduceDIte, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
   exact g_bilin_eq_00a_pre i b hb α β
 
 lemma g_global_bilin_eq
