@@ -511,10 +511,7 @@ lemma riemannian_metric_symm (f : SmoothPartitionOfUnity B IB B) (b : B)
       simp only [Set.mem_setOf_eq, Function.mem_support, ne_eq]
       exact hi.1
   rw [finsum_eq_sum _ h_fin]
-  have : ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun v).toFun w =
-         ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun w).toFun v :=
-    h_need f b v w h_fin
-  exact this
+  exact h_need f b v w h_fin
 
 lemma sum_bilinear_form_pos (f : SmoothPartitionOfUnity B IB B)
   (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
@@ -583,9 +580,7 @@ lemma riemannian_metric_pos_def (f : SmoothPartitionOfUnity B IB B)
     simp only [Function.mem_support, ne_eq, smul_eq_zero, not_or] at hi
     simp only [Set.mem_setOf_eq, Function.mem_support, ne_eq]
     exact hi.1
-  have h6a : (∑ᶠ (j : B), (f j) b • g_bilin_2 (F := F) j b) =
-            ∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 (F := F) j b := finsum_eq_sum _ h_fin
-  rw [h6a]
+  rw [finsum_eq_sum _ h_fin]
   exact sum_bilinear_form_pos  f hf b v h_fin hv
 
 lemma riemannian_metric_def (f : SmoothPartitionOfUnity B IB B)
