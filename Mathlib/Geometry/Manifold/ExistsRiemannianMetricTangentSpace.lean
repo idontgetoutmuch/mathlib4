@@ -455,12 +455,10 @@ lemma finsum_image_eq_sum {B E F : Type*} [AddCommMonoid E] [AddCommMonoid F]
     exact h1 hf
 
 def evalAt (b : B) (v w : E b) :
-    (E b →L[ℝ] (E b →L[ℝ] ℝ)) →+ ℝ :=
-  {
+    (E b →L[ℝ] (E b →L[ℝ] ℝ)) →+ ℝ where
     toFun := fun f => (f.toFun v).toFun w
     map_zero' := by simp
     map_add' := by intro f g; exact rfl
-  }
 
 lemma h_need (f : SmoothPartitionOfUnity B IB B) (b : B) (v w : E b)
   (h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2 (F := F) j b) :
