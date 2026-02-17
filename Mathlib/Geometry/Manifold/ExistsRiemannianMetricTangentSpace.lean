@@ -507,12 +507,6 @@ lemma h_need (f : SmoothPartitionOfUnity B IB B) (b : B) (v w : E b)
     fun j ↦ (f j) b • g_bilin_2 (F := F) j b
   have h_inc : (Function.support h) ⊆ h_fin.toFinset :=
       Set.Finite.toFinset_subset.mp fun ⦃a⦄ a ↦ a
-  have hb : ∑ᶠ (j : B), (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun w =
-            ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun w :=
-    finsum_image_eq_sum (evalAt b v w) h h_fin.toFinset h_inc
-  have hb' : ∑ᶠ (j : B), (((f j) b • g_bilin_2 j b).toFun w).toFun v =
-            ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 j b).toFun w).toFun v :=
-    finsum_image_eq_sum (evalAt b w v) h h_fin.toFinset h_inc
   have h_gbilin_symm : ∑ᶠ (j : B), (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun w =
                        ∑ᶠ (j : B), (((f j) b • g_bilin_2 (F := F) j b).toFun w).toFun v := by
     have h5 : ∀ (j : B), (((g_bilin_2 (F := F) j b)).toFun v).toFun w =
@@ -525,9 +519,11 @@ lemma h_need (f : SmoothPartitionOfUnity B IB B) (b : B) (v w : E b)
   calc
       ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 (F := F) j b).toFun v).toFun w
         = ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun w := ha.symm
-      _ = ∑ᶠ (j : B), (((f j) b • g_bilin_2 j b).toFun v).toFun w := hb.symm
+      _ = ∑ᶠ (j : B), (((f j) b • g_bilin_2 j b).toFun v).toFun w :=
+            (finsum_image_eq_sum (evalAt b v w) h h_fin.toFinset h_inc).symm
       _ = ∑ᶠ (j : B), (((f j) b • g_bilin_2 j b).toFun w).toFun v := h_gbilin_symm
-      _ = ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 j b).toFun w).toFun v := hb'
+      _ = ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 j b).toFun w).toFun v :=
+             finsum_image_eq_sum (evalAt b w v) h h_fin.toFinset h_inc
       _ = ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 j b).toFun w).toFun v := ha'
 
 lemma riemannian_metric_symm (f : SmoothPartitionOfUnity B IB B) (b : B)
@@ -568,9 +564,6 @@ lemma sum_bilinear_form_pos (f : SmoothPartitionOfUnity B IB B)
   letI h' x := f x b * ((g_bilin_2 (F := F) x b).toFun v).toFun v
   have h_inc : (Function.support h) ⊆ h_fin.toFinset :=
       Set.Finite.toFinset_subset.mp fun ⦃a⦄ a ↦ a
-  have hb : ∑ᶠ (j : B), (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v =
-           ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v :=
-      finsum_image_eq_sum (evalAt b v v) h h_fin.toFinset h_inc
   have : ∀ j, (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v = h' j := by
     simp only [ContinuousLinearMap.coe_smul, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom,
                LinearMap.smul_apply,
@@ -602,10 +595,9 @@ lemma sum_bilinear_form_pos (f : SmoothPartitionOfUnity B IB B)
     have : (f x) b * ((g_bilin_2 (F := F) x b).toFun v).toFun v ≠ 0 := mul_ne_zero_iff.mpr this
     exact mul_ne_zero_iff.mp this |>.1
   have h4 : 0 < ∑ᶠ i, h' i := finsum_pos h1 h2 h3
-  have h5 : ∑ᶠ i, h' i  = ∑ᶠ i, (((f i) b • g_bilin_2 (F := F) i b).toFun v).toFun v := rfl
   have h6 : ∑ᶠ i, h' i  =
             ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v := by
-    exact hb ▸ h5
+    exact (finsum_image_eq_sum (evalAt b v v) h h_fin.toFinset h_inc) ▸ rfl
   have h7 : ∑ᶠ i, h' i =
             ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v := by
     exact ha ▸ h6
