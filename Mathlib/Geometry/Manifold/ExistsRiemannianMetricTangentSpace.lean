@@ -293,7 +293,7 @@ lemma g_pos (i b : B)
       exact AddEquivClass.map_ne_zero_iff
     have h5 : innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
                        ((continuousLinearMapAt ℝ χ b) v) ≠ 0 := inner_self_ne_zero.mpr (h3.mpr hv)
-    exact Std.lt_of_le_of_ne (inner_self_nonneg (𝕜 := ℝ)) (id (Ne.symm h5))
+    exact Std.lt_of_le_of_ne (inner_self_nonneg (𝕜 := ℝ)) h5.symm
   · exfalso
     exact hh1 hb.1
 
@@ -327,55 +327,34 @@ lemma withSeminormsOfBilinearForm {x : B}
   (hdef : ∀ v, φ v v = 0 → v = 0)
   [FiniteDimensional ℝ (E x)] :
   WithSeminorms (aux φ hpos hsymm) := by
-    have h1 : WithSeminorms fun x_1 ↦ normSeminorm ℝ (VectorSpaceAux x φ hpos hsymm hdef) :=
-      norm_withSeminorms ℝ (VectorSpaceAux x φ hpos hsymm hdef)
-    have h_eq : ∀ i v, aux φ hpos hsymm i v =
-                       normSeminorm ℝ (VectorSpaceAux x φ hpos hsymm hdef) ⟨v⟩ := by
-      intro i v
-      simp [aux, seminormOfBilinearForm]
-      rfl
     apply WithSeminorms.congr (norm_withSeminorms ℝ (E x))
-    · have : IsBoundedLinearMap ℝ (tangentSpaceEquiv φ hpos hsymm hdef).toLinearMap := by
+    · have h1 : IsBoundedLinearMap ℝ (tangentSpaceEquiv φ hpos hsymm hdef).toLinearMap := by
         rw [← IsBoundedLinearMap.isLinearMap_and_continuous_iff_isBoundedLinearMap]
         exact ⟨LinearMap.isLinear _, LinearMap.continuous_of_finiteDimensional _⟩
-      obtain ⟨C, hC⟩ := this.bound
+      obtain ⟨C, hC⟩ := h1.bound
       intro i
       use {0}, ⟨max C 1, by positivity⟩
       intro v
       simp only [Seminorm.comp_id, Fin.isValue, Finset.sup_singleton, Seminorm.smul_apply,
                  coe_normSeminorm]
-      have hhave : ‖(tangentSpaceEquiv φ hpos hsymm hdef) v‖ ≤ C * ‖v‖ := hC.2 v
-      have h_aux_eq : aux φ hpos hsymm i v = seminormOfBilinearForm φ hpos hsymm v := rfl
-      have h_norm_eq : ‖tangentSpaceEquiv φ hpos hsymm hdef v‖ =
-                       seminormOfBilinearForm φ hpos hsymm v := rfl
-      rw [h_aux_eq, ← h_norm_eq]
-      have : seminormOfBilinearForm φ hpos hsymm v  ≤ max C 1 * ‖v‖ := calc
+      calc
         seminormOfBilinearForm φ hpos hsymm v =
-        ‖tangentSpaceEquiv φ hpos hsymm hdef v‖ := h_norm_eq.symm
-        _ ≤ C * ‖v‖ := hhave
+        ‖tangentSpaceEquiv φ hpos hsymm hdef v‖ := rfl
+        _ ≤ C * ‖v‖ := hC.2 v
         _ ≤ max C 1 * ‖v‖ := by gcongr; exact le_max_left C 1
-      exact this
-    · have : IsBoundedLinearMap ℝ (tangentSpaceEquiv φ hpos hsymm hdef).symm.toLinearMap := by
+    · have h1 : IsBoundedLinearMap ℝ (tangentSpaceEquiv φ hpos hsymm hdef).symm.toLinearMap := by
         rw [← IsBoundedLinearMap.isLinearMap_and_continuous_iff_isBoundedLinearMap]
         exact ⟨LinearMap.isLinear _, LinearMap.continuous_of_finiteDimensional _⟩
-      obtain ⟨C, hC⟩ := this.bound
+      obtain ⟨C, hC⟩ := h1.bound
       intro j
       use {0}, ⟨max C 1, by positivity⟩
       intro v
-      simp only [Seminorm.comp_id, coe_normSeminorm, Fin.isValue, Finset.sup_singleton,
-                 Seminorm.smul_apply]
-      have hhave :
-        ‖(tangentSpaceEquiv φ hpos hsymm hdef).symm (tangentSpaceEquiv φ hpos hsymm hdef v)‖
-        ≤
-        C * ‖tangentSpaceEquiv φ hpos hsymm hdef v‖ := hC.2 ⟨v⟩
-      simp only [tangentSpaceEquiv, LinearEquiv.coe_mk, LinearMap.coe_mk, AddHom.coe_mk,
-                 LinearEquiv.coe_symm_mk'] at hhave
-      have :   ‖v‖ ≤ max C 1 * (aux φ hpos hsymm j) v := by
-         calc ‖v‖ ≤ C * seminormOfBilinearForm φ hpos hsymm v := hhave
-              _ ≤ max C 1 * seminormOfBilinearForm φ hpos hsymm v := by
-                gcongr; exact le_max_left C 1
-              _ = max C 1 * aux φ hpos hsymm j v := rfl
-      exact this
+      simp only [Seminorm.comp_id, Fin.isValue, Finset.sup_singleton, Seminorm.smul_apply,
+                 coe_normSeminorm, ]
+      calc ‖v‖ ≤ C * seminormOfBilinearForm φ hpos hsymm v := hC.2 ⟨v⟩
+        _ ≤ max C 1 * seminormOfBilinearForm φ hpos hsymm v := by
+          gcongr; exact le_max_left C 1
+        _ = max C 1 * aux φ hpos hsymm j v := rfl
 
 lemma aux_tvs {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
    (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
