@@ -269,7 +269,7 @@ def g_bilin_1 (i b : B) :
     · exact (ψ.invFun (b, (fun (x : B) ↦ innerSL ℝ) b)).snd
     · exact 0⟩
 
-open Classical in
+open scoped Classical in
 def g_bilin_2 (i p : B) : E p →L[ℝ] (E p →L[ℝ] ℝ) :=
   letI χ := trivializationAt F E i
   if p ∈ χ.baseSet then
@@ -297,7 +297,7 @@ lemma g_pos (i b : B)
       have : ((continuousLinearEquivAt ℝ χ b hh1) v) =
              ((continuousLinearMapAt ℝ χ b) v) :=
               congrArg (fun f => f v) (coe_continuousLinearEquivAt_eq χ hh1)
-      rw [<-this]
+      rw [←this]
       exact AddEquivClass.map_ne_zero_iff
     have h5 : innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
                        ((continuousLinearMapAt ℝ χ b) v) ≠ 0 := inner_self_ne_zero.mpr (h3.mpr hv)
@@ -795,7 +795,7 @@ lemma g_bilin_eq_00a_pre (i b : B)
     rw [continuousLinearMapAt_symmL ψ hc]
   have h3 : ∀ u v, innerSL ℝ u v = w (χ.symm b u) (χ.symm b v) := by
     intro u v
-    rw [<-h4]
+    rw [←h4]
     exact trivializationAt_vectorBundle_bilinearForm_apply i b w u v hb.1
   have ha : χ.symm b (χ.continuousLinearMapAt ℝ b α) = α :=
       symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 α
