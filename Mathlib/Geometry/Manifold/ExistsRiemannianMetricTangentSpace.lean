@@ -294,10 +294,7 @@ lemma g_pos (i b : B)
   split_ifs with hh1
   · letI χ := (trivializationAt F E i)
     have h3 : ((continuousLinearMapAt ℝ χ b) v ≠ 0 ↔ v ≠ 0) := by
-      have : ((continuousLinearEquivAt ℝ χ b hh1) v) =
-             ((continuousLinearMapAt ℝ χ b) v) :=
-              congrArg (fun f => f v) (coe_continuousLinearEquivAt_eq χ hh1)
-      rw [←this]
+      rw [←coe_continuousLinearEquivAt_eq χ hh1]
       exact AddEquivClass.map_ne_zero_iff
     have h5 : innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
                        ((continuousLinearMapAt ℝ χ b) v) ≠ 0 := inner_self_ne_zero.mpr (h3.mpr hv)
