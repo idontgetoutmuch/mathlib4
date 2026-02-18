@@ -147,7 +147,6 @@ lemma my_eq_of_dist_eq_zero {x : B}
     (seminormOfBilinearForm φ hpos hsymm) (u.val - v.val) = 0 → u = v := by
     intro u v h
     rw [seminormOfBilinearForm] at h
-    have h1 : √((φ (u.val - v.val)) (u.val - v.val)) = 0 := h
     have h2 : ((φ (u.val - v.val)) (u.val - v.val)) = 0 :=
       (Real.sqrt_eq_zero (hpos (u.val - v.val))).mp h
     have h3 : u.val - v.val = 0 := (hdef (u.val - v.val)) h2
