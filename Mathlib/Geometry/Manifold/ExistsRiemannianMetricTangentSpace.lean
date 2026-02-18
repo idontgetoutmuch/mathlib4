@@ -91,10 +91,9 @@ noncomputable def seminormOfBilinearForm {x : B}
     rw [@Real.sqrt_le_iff]
     · have : ((φ r) s) * ((φ s) r) ≤ ((φ r) r) * ((φ s) s) :=
         LinearMap.BilinForm.apply_mul_apply_le_of_forall_zero_le φ.toLinearMap₁₂ hpos r s
-      have h0 : φ (r + s) (r + s) = (φ r) r + (φ r) s + (φ s) r + (φ s) s := by grind
-      have h1 : φ (r + s) (r + s) ≤ (Real.sqrt ((φ r) r) + Real.sqrt ((φ s) s)) ^ 2 :=
+      have h1 : φ (r + s) (r + s) ≤ (Real.sqrt ((φ r) r) + Real.sqrt ((φ s) s)) ^ 2 := by
         calc φ (r + s) (r + s)
-          = (φ r) r + (φ r) s + (φ s) r + (φ s) s := h0
+          = (φ r) r + (φ r) s + (φ s) r + (φ s) s := by grind
         _ = (φ r) r + 2 * (φ r) s + (φ s) s := by
               rw [hsymm r s]
               ring
@@ -110,9 +109,7 @@ noncomputable def seminormOfBilinearForm {x : B}
                 rw [add_sq, Real.sq_sqrt (hpos r), Real.sq_sqrt (hpos s),
                     Real.sqrt_mul (hpos r) ((φ s) s)]
                 ring
-      have h2 : 0 ≤ √((φ r) r) + √((φ s) s) :=
-        add_nonneg (Real.sqrt_nonneg ((φ r) r)) (Real.sqrt_nonneg ((φ s) s))
-      exact And.symm ⟨h1, h2⟩
+      exact ⟨by positivity, h1⟩
   neg' r := by simp
   smul' a v := by simp [← mul_assoc, ← Real.sqrt_mul_self_eq_abs, Real.sqrt_mul (mul_self_nonneg a)]
 
