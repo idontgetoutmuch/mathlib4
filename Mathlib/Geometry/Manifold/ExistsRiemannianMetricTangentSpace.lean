@@ -147,11 +147,10 @@ lemma my_eq_of_dist_eq_zero {x : B}
     (seminormOfBilinearForm φ hpos hsymm) (u.val - v.val) = 0 → u = v := by
     intro u v h
     rw [seminormOfBilinearForm] at h
-    have h2 : ((φ (u.val - v.val)) (u.val - v.val)) = 0 :=
-      (Real.sqrt_eq_zero (hpos (u.val - v.val))).mp h
-    have h3 : u.val - v.val = 0 := (hdef (u.val - v.val)) h2
-    have h4 : u.val = v.val := sub_eq_zero.mp h3
-    exact (VectorSpaceAux.ext_iff φ hpos hsymm hdef u v).mpr h4
+    have h3 : u.val - v.val = 0 := (hdef (u.val - v.val))
+      ((Real.sqrt_eq_zero (hpos (u.val - v.val))).mp h)
+    apply (VectorSpaceAux.ext_iff φ hpos hsymm hdef u v).mpr
+    exact sub_eq_zero.mp h3
 
 lemma my_dist_triangle {x : B}
   (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
