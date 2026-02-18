@@ -406,15 +406,6 @@ lemma aux_tvs {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   rw [Real.sqrt_lt' (by norm_num)]
   simp [h]
 
-@[simp]
-theorem linear_flip_apply
-  {𝕜 E F G : Type*}
-  [NontriviallyNormedField 𝕜]
-  [SeminormedAddCommGroup E] [SeminormedAddCommGroup F] [SeminormedAddCommGroup G]
-  [NormedSpace 𝕜 E] [NormedSpace 𝕜 F] [NormedSpace 𝕜 G]
-  (f : E →L[𝕜] F →L[𝕜] G) (x : F) (y : E) :
-  f.flip x y = f y x := rfl
-
 end section2
 
 noncomputable section section3
