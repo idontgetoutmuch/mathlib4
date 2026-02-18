@@ -33,11 +33,11 @@ structure VectorSpaceAux
   val : E x
 
 lemma VectorSpaceAux.ext_iff {x : B}
-  (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-  (hpos : ∀ v, 0 ≤ φ v v)
-  (hsymm : ∀ u v, φ u v = φ v u)
-  (hdef : ∀ v, φ v v = 0 → v = 0)
-  (u v : VectorSpaceAux x φ hpos hsymm hdef) :
+    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
+    (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u)
+    (hdef : ∀ v, φ v v = 0 → v = 0)
+    (u v : VectorSpaceAux x φ hpos hsymm hdef) :
   u = v ↔ u.val = (v.val : E x) := by
   cases u; cases v; simp
 
