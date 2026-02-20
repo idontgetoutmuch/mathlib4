@@ -238,7 +238,7 @@ lemma g_nonneg (j b : B) (v : E b) :
   unfold g_bilin_2
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
   split_ifs with h
-  · exact (inner_self_nonneg (𝕜 := ℝ))
+  · exact inner_self_nonneg (𝕜 := ℝ)
   · simp
 
 lemma g_pos (i b : B)
@@ -262,13 +262,11 @@ def aux {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
   (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) :
   SeminormFamily ℝ (E x) (Fin 1) := fun _ ↦ seminormOfBilinearForm φ hpos hsymm
 
-instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-  (hpos : ∀ v, 0 ≤ φ v v)
-  (hsymm : ∀ u v, φ u v = φ v u)
-  (hdef : ∀ v, φ v v = 0 → v = 0)
-  [FiniteDimensional ℝ (E x)] :
+instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
+    [FiniteDimensional ℝ (E x)] :
     FiniteDimensional ℝ (VectorSpaceAux x φ hpos hsymm hdef) := by
-      exact LinearEquiv.finiteDimensional (tangentSpaceEquiv φ hpos hsymm hdef)
+  exact LinearEquiv.finiteDimensional (tangentSpaceEquiv φ hpos hsymm hdef)
 
 end section1
 
