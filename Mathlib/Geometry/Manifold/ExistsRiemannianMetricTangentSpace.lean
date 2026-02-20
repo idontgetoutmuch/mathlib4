@@ -432,7 +432,7 @@ def evalAt (b : B) (v w : E b) :
     map_zero' := by simp
     map_add' := by intro f g; exact rfl
 
-lemma riemannian_metric_symm (f : SmoothPartitionOfUnity B IB B) (b : B)
+lemma riemannian_metric_symm_2 (f : SmoothPartitionOfUnity B IB B) (b : B)
   (v w : E b) :
   ((g_global_bilin_2 (F := F) f b).toFun v).toFun w
    =
@@ -464,7 +464,7 @@ lemma riemannian_metric_symm (f : SmoothPartitionOfUnity B IB B) (b : B)
           finsum_image_eq_sum (evalAt b w v) (f := h) (h_fin := h1.toFinset) h2
     _ = ((∑ j ∈ h1.toFinset, (f j) b • g_bilin_2 j b).toFun w).toFun v := h3 w v
 
-lemma riemannian_metric_pos_def (f : SmoothPartitionOfUnity B IB B)
+lemma riemannian_metric_pos_def_2 (f : SmoothPartitionOfUnity B IB B)
   (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
   (b : B) (v : E b) (hv : v ≠ 0) :
   0 < g_global_bilin_2 (F := F) f b v v := by
@@ -505,36 +505,20 @@ lemma riemannian_metric_pos_def (f : SmoothPartitionOfUnity B IB B)
     (finsum_image_eq_sum (evalAt b v v) (f := h) (h_fin := h1.toFinset) h3) ▸ rfl
   exact lt_of_lt_of_eq ha (hb.trans h2)
 
-lemma riemannian_metric_def (f : SmoothPartitionOfUnity B IB B)
-  (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
-  (b : B) (v : E b) :
-  g_global_bilin_2 (F := F) f b v v = 0 → v = 0 := by
-  intro h
-  by_cases hv : v = 0
-  · exact hv
-  · exfalso
-    have hpos : 0 < g_global_bilin_2 f b v v :=
-      riemannian_metric_pos_def f hf b v hv
-    rw [h] at hpos
-    exact lt_irrefl 0 hpos
-
 lemma riemannian_unit_ball_bounded (f : SmoothPartitionOfUnity B IB B)
   (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
   [∀ x, FiniteDimensional ℝ (E x)] :
   ∀ (b : B), Bornology.IsVonNBounded ℝ
-    {v : E b | g_global_bilin_2 (F := F) f b v v < 1} := by
-  intro b
-  have h1 : ∀ (v : E b), 0 ≤ g_global_bilin_2 (F := F) f b v v := by
-    intro v
-    rcases eq_or_ne v 0 with rfl | hv
-    · simp
-    · exact le_of_lt (riemannian_metric_pos_def f hf b v hv)
-  have h2 : ∀ (u v : E b),
-    g_global_bilin_2 (F := F) f b u v = g_global_bilin_2 (F := F) f b v u := by
-    exact fun u v ↦ riemannian_metric_symm f b u v
-  have h3 : ∀ (v : E b), g_global_bilin_2 f b v v = 0 → v = 0 :=
-    fun v => riemannian_metric_def f hf b v
-  exact aux_tvs (g_global_bilin_2 f b) h1 h2 h3
+    {v : E b | g_global_bilin_2 (F := F) f b v v < 1} := fun b =>
+  aux_tvs (g_global_bilin_2 f b)
+    (fun v => by
+      rcases eq_or_ne v 0 with rfl | hv
+      · simp
+      · exact le_of_lt (riemannian_metric_pos_def_2 f hf b v hv))
+    (fun u v => riemannian_metric_symm_2 f b u v)
+    (fun v h => by
+      by_contra hv
+      exact lt_irrefl 0 (h ▸ riemannian_metric_pos_def_2 f hf b v hv))
 
 end section3
 
@@ -765,7 +749,7 @@ lemma riemannian_metric_symm_1
     g_global_bilin_1 (F := F) (E := E) f b w v := by
   have h1 := g_global_bilin_eq f hf b v w
   have h2 := g_global_bilin_eq f hf b w v
-  have hsym := riemannian_metric_symm (F := F) f b v w
+  have hsym := riemannian_metric_symm_2 (F := F) f b v w
   rw [h1, h2]
   exact Real.ext_cauchy (congrArg Real.cauchy hsym)
 
@@ -776,7 +760,7 @@ lemma riemannian_metric_pos_def_1
     0 < g_global_bilin_1 (F := F) (E := E) f b v v := by
   have h1 := g_global_bilin_eq (F := F) (E := E) f hf b v v
   rw [h1]
-  exact riemannian_metric_pos_def f hf b v hv
+  exact riemannian_metric_pos_def_2 f hf b v hv
 
 lemma riemannian_unit_ball_bounded_1 (f : SmoothPartitionOfUnity B IB B)
   (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
