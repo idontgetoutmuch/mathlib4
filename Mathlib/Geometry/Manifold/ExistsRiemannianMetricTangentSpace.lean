@@ -199,15 +199,14 @@ def tangentSpaceEquiv {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀
 end tangentSpaceEquiv
 
 variable
-{EB : Type*} [NormedAddCommGroup EB]
-{HB : Type*}
+{EB : Type*} [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
+{HB : Type*} [TopologicalSpace HB]
 {F : Type*} [NormedAddCommGroup F] [TopologicalSpace (TotalSpace F E)]
 
 noncomputable section section1
 
 variable
-  [InnerProductSpace ℝ EB]
-  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+{IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
   [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
@@ -273,8 +272,7 @@ end section1
 section section2
 
 variable
-  [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
-  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [NormedAddCommGroup F] [InnerProductSpace ℝ F]
   [TopologicalSpace (TotalSpace F E)]
   [∀ x, NormedSpace ℝ (E x)]
@@ -344,8 +342,7 @@ end section2
 noncomputable section section3
 
 variable
-  [InnerProductSpace ℝ EB]
-  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
   [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
@@ -474,8 +471,7 @@ end section3
 section section4
 
 variable
-  [InnerProductSpace ℝ EB]
-  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
   [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
@@ -544,8 +540,7 @@ end section4
 noncomputable section section5
 
 variable
-  [InnerProductSpace ℝ EB]
-  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
   [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
@@ -594,8 +589,7 @@ end section5
 section section6
 
 variable
-  [InnerProductSpace ℝ EB]
-  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
   [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
@@ -724,8 +718,7 @@ end section6
 section section9
 
 variable
-  [InnerProductSpace ℝ EB]
-  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
   [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
