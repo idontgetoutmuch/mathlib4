@@ -689,16 +689,16 @@ lemma trivializationAt_vectorBundle_bilinearForm_apply
   simp only [Trivial.fiberBundle_trivializationAt', Trivial.linearMapAt_trivialization,
              LinearMap.id_coe, id_eq]
 
-lemma g_bilin_eq_pre (i b : B)
+lemma g_bilin_eq (i b : B)
   (hb : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source)
   (α β : E b) :
-  (((FiberBundle.trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
-  (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).toOpenPartialHomeomorph.symm
-    (b, innerSL ℝ)).snd α) β =
-    ((innerSL ℝ)
-      ((Trivialization.linearMapAt ℝ (trivializationAt F E i) b) β))
-      ((Trivialization.linearMapAt ℝ (trivializationAt F E i) b) α) := by
-  simp only [innerSL_apply_apply]
+  (g_bilin_1 (F := F) i b).snd.toFun α β = (g_bilin_2 (F := F) i b).toFun α β := by
+  unfold g_bilin_1 g_bilin_2
+  simp only [PartialEquiv.invFun_as_coe, OpenPartialHomeomorph.coe_coe_symm, dite_eq_ite,
+    hom_trivializationAt_target, hom_trivializationAt_baseSet,
+    Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet,
+    Set.inter_univ, Set.inter_self, Set.mem_prod, hb.1, Set.mem_univ, and_self, ↓reduceDIte,
+    AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe, if_true]
   letI ψ := FiberBundle.trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
       (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
   letI χ := trivializationAt F E i
@@ -706,46 +706,26 @@ lemma g_bilin_eq_pre (i b : B)
   have hc : b ∈ ψ.baseSet := by
     rw [hom_trivializationAt_baseSet]
     simp only [hom_trivializationAt_baseSet, Trivial.fiberBundle_trivializationAt',
-               Trivial.trivialization_baseSet, Set.inter_univ, Set.inter_self]
+               Trivial.trivialization_baseSet, inter_univ, inter_self]
     exact hb.1
-  have h4 u v :
+  have h1 u v :
       (((continuousLinearMapAt ℝ ψ b) (ψ.symmL ℝ b (innerSL ℝ))) u) v =
-      innerSL ℝ u v := by
-    rw [continuousLinearMapAt_symmL ψ hc]
-  have h3 : ∀ u v, innerSL ℝ u v = w (χ.symm b u) (χ.symm b v) := by
-    intro u v
-    rw [←h4]
-    exact trivializationAt_vectorBundle_bilinearForm_apply i b w u v hb.1
-  have ha : χ.symm b (χ.continuousLinearMapAt ℝ b α) = α :=
-      symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 α
-  have hb' : χ.symm b (χ.continuousLinearMapAt ℝ b β) = β :=
-      symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 β
-  have hp : (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) α)
-                       ((continuousLinearMapAt ℝ χ b) β) =
-      w (χ.symm b ((continuousLinearMapAt ℝ χ b) α))
-        (χ.symm b ((continuousLinearMapAt ℝ χ b) β)) :=
-    h3 (χ.continuousLinearMapAt ℝ b α) (χ.continuousLinearMapAt ℝ b β)
-  rw [ha, hb'] at hp
-  have he : (ψ.toOpenPartialHomeomorph.symm (b, innerSL ℝ)).snd = ψ.symm b (innerSL ℝ) := by
+      innerSL ℝ u v :=
+    by rw [continuousLinearMapAt_symmL ψ hc]
+  have h2 : ∀ u v, innerSL ℝ u v = w (χ.symm b u) (χ.symm b v) := fun u v => by
+    rw [← h1]; exact trivializationAt_vectorBundle_bilinearForm_apply i b w u v hb.1
+  have h3 : χ.symm b (χ.continuousLinearMapAt ℝ b α) = α :=
+    symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 α
+  have h4 : χ.symm b (χ.continuousLinearMapAt ℝ b β) = β :=
+    symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 β
+  have h5 : (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) α) ((continuousLinearMapAt ℝ χ b) β) =
+      w α β := by
+    rw [h2 (χ.continuousLinearMapAt ℝ b α) (χ.continuousLinearMapAt ℝ b β), h3, h4]
+  have h6 : (ψ.toOpenPartialHomeomorph.symm (b, innerSL ℝ)).snd = ψ.symm b (innerSL ℝ) := by
     rw [symm_apply ψ hc (innerSL ℝ)]
     simp only [cast_eq]
-  rw [he]
-  calc w α β
-      = (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) α) ((continuousLinearMapAt ℝ χ b) β) := hp.symm
-    _ = (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) β) ((continuousLinearMapAt ℝ χ b) α) :=
-      real_inner_comm _ _
-
-lemma g_bilin_eq (i b : B)
-  (hb : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source)
-  (α β : E b) :
-  (g_bilin_1 (F := F) i b).snd.toFun α β = (g_bilin_2 (F := F) i b).toFun α β := by
-  unfold g_bilin_1 g_bilin_2
-  simp only [PartialEquiv.invFun_as_coe, OpenPartialHomeomorph.coe_coe_symm, dite_eq_ite,
-            hom_trivializationAt_target, hom_trivializationAt_baseSet,
-             Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet,
-             Set.inter_univ, Set.inter_self, Set.mem_prod, hb.1, Set.mem_univ, and_self,
-             ↓reduceDIte, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
-  exact g_bilin_eq_pre i b hb α β
+  rw [h6, ← h5]
+  exact real_inner_comm _ _
 
 lemma g_global_bilin_eq
     (f : SmoothPartitionOfUnity B IB B)
