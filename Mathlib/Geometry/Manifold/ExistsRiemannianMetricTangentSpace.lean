@@ -26,65 +26,43 @@ variable
   [∀ x, NormedSpace ℝ (E x)]
 
 structure VectorSpaceAux
-  (x : B) (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-  (hpos : ∀ v, 0 ≤ φ v v)
-  (hsymm : ∀ u v, φ u v = φ v u)
-  (hdef : ∀ v, φ v v = 0 → v = 0) where
+  (x : B) (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+  (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) where
   val : E x
 
-lemma VectorSpaceAux.ext_iff {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0)
+lemma VectorSpaceAux.ext_iff {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
     (u v : VectorSpaceAux x φ hpos hsymm hdef) :
   u = v ↔ u.val = (v.val : E x) := by
   cases u; cases v; simp
 
-instance {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0) :
+instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   Zero (VectorSpaceAux x φ hpos hsymm hdef) where
   zero := ⟨0⟩
 
-instance {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0) :
+instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   Add (VectorSpaceAux x φ hpos hsymm hdef) where
   add u v := ⟨u.val + v.val⟩
 
-instance {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0) :
+instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   Neg (VectorSpaceAux x φ hpos hsymm hdef) where
   neg u := ⟨-u.val⟩
 
-instance {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0) :
+instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   Sub (VectorSpaceAux x φ hpos hsymm hdef) where
   sub u v := ⟨u.val - v.val⟩
 
-instance {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0) :
+instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   SMul ℝ (VectorSpaceAux x φ hpos hsymm hdef) where
   smul a u := ⟨a • u.val⟩
 
-noncomputable def seminormOfBilinearForm {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u) :
+noncomputable def seminormOfBilinearForm {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
+    (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) :
   Seminorm ℝ (E x) where
   toFun v := Real.sqrt (φ v v)
   map_zero' := by simp
@@ -114,29 +92,20 @@ noncomputable def seminormOfBilinearForm {x : B}
   neg' r := by simp
   smul' a v := by simp [← mul_assoc, ← Real.sqrt_mul_self_eq_abs, Real.sqrt_mul (mul_self_nonneg a)]
 
-noncomputable instance {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0) :
+noncomputable instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   Norm (VectorSpaceAux x φ hpos hsymm hdef) where
   norm v := seminormOfBilinearForm φ hpos hsymm v.val
 
-lemma seminormOfBilinearForm_sub_self {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0)
+lemma seminormOfBilinearForm_sub_self {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
     (v : VectorSpaceAux x φ hpos hsymm hdef) :
   seminormOfBilinearForm φ hpos hsymm (v.val - v.val) = 0 := by
   unfold seminormOfBilinearForm
   simp
 
-lemma seminormOfBilinearForm_sub_comm {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0)
+lemma seminormOfBilinearForm_sub_comm {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
     (u v : VectorSpaceAux x φ hpos hsymm hdef) :
   seminormOfBilinearForm φ hpos hsymm (u.val - v.val) =
   seminormOfBilinearForm φ hpos hsymm (v.val - u.val) := by
@@ -145,11 +114,8 @@ lemma seminormOfBilinearForm_sub_comm {x : B}
     grind
   exact this
 
-lemma my_eq_of_dist_eq_zero {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0) :
+lemma my_eq_of_dist_eq_zero {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   ∀ {u v: VectorSpaceAux x φ hpos hsymm hdef},
     (seminormOfBilinearForm φ hpos hsymm) (u.val - v.val) = 0 → u = v := by
     intro u v h
@@ -159,11 +125,8 @@ lemma my_eq_of_dist_eq_zero {x : B}
     apply (VectorSpaceAux.ext_iff φ hpos hsymm hdef u v).mpr
     exact sub_eq_zero.mp h1
 
-lemma my_dist_triangle {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0) :
+lemma my_dist_triangle {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   ∀ (x_1 y z : VectorSpaceAux x φ hpos hsymm hdef),
     (seminormOfBilinearForm φ hpos hsymm) (x_1.val - z.val) ≤
       (seminormOfBilinearForm φ hpos hsymm) (x_1.val - y.val) +
@@ -177,11 +140,8 @@ lemma my_dist_triangle {x : B}
     sub_add_sub_cancel u.val v.val w.val
   exact h2 ▸ h1
 
-noncomputable instance {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0) :
+noncomputable instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   NormedAddCommGroup (VectorSpaceAux x φ hpos hsymm hdef) where
   norm := fun v => seminormOfBilinearForm φ hpos hsymm v.val
   dist_eq := by intros; rfl
@@ -199,11 +159,8 @@ noncomputable instance {x : B}
   dist_triangle := my_dist_triangle φ hpos hsymm hdef
   eq_of_dist_eq_zero := my_eq_of_dist_eq_zero φ hpos hsymm hdef
 
-instance {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0) :
+instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   Module ℝ (VectorSpaceAux x φ hpos hsymm hdef) where
   one_smul u := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (one_smul ℝ u.val)
   mul_smul a b u := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (mul_smul a b u.val)
@@ -212,11 +169,8 @@ instance {x : B}
   zero_smul u := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (zero_smul ℝ u.val)
   add_smul a b u := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_smul a b u.val)
 
-instance {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0) :
+instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   NormedSpace ℝ (VectorSpaceAux x φ hpos hsymm hdef) where
   norm_smul_le := by
     intro a u
@@ -232,11 +186,8 @@ instance {x : B}
       rw [h4, Real.sqrt_mul' (a * a) (hpos u.val), Real.sqrt_mul_self_eq_abs a]
     exact le_of_eq h5
 
-def tangentSpaceEquiv {x : B}
-    (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u)
-    (hdef : ∀ v, φ v v = 0 → v = 0) :
+def tangentSpaceEquiv {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   E x ≃ₗ[ℝ] VectorSpaceAux x φ hpos hsymm hdef where
   toFun v := ⟨v⟩
   map_add' _ _ := rfl
@@ -505,7 +456,7 @@ lemma riemannian_metric_pos_def_2 (f : SmoothPartitionOfUnity B IB B)
     (finsum_image_eq_sum (evalAt b v v) (f := h) (h_fin := h1.toFinset) h3) ▸ rfl
   exact lt_of_lt_of_eq ha (hb.trans h2)
 
-lemma riemannian_unit_ball_bounded (f : SmoothPartitionOfUnity B IB B)
+lemma riemannian_unit_ball_bounded_2 (f : SmoothPartitionOfUnity B IB B)
   (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
   [∀ x, FiniteDimensional ℝ (E x)] :
   ∀ (b : B), Bornology.IsVonNBounded ℝ
@@ -747,19 +698,15 @@ lemma riemannian_metric_symm_1
     (b : B) (v w : E b) :
     g_global_bilin_1 (F := F) (E := E) f b v w =
     g_global_bilin_1 (F := F) (E := E) f b w v := by
-  have h1 := g_global_bilin_eq f hf b v w
-  have h2 := g_global_bilin_eq f hf b w v
-  have hsym := riemannian_metric_symm_2 (F := F) f b v w
-  rw [h1, h2]
-  exact Real.ext_cauchy (congrArg Real.cauchy hsym)
+  rw [g_global_bilin_eq f hf b v w, g_global_bilin_eq f hf b w v]
+  exact Real.ext_cauchy (congrArg Real.cauchy (riemannian_metric_symm_2 (F := F) f b v w))
 
 lemma riemannian_metric_pos_def_1
     (f : SmoothPartitionOfUnity B IB B)
     (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
     (b : B) (v : E b) (hv : v ≠ 0) :
     0 < g_global_bilin_1 (F := F) (E := E) f b v v := by
-  have h1 := g_global_bilin_eq (F := F) (E := E) f hf b v v
-  rw [h1]
+  rw [g_global_bilin_eq (F := F) (E := E) f hf b v v]
   exact riemannian_metric_pos_def_2 f hf b v hv
 
 lemma riemannian_unit_ball_bounded_1 (f : SmoothPartitionOfUnity B IB B)
@@ -772,40 +719,9 @@ lemma riemannian_unit_ball_bounded_1 (f : SmoothPartitionOfUnity B IB B)
                   g_global_bilin_2 (F := F) f b v v :=
     fun v => g_global_bilin_eq f hf b v v
   simp_rw [hy]
-  exact riemannian_unit_ball_bounded f hf b
+  exact riemannian_unit_ball_bounded_2 f hf b
 
 end section6
-
-noncomputable section section7
-
-variable
-  [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
-  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
-  [TopologicalSpace B] [ChartedSpace HB B]
-  [NormedAddCommGroup F] [InnerProductSpace ℝ F]
-  [TopologicalSpace (TotalSpace F E)]
-  [∀ x, NormedAddCommGroup (E x)]
-  [∀ x, NormedSpace ℝ (E x)]
-  [FiberBundle F E] [VectorBundle ℝ F E]
-  [IsManifold IB ω B] [ContMDiffVectorBundle ω F E IB]
-  [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
-  [FiniteDimensional ℝ F]
-
-/--
-Existence of a smooth Riemannian metric on a manifold.
--/
-public def riemannian_metric_exists
-    (f : SmoothPartitionOfUnity B IB B)
-    (h_sub : f.IsSubordinate fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source)
-    [∀ x, FiniteDimensional ℝ (E x)] :
-    ContMDiffRiemannianMetric (IB := IB) (n := ∞) (F := F) (E := E) where
-  inner := g_global_bilin_1 (F := F) f
-  symm := riemannian_metric_symm_1 f h_sub
-  pos := riemannian_metric_pos_def_1 f h_sub
-  isVonNBounded := riemannian_unit_ball_bounded_1 f h_sub
-  contMDiff := g_global_bilin_1_smooth f h_sub
-
-end section7
 
 section section8
 
@@ -845,11 +761,18 @@ variable
   [IsManifold IB ω B] [ContMDiffVectorBundle ω F E IB]
   [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
 
-theorem exists_riemannian_metric
+/--
+Existence of a smooth Riemannian metric on a manifold.
+-/
+public theorem exists_riemannian_metric
   [FiniteDimensional ℝ F]
   [∀ x, FiniteDimensional ℝ (E x)] :
     Nonempty (ContMDiffRiemannianMetric (IB := IB) (n := ∞) (F := F) (E := E)) :=
   let ⟨f, hf⟩ := exists_partition_subordinate_to_intersection (F := F)
-  ⟨riemannian_metric_exists f hf⟩
+  ⟨{ inner := g_global_bilin_1 (F := F) f
+     symm := riemannian_metric_symm_1 f hf
+     pos := riemannian_metric_pos_def_1 f hf
+     isVonNBounded := riemannian_unit_ball_bounded_1 f hf
+     contMDiff := g_global_bilin_1_smooth f hf }⟩
 
 end section9
