@@ -464,75 +464,46 @@ lemma riemannian_metric_symm (f : SmoothPartitionOfUnity B IB B) (b : B)
           finsum_image_eq_sum (evalAt b w v) (f := h) (h_fin := h1.toFinset) h2
     _ = ((∑ j ∈ h1.toFinset, (f j) b • g_bilin_2 j b).toFun w).toFun v := h3 w v
 
-lemma sum_bilinear_form_pos (f : SmoothPartitionOfUnity B IB B)
-  (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
-  (b : B) (v : E b)
-  (h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2 (F := F) j b) :
-    E b →L[ℝ] (E b →L[ℝ] ℝ))).Finite)
-  (hv : v ≠ 0) :
-    0 < ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v := by
-  have ha : ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v =
-            ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v := by
-    simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
-    rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
-  letI h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) :=
-    fun j ↦ (f j) b • g_bilin_2 (F := F) j b
-  letI h' x := f x b * ((g_bilin_2 (F := F) x b).toFun v).toFun v
-  have h_inc : (Function.support h) ⊆ h_fin.toFinset :=
-      Set.Finite.toFinset_subset.mp fun ⦃a⦄ a ↦ a
-  have : ∀ j, (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v = h' j := by
-    simp only [ContinuousLinearMap.coe_smul, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom,
-               LinearMap.smul_apply,
-               ContinuousLinearMap.coe_coe, smul_eq_mul]
-    exact fun j ↦ rfl
-  have h_nonneg : ∀ i, 0 ≤ f.toFun i b := fun i => f.nonneg' i b
-  have ⟨i, hi_pos⟩ : ∃ i, 0 < f i b := by
-    by_contra hneg
-    push_neg at hneg
-    have : ∀ (x : B), f x b = 0 := fun x => le_antisymm (hneg x) (h_nonneg x)
-    have h1 : ∑ᶠ i, f i b = 0 := finsum_eq_zero_of_forall_eq_zero this
-    have h2 : ∑ᶠ i, f i b = 1 := f.sum_eq_one' b trivial
-    exact absurd (h1.symm.trans h2) one_ne_zero.symm
-  have hi_mem : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source := by
-    apply hf
-    apply subset_closure
-    exact Function.mem_support.mpr hi_pos.ne'
-  have h1 : ∀ j, 0 ≤ h' j := fun j =>
-    mul_nonneg (h_nonneg j) (g_nonneg j b v)
-  have h2 : ∃ j, 0 < h' j :=
-    ⟨i, mul_pos hi_pos (g_pos i b hi_mem v hv)⟩
-  have h3 : (Function.support h').Finite := by
-    apply (f.locallyFinite'.point_finite b).subset
-    intro x hx
-    simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe,
-    Function.support_mul,
-    Set.mem_inter_iff, Function.mem_support, ne_eq, h'] at hx
-    have : f x b ≠ 0 ∧ (((g_bilin_2 (F := F) x b)).toFun v).toFun v ≠ 0 := hx
-    have : (f x) b * ((g_bilin_2 (F := F) x b).toFun v).toFun v ≠ 0 := mul_ne_zero_iff.mpr this
-    exact mul_ne_zero_iff.mp this |>.1
-  have h4 : 0 < ∑ᶠ i, h' i := finsum_pos h1 h2 h3
-  have h6 : ∑ᶠ i, h' i  =
-            ∑ j ∈ h_fin.toFinset, (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v := by
-    exact (finsum_image_eq_sum (evalAt b v v) (f := h) (h_fin := h_fin.toFinset) h_inc) ▸ rfl
-  have h7 : ∑ᶠ i, h' i =
-            ((∑ j ∈ h_fin.toFinset, (f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v := by
-    exact ha ▸ h6
-  exact lt_of_lt_of_eq h4 h7
-
 lemma riemannian_metric_pos_def (f : SmoothPartitionOfUnity B IB B)
   (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
   (b : B) (v : E b) (hv : v ≠ 0) :
   0 < g_global_bilin_2 (F := F) f b v v := by
   unfold g_global_bilin_2
-  have h_fin : (Function.support fun j ↦ ((f j) b • (g_bilin_2 (F := F) j b) :
-    E b →L[ℝ] (E b →L[ℝ] ℝ))).Finite := by
+  have h1 : (Function.support fun j ↦ ((f j) b • (g_bilin_2 (F := F) j b) :
+    E b →L[ℝ] E b →L[ℝ] ℝ)).Finite := by
     apply (f.locallyFinite'.point_finite b).subset
     intro i hi
     simp only [Function.mem_support, ne_eq, smul_eq_zero, not_or] at hi
-    simp only [Set.mem_setOf_eq, Function.mem_support, ne_eq]
     exact hi.1
-  rw [finsum_eq_sum _ h_fin]
-  exact sum_bilinear_form_pos  f hf b v h_fin hv
+  rw [finsum_eq_sum _ h1]
+  have h2 : ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v =
+            ((∑ j ∈ h1.toFinset, (f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v := by
+    simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
+    rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  letI h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) := fun j ↦ (f j) b • g_bilin_2 (F := F) j b
+  letI h' x := f x b * ((g_bilin_2 (F := F) x b).toFun v).toFun v
+  have h3 : (Function.support h) ⊆ h1.toFinset := Set.Finite.toFinset_subset.mp fun ⦃a⦄ a ↦ a
+  have h4 : ∀ i, 0 ≤ f.toFun i b := fun i => f.nonneg' i b
+  have ⟨i, h5⟩ : ∃ i, 0 < f i b := by
+    by_contra hneg
+    push_neg at hneg
+    have : ∀ (x : B), f x b = 0 := fun x => le_antisymm (hneg x) (h4 x)
+    exact absurd ((finsum_eq_zero_of_forall_eq_zero this).symm.trans (f.sum_eq_one' b trivial))
+      one_ne_zero.symm
+  have h6 : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source :=
+    hf i (subset_closure (Function.mem_support.mpr h5.ne'))
+  have h7 : ∀ j, 0 ≤ h' j := fun j => mul_nonneg (h4 j) (g_nonneg j b v)
+  have h8 : ∃ j, 0 < h' j := ⟨i, mul_pos h5 (g_pos i b h6 v hv)⟩
+  have h9 : (Function.support h').Finite := by
+    apply (f.locallyFinite'.point_finite b).subset
+    intro x hx
+    simp only [Function.support_mul, Set.mem_inter_iff, Function.mem_support, ne_eq, h'] at hx
+    exact mul_ne_zero_iff.mp (mul_ne_zero_iff.mpr hx) |>.1
+  have ha : 0 < ∑ᶠ i, h' i := finsum_pos h7 h8 h9
+  have hb : ∑ᶠ i, h' i =
+            ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_2 (F := F) j b).toFun v).toFun v :=
+    (finsum_image_eq_sum (evalAt b v v) (f := h) (h_fin := h1.toFinset) h3) ▸ rfl
+  exact lt_of_lt_of_eq ha (hb.trans h2)
 
 lemma riemannian_metric_def (f : SmoothPartitionOfUnity B IB B)
   (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
@@ -632,8 +603,7 @@ lemma g_bilin_1g_smooth_on_chart (i : B) :
   ext
   · rfl
   · simp only [innerAtP, Set.inter_univ, Set.inter_self, Set.mem_prod, Set.mem_univ, and_true,
-               OpenPartialHomeomorph.coe_coe_symm, heq_eq_eq]
-    simp only [if_pos hy.1]
+               OpenPartialHomeomorph.coe_coe_symm, heq_eq_eq, if_pos hy.1]
     rfl
 
 end section4
