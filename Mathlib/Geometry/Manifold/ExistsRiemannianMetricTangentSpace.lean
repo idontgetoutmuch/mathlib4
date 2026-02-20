@@ -199,14 +199,14 @@ def tangentSpaceEquiv {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀
 end tangentSpaceEquiv
 
 variable
-{EB : Type*} [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
-{HB : Type*} [TopologicalSpace HB]
-{F : Type*} [NormedAddCommGroup F] [TopologicalSpace (TotalSpace F E)]
+  {EB : Type*} [NormedAddCommGroup EB] [InnerProductSpace ℝ EB]
+  {HB : Type*} [TopologicalSpace HB]
+  {F : Type*} [NormedAddCommGroup F] [TopologicalSpace (TotalSpace F E)]
 
 noncomputable section section1
 
 variable
-{IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
   [TopologicalSpace B] [ChartedSpace HB B]
   [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
@@ -478,7 +478,7 @@ variable
   [FiberBundle F E] [VectorBundle ℝ F E]
   [ContMDiffVectorBundle ω F E IB]
 
-lemma g_bilin_1g_smooth_on_chart (i : B) :
+lemma g_bilin_1_smooth_on_chart (i : B) :
   ContMDiffOn IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
     (g_bilin_1 (F := F) (E := E) i)
     ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) := by
@@ -570,7 +570,7 @@ lemma g_global_bilin_1_smooth (f : SmoothPartitionOfUnity B IB B)
       apply ContMDiffOn.congr
       · have : ContMDiffOn IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞ (g_bilin_1 i)
                 ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) :=
-          g_bilin_1g_smooth_on_chart i
+          g_bilin_1_smooth_on_chart i
         exact this
       · have h1 : ∀ y ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source,
           TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) y ((g_bilin_1 (F := F) (E := E) i y).snd) =
@@ -618,8 +618,8 @@ lemma trivializationAt_vectorBundle_bilinearForm_apply
 
 lemma g_bilin_eq (i b : B)
   (hb : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source)
-  (α β : E b) :
-  (g_bilin_1 (F := F) i b).snd.toFun α β = (g_bilin_2 (F := F) i b).toFun α β := by
+  (u v : E b) :
+  (g_bilin_1 (F := F) i b).snd.toFun u v = (g_bilin_2 (F := F) i b).toFun u v := by
   unfold g_bilin_1 g_bilin_2
   simp only [PartialEquiv.invFun_as_coe, OpenPartialHomeomorph.coe_coe_symm, dite_eq_ite,
     hom_trivializationAt_target, hom_trivializationAt_baseSet,
@@ -641,13 +641,13 @@ lemma g_bilin_eq (i b : B)
     by rw [continuousLinearMapAt_symmL ψ hc]
   have h2 : ∀ u v, innerSL ℝ u v = w (χ.symm b u) (χ.symm b v) := fun u v => by
     rw [← h1]; exact trivializationAt_vectorBundle_bilinearForm_apply i b w u v hb.1
-  have h3 : χ.symm b (χ.continuousLinearMapAt ℝ b α) = α :=
-    symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 α
-  have h4 : χ.symm b (χ.continuousLinearMapAt ℝ b β) = β :=
-    symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 β
-  have h5 : (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) α) ((continuousLinearMapAt ℝ χ b) β) =
-      w α β := by
-    rw [h2 (χ.continuousLinearMapAt ℝ b α) (χ.continuousLinearMapAt ℝ b β), h3, h4]
+  have h3 : χ.symm b (χ.continuousLinearMapAt ℝ b u) = u :=
+    symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 u
+  have h4 : χ.symm b (χ.continuousLinearMapAt ℝ b v) = v :=
+    symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 v
+  have h5 : (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) u) ((continuousLinearMapAt ℝ χ b) v) =
+      w u v := by
+    rw [h2 (χ.continuousLinearMapAt ℝ b u) (χ.continuousLinearMapAt ℝ b v), h3, h4]
   have h6 : (ψ.toOpenPartialHomeomorph.symm (b, innerSL ℝ)).snd = ψ.symm b (innerSL ℝ) := by
     rw [symm_apply ψ hc (innerSL ℝ)]
     simp only [cast_eq]
@@ -657,15 +657,15 @@ lemma g_bilin_eq (i b : B)
 lemma g_global_bilin_eq
     (f : SmoothPartitionOfUnity B IB B)
     (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
-    (p : B) (α β : E p) :
-    g_global_bilin_1 (F := F) (E := E) f p α β =
-    g_global_bilin_2 (F := F) f p α β := by
+    (p : B) (u v : E p) :
+    g_global_bilin_1 (F := F) (E := E) f p u v =
+    g_global_bilin_2 (F := F) f p u v := by
   have : g_global_bilin_1 (F := F) (E := E) f p = g_global_bilin_2 (F := F) f p := by
     unfold g_global_bilin_1 g_global_bilin_2
     congr 1
     ext j
     congr 2
-    ext α β
+    ext u v
     by_cases h : (f j) p = 0
     · have h1 : (f j) p = 0 := h
       have h2 : (f j) p • (g_bilin_1 (F := F) (E := E) j p).snd = 0 :=
@@ -681,7 +681,7 @@ lemma g_global_bilin_eq
         hf j hp
       simp only [ContinuousLinearMap.coe_smul', Pi.smul_apply, smul_eq_mul]
       congr 1
-      exact g_bilin_eq j p hsupp α β
+      exact g_bilin_eq j p hsupp u v
   rw [this]
 
 lemma riemannian_metric_symm_1
