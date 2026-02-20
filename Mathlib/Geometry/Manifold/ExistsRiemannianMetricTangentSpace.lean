@@ -723,32 +723,6 @@ lemma riemannian_unit_ball_bounded_1 (f : SmoothPartitionOfUnity B IB B)
 
 end section6
 
-section section8
-
-variable
-  [InnerProductSpace ℝ EB]
-  [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
-  [TopologicalSpace B] [ChartedSpace HB B]
-  [FiberBundle F E]
-  [IsManifold IB ω B]
-  [FiniteDimensional ℝ EB] [SigmaCompactSpace B] [T2Space B]
-
-lemma exists_partition_subordinate_to_intersection :
-  ∃ (f : SmoothPartitionOfUnity B IB B),
-    f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source) := by
-  apply SmoothPartitionOfUnity.exists_isSubordinate
-  · exact isClosed_univ
-  · intro i
-    exact IsOpen.inter (trivializationAt F E i).open_baseSet (chartAt HB i).open_source
-  · intro b _
-    simp only [Set.mem_iUnion, Set.mem_inter_iff]
-    use b
-    constructor
-    · exact FiberBundle.mem_baseSet_trivializationAt' b
-    · exact mem_chart_source HB b
-
-end section8
-
 section section9
 
 variable
@@ -768,7 +742,15 @@ public theorem exists_riemannian_metric
   [FiniteDimensional ℝ F]
   [∀ x, FiniteDimensional ℝ (E x)] :
     Nonempty (ContMDiffRiemannianMetric (IB := IB) (n := ∞) (F := F) (E := E)) :=
-  let ⟨f, hf⟩ := exists_partition_subordinate_to_intersection (F := F)
+  let ⟨f, hf⟩ : ∃ (f : SmoothPartitionOfUnity B IB B),
+      f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source) := by
+    apply SmoothPartitionOfUnity.exists_isSubordinate
+    · exact isClosed_univ
+    · intro i
+      exact IsOpen.inter (trivializationAt F E i).open_baseSet (chartAt HB i).open_source
+    · intro b _
+      simp only [Set.mem_iUnion, Set.mem_inter_iff]
+      exact ⟨b, FiberBundle.mem_baseSet_trivializationAt' b, mem_chart_source HB b⟩
   ⟨{ inner := g_global_bilin_1 (F := F) f
      symm := riemannian_metric_symm_1 f hf
      pos := riemannian_metric_pos_def_1 f hf
