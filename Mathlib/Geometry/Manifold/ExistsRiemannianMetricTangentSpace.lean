@@ -730,7 +730,6 @@ variable
 Existence of a smooth Riemannian metric on a manifold.
 -/
 public theorem exists_riemannian_metric
-  [FiniteDimensional ℝ F]
   [∀ x, FiniteDimensional ℝ (E x)] :
     Nonempty (ContMDiffRiemannianMetric (IB := IB) (n := ∞) (F := F) (E := E)) :=
   let ⟨f, hf⟩ : ∃ (f : SmoothPartitionOfUnity B IB B),
