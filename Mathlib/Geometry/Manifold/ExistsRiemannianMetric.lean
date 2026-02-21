@@ -67,7 +67,7 @@ noncomputable def seminormOfBilinearForm {x : B} (φ : E x →L[ℝ] E x →L[�
   toFun v := Real.sqrt (φ v v)
   map_zero' := by simp
   add_le' r s := by
-    rw [@Real.sqrt_le_iff]
+    rw [Real.sqrt_le_iff]
     · have h0 : ((φ r) s) * ((φ s) r) ≤ ((φ r) r) * ((φ s) s) :=
         LinearMap.BilinForm.apply_mul_apply_le_of_forall_zero_le φ.toLinearMap₁₂ hpos r s
       have h1 : φ (r + s) (r + s) ≤ (Real.sqrt ((φ r) r) + Real.sqrt ((φ s) s)) ^ 2 := by
@@ -78,11 +78,9 @@ noncomputable def seminormOfBilinearForm {x : B} (φ : E x →L[ℝ] E x →L[�
               ring
         _ ≤ (φ r) r + 2 * √((φ r) r * (φ s) s) + (φ s) s := by
               gcongr
-              have h1 :  (φ r) s * (φ s) r ≤ (φ r) r * (φ s) s :=
-                LinearMap.BilinForm.apply_mul_apply_le_of_forall_zero_le φ.toLinearMap₁₂ hpos r s
-              have h2 :  ((φ r) s) ^ 2 ≤ ((φ r) r * (φ s) s) := by
-                rw [sq, hsymm r s]
-                exact le_of_eq_of_le (congrFun (congrArg HMul.hMul (hsymm s r)) ((φ s) r)) h0
+              have h2 : ((φ r) s) ^ 2 ≤ ((φ r) r * (φ s) s) := by
+                have : ((φ r) s) ^ 2 = (φ r) s * (φ s) r := by rw [sq, hsymm r s]
+                linarith [h0]
               exact Real.le_sqrt_of_sq_le h2
         _ = (√((φ r) r) + √((φ s) s)) ^ 2 := by
                 rw [add_sq, Real.sq_sqrt (hpos r), Real.sq_sqrt (hpos s),
@@ -115,10 +113,10 @@ lemma seminormOfBilinearForm_sub_comm {x : B} (φ : E x →L[ℝ] E x →L[ℝ] 
   exact this
 
 lemma my_eq_of_dist_eq_zero {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
-  ∀ {u v: VectorSpaceAux x φ hpos hsymm hdef},
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
+    {u v : VectorSpaceAux x φ hpos hsymm hdef} :
     (seminormOfBilinearForm φ hpos hsymm) (u.val - v.val) = 0 → u = v := by
-    intro u v h
+    intro h
     rw [seminormOfBilinearForm] at h
     have h1 : u.val - v.val = 0 := (hdef (u.val - v.val))
       ((Real.sqrt_eq_zero (hpos (u.val - v.val))).mp h)
@@ -132,28 +130,22 @@ lemma my_dist_triangle {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : �
       (seminormOfBilinearForm φ hpos hsymm) (x_1.val - y.val) +
       (seminormOfBilinearForm φ hpos hsymm) (y.val - z.val) := by
   intro u v w
-  have h1 : seminormOfBilinearForm φ hpos hsymm ((u.val - v.val) + (v.val - w.val)) ≤
-    seminormOfBilinearForm φ hpos hsymm (u.val - v.val) +
-    seminormOfBilinearForm φ hpos hsymm (v.val - w.val)
-    := (seminormOfBilinearForm φ hpos hsymm).add_le' (u.val - v.val) (v.val - w.val)
-  have h2 : (u.val - v.val) + (v.val - w.val) = u.val - w.val :=
-    sub_add_sub_cancel u.val v.val w.val
-  exact h2 ▸ h1
+  simpa [sub_add_sub_cancel] using
+    (seminormOfBilinearForm φ hpos hsymm).add_le' (u.val - v.val) (v.val - w.val)
 
 noncomputable instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
     (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
   NormedAddCommGroup (VectorSpaceAux x φ hpos hsymm hdef) where
-  norm := fun v => seminormOfBilinearForm φ hpos hsymm v.val
+  norm v := seminormOfBilinearForm φ hpos hsymm v.val
   dist_eq := by intros; rfl
-  add_assoc := fun u v w => VectorSpaceAux.ext_iff _ _ _ _ _ _|>.mpr (add_assoc u.val v.val w.val)
-  zero_add := fun u => VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (zero_add u.val)
-  add_zero := fun u => VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_zero u.val)
+  add_assoc u v w := VectorSpaceAux.ext_iff _ _ _ _ _ _|>.mpr (add_assoc u.val v.val w.val)
+  zero_add u := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (zero_add u.val)
+  add_zero u := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_zero u.val)
   nsmul := nsmulRec
   zsmul := zsmulRec
-  neg_add_cancel := fun u => VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (neg_add_cancel u.val)
-  add_comm := fun u v => VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_comm u.val v.val)
-  sub_eq_add_neg :=
-    fun u v => VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (sub_eq_add_neg u.val v.val)
+  neg_add_cancel u := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (neg_add_cancel u.val)
+  add_comm u v := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (add_comm u.val v.val)
+  sub_eq_add_neg u v := VectorSpaceAux.ext_iff _ _ _ _ _ _ |>.mpr (sub_eq_add_neg u.val v.val)
   dist_self := seminormOfBilinearForm_sub_self φ hpos hsymm hdef
   dist_comm := seminormOfBilinearForm_sub_comm φ hpos hsymm hdef
   dist_triangle := my_dist_triangle φ hpos hsymm hdef
@@ -180,11 +172,9 @@ instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ 
     have h2 : (φ u.val) (a • u.val) = a * (φ u.val u.val) :=
       (φ u.val).map_smul a u.val
     have h3 : φ (a • u.val) (a • u.val) = a * a * φ u.val u.val := by grind
-    have h4 : norm (a • u) = Real.sqrt ( a * a * φ u.val u.val) :=
-      Eq.symm (Real.ext_cauchy (congrArg Real.cauchy (congrArg Real.sqrt (id (Eq.symm h3)))))
-    have h5 : norm (a • u) = |a| * Real.sqrt (φ u.val u.val) := by
-      rw [h4, Real.sqrt_mul' (a * a) (hpos u.val), Real.sqrt_mul_self_eq_abs a]
-    exact le_of_eq h5
+    apply le_of_eq
+    change Real.sqrt (φ (a • u.val) (a • u.val)) = |a| * Real.sqrt (φ u.val u.val)
+    rw [h3, Real.sqrt_mul' (a * a) (hpos u.val), Real.sqrt_mul_self_eq_abs a]
 
 def tangentSpaceEquiv {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
     (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0) :
@@ -257,10 +247,6 @@ lemma g_pos (i b : B)
   · exfalso
     exact hh1 hb.1
 
-def aux {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
-  (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) :
-  SeminormFamily ℝ (E x) (Fin 1) := fun _ ↦ seminormOfBilinearForm φ hpos hsymm
-
 instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
     (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
     [FiniteDimensional ℝ (E x)] :
@@ -283,7 +269,7 @@ lemma withSeminormsOfBilinearForm {x : B}
   (hsymm : ∀ u v, φ u v = φ v u)
   (hdef : ∀ v, φ v v = 0 → v = 0)
   [FiniteDimensional ℝ (E x)] :
-  WithSeminorms (aux φ hpos hsymm) := by
+  WithSeminorms (Function.const (Fin 1) (seminormOfBilinearForm φ hpos hsymm)) := by
     apply WithSeminorms.congr (norm_withSeminorms ℝ (E x))
     · have h1 : IsBoundedLinearMap ℝ (tangentSpaceEquiv φ hpos hsymm hdef).toLinearMap := by
         rw [← IsBoundedLinearMap.isLinearMap_and_continuous_iff_isBoundedLinearMap]
@@ -311,17 +297,19 @@ lemma withSeminormsOfBilinearForm {x : B}
       calc ‖v‖ ≤ C * seminormOfBilinearForm φ hpos hsymm v := hC.2 ⟨v⟩
         _ ≤ max C 1 * seminormOfBilinearForm φ hpos hsymm v := by
           gcongr; exact le_max_left C 1
-        _ = max C 1 * aux φ hpos hsymm j v := rfl
+        _ = max C 1 * seminormOfBilinearForm φ hpos hsymm v := rfl
 
 lemma aux_tvs {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
    (hpos : ∀ v, 0 ≤ φ v v) (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
    [FiniteDimensional ℝ (E x)] :
     Bornology.IsVonNBounded ℝ {v | (φ v) v < 1} := by
   rw [WithSeminorms.isVonNBounded_iff_finset_seminorm_bounded
-        (p := aux φ hpos hsymm) (withSeminormsOfBilinearForm φ hpos hsymm hdef)]
+        (p := Function.const (Fin 1) (seminormOfBilinearForm φ hpos hsymm))
+        (withSeminormsOfBilinearForm φ hpos hsymm hdef)]
   intro I
   letI J : Finset (Fin 1) := {1}
-  suffices ∃ r > 0, ∀ x ∈ {v | (φ v) v < 1}, (J.sup (aux φ hpos hsymm)) x < r by
+  suffices ∃ r > 0, ∀ x ∈ {v | (φ v) v < 1},
+    (J.sup (Function.const (Fin 1) (seminormOfBilinearForm φ hpos hsymm))) x < r by
     obtain (rfl | h) : I = ∅ ∨ I = {default} := by
       by_cases h : I = ∅
       · simp only [Fin.default_eq_zero, Fin.isValue]
@@ -332,7 +320,7 @@ lemma aux_tvs {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ)
     · convert this
   simp only [Set.mem_setOf_eq, Finset.sup_singleton, J]
   refine ⟨1, by norm_num, fun x h ↦ ?_⟩
-  simp only [aux, seminormOfBilinearForm]
+  simp only [seminormOfBilinearForm]
   change Real.sqrt (φ x x) < 1
   rw [Real.sqrt_lt' (by norm_num)]
   simp [h]
@@ -601,7 +589,7 @@ lemma trivializationAt_vectorBundle_bilinearForm_apply
                     (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) x₀).continuousLinearMapAt ℝ x w u v =
     w ((trivializationAt F E x₀).symm x u)
       ((trivializationAt F E x₀).symm x v) := by
-  rw [continuousLinearMapAt_apply, @linearMapAt_apply]
+  rw [continuousLinearMapAt_apply, linearMapAt_apply]
   simp only [hom_trivializationAt_baseSet, Trivial.fiberBundle_trivializationAt',
              Trivial.trivialization_baseSet, Set.inter_univ, Set.inter_self]
   rw [hom_trivializationAt_apply]
