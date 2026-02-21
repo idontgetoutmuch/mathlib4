@@ -568,10 +568,7 @@ lemma g_global_bilin_1_smooth (f : SmoothPartitionOfUnity B IB B)
     (h_smooth_s_loc := by
       intro i
       apply ContMDiffOn.congr
-      · have : ContMDiffOn IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞ (g_bilin_1 i)
-                ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) :=
-          g_bilin_1_smooth_on_chart i
-        exact this
+      · exact g_bilin_1_smooth_on_chart i
       · have h1 : ∀ y ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source,
           TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) y ((g_bilin_1 (F := F) (E := E) i y).snd) =
           g_bilin_1 (F := F) i y := by
