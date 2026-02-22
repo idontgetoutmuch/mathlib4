@@ -207,30 +207,19 @@ variable
 def g_bilin_1 (i b : B) :
  (TotalSpace (F →L[ℝ] F →L[ℝ] ℝ)
              (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ)) :=
-  ⟨b, by
-    letI ψ := trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
-        (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
-    by_cases h : (b, (fun (x : B) ↦ innerSL ℝ) b) ∈ ψ.target
-    · exact (ψ.invFun (b, (fun (x : B) ↦ innerSL ℝ) b)).snd
-    · exact 0⟩
-
+  ⟨b, (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
+        (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).symm b (innerSL ℝ)⟩
 
 variable (F) in
-open scoped Classical in
 def g_bilin_2 (i p : B) : E p →L[ℝ] (E p →L[ℝ] ℝ) :=
   letI χ := trivializationAt F E i
-  if p ∈ χ.baseSet then
-    (innerSL ℝ).comp (χ.continuousLinearMapAt ℝ p) |>.flip.comp (χ.continuousLinearMapAt ℝ p)
-  else
-    0
+  (innerSL ℝ).comp (χ.continuousLinearMapAt ℝ p) |>.flip.comp (χ.continuousLinearMapAt ℝ p)
 
 lemma g_nonneg {j b : B} (v : E b) :
     0 ≤ ((g_bilin_2 F j b).toFun v).toFun v := by
   unfold g_bilin_2
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
-  split_ifs with h
   · exact inner_self_nonneg (𝕜 := ℝ)
-  · simp
 
 lemma g_pos {i b : B}
     (hb : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source)
@@ -238,16 +227,12 @@ lemma g_pos {i b : B}
     0 < ((g_bilin_2 F i b).toFun v).toFun v := by
   unfold g_bilin_2
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
-  split_ifs with hh1
-  · letI χ := (trivializationAt F E i)
-    have h1 : ((continuousLinearMapAt ℝ χ b) v ≠ 0 ↔ v ≠ 0) := by
-      rw [←coe_continuousLinearEquivAt_eq χ hh1]
-      exact AddEquivClass.map_ne_zero_iff
-    have h2 : innerSL ℝ ((continuousLinearMapAt ℝ χ b) v)
-                       ((continuousLinearMapAt ℝ χ b) v) ≠ 0 := inner_self_ne_zero.mpr (h1.mpr hv)
-    exact Std.lt_of_le_of_ne (inner_self_nonneg (𝕜 := ℝ)) h2.symm
-  · exfalso
-    exact hh1 hb.1
+  letI χ := trivializationAt F E i
+  have h1 : (continuousLinearMapAt ℝ χ b) v ≠ 0 := by
+    rw [← coe_continuousLinearEquivAt_eq χ hb.1]
+    exact AddEquivClass.map_ne_zero_iff.mpr hv
+  exact Std.lt_of_le_of_ne (inner_self_nonneg (𝕜 := ℝ))
+    (inner_self_ne_zero.mpr h1).symm
 
 instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
     (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
@@ -342,9 +327,7 @@ theorem g_bilin_symm_2 (i p : B) (v w : E p) :
     ((g_bilin_2 F i p).toFun v).toFun w =
     ((g_bilin_2 F i p).toFun w).toFun v := by
   unfold g_bilin_2
-  split_ifs with h
-  · simp [real_inner_comm]
-  · simp
+  simp [real_inner_comm]
 
 def g_global_bilin_2 (f : SmoothPartitionOfUnity B IB B) (p : B) :
     E p →L[ℝ] (E p →L[ℝ] ℝ) :=
@@ -469,11 +452,6 @@ lemma g_bilin_1_smooth_on_chart (i : B) :
     (g_bilin_1 (F := F) (E := E) i)
     ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) := by
   unfold g_bilin_1
-  simp only [hom_trivializationAt_target, hom_trivializationAt_baseSet,
-  Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet, Set.inter_univ,
-  Set.inter_self, Set.mem_prod,
-  Set.mem_univ, and_true, PartialEquiv.invFun_as_coe, OpenPartialHomeomorph.coe_coe_symm,
-  dite_eq_ite]
   intro b hb
   classical
   letI ψ := trivializationAt (F →L[ℝ] F →L[ℝ] ℝ) (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
@@ -508,9 +486,10 @@ lemma g_bilin_1_smooth_on_chart (i : B) :
   simp only [Function.comp_apply]
   ext
   · rfl
-  · simp only [innerAtP, Set.inter_univ, Set.inter_self, Set.mem_prod, Set.mem_univ, and_true,
-               heq_eq_eq, if_pos hy.1]
-    rfl
+  · simp only [innerAtP, heq_eq_eq]
+    rw [Trivialization.symm_apply ψ _ (innerSL ℝ)]
+    · simp [cast_eq]
+    · exact (mk_mem_target ψ).mp (this hy)
 
 end section4
 
@@ -542,10 +521,7 @@ lemma g_global_bilin_1_smooth (f : SmoothPartitionOfUnity B IB B)
     (h_smooth_s_loc := fun i =>
       (g_bilin_1_smooth_on_chart i).congr (by
         unfold g_bilin_1
-        simp only [Set.mem_inter_iff, hom_trivializationAt_target, hom_trivializationAt_baseSet,
-          Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet, Set.inter_univ,
-          Set.inter_self, Set.mem_prod, Set.mem_univ, and_true, PartialEquiv.invFun_as_coe,
-          OpenPartialHomeomorph.coe_coe_symm, dite_eq_ite, implies_true]))
+        simp only [Set.mem_inter_iff, implies_true]))
 
 end section5
 
@@ -584,11 +560,7 @@ lemma g_bilin_eq (i b : B)
   (u v : E b) :
   (g_bilin_1 (F := F) i b).snd.toFun u v = (g_bilin_2 F i b).toFun u v := by
   unfold g_bilin_1 g_bilin_2
-  simp only [PartialEquiv.invFun_as_coe, OpenPartialHomeomorph.coe_coe_symm, dite_eq_ite,
-    hom_trivializationAt_target, hom_trivializationAt_baseSet,
-    Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet,
-    Set.inter_univ, Set.inter_self, Set.mem_prod, hb.1, Set.mem_univ, and_self, ↓reduceDIte,
-    AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe, if_true]
+  simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
   letI ψ := FiberBundle.trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
       (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
   letI χ := trivializationAt F E i
@@ -599,8 +571,7 @@ lemma g_bilin_eq (i b : B)
                Trivial.trivialization_baseSet, inter_univ, inter_self]
     exact hb.1
   have h1 u v :
-      (((continuousLinearMapAt ℝ ψ b) (ψ.symmL ℝ b (innerSL ℝ))) u) v =
-      innerSL ℝ u v :=
+      (((continuousLinearMapAt ℝ ψ b) (ψ.symmL ℝ b (innerSL ℝ))) u) v = innerSL ℝ u v :=
     by rw [continuousLinearMapAt_symmL ψ hc]
   have h2 : ∀ u v, innerSL ℝ u v = w (χ.symm b u) (χ.symm b v) := fun u v => by
     rw [← h1]; exact trivializationAt_vectorBundle_bilinearForm_apply i b w u v hb.1
@@ -611,10 +582,7 @@ lemma g_bilin_eq (i b : B)
   have h5 : (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) u) ((continuousLinearMapAt ℝ χ b) v) =
       w u v := by
     rw [h2 (χ.continuousLinearMapAt ℝ b u) (χ.continuousLinearMapAt ℝ b v), h3, h4]
-  have h6 : (ψ.toOpenPartialHomeomorph.symm (b, innerSL ℝ)).snd = ψ.symm b (innerSL ℝ) := by
-    rw [symm_apply ψ hc (innerSL ℝ)]
-    simp only [cast_eq]
-  rw [h6, ← h5]
+  rw [← h5]
   exact real_inner_comm _ _
 
 lemma g_global_bilin_eq
@@ -630,8 +598,7 @@ lemma g_global_bilin_eq
     congr 2
     ext u v
     by_cases h : (f j) p = 0
-    · have h1 : (f j) p = 0 := h
-      have h2 : (f j) p • (g_bilin_1 (F := F) (E := E) j p).snd = 0 :=
+    · have h2 : (f j) p • (g_bilin_1 (F := F) (E := E) j p).snd = 0 :=
         smul_eq_zero_of_left h (g_bilin_1 j p).snd
       have h3 : (f j) p • g_bilin_2 F (E := E) j p = 0 :=
         smul_eq_zero_of_left h (g_bilin_2 F j p)
