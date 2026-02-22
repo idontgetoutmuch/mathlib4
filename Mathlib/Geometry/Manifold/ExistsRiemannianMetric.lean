@@ -453,23 +453,12 @@ lemma g_bilin_1_smooth_on_chart (i : B) :
     ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) := by
   unfold g_bilin_1
   intro b hb
-  classical
   letI ψ := trivializationAt (F →L[ℝ] F →L[ℝ] ℝ) (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
-  have heq : ∀ x ∈ (chartAt HB i).source,
-    (if (x, ((innerSL ℝ) : (F →L[ℝ] F →L[ℝ] ℝ))) ∈ (chartAt HB i).source ×ˢ Set.univ
-      then
-        ψ.invFun (x, ((innerSL ℝ) : (F →L[ℝ] F →L[ℝ] ℝ)))
-      else
-        ⟨x, 0⟩)
-    =
-    ψ.invFun (x, ((innerSL ℝ) : (F →L[ℝ] F →L[ℝ] ℝ))) := by
-    intro x hx
-    exact if_pos (Set.mk_mem_prod hx (Set.mem_univ _))
   letI innerAtP : B → F →L[ℝ] F →L[ℝ] ℝ := fun x ↦ innerSL ℝ
   have h4 : ContMDiffOn IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
     (fun c => (c, innerAtP c)) ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) :=
     contMDiffOn_id.prodMk contMDiffOn_const
-  have : (trivializationAt F E i).baseSet ∩ (chartAt HB i).source ⊆
+  have h5 : (trivializationAt F E i).baseSet ∩ (chartAt HB i).source ⊆
   (fun c ↦ (c, innerAtP c)) ⁻¹' ψ.target := by
     intro c hc
     simp only [Set.mem_preimage]
@@ -481,7 +470,7 @@ lemma g_bilin_1_smooth_on_chart (i : B) :
                Trivial.trivialization_baseSet, Set.inter_univ, Set.inter_self]
     rw [←baseSet_eq]
     exact hc.1
-  refine (ContMDiffOn.congr ((contMDiffOn_symm _).comp h4 this) ?_) b hb
+  refine (ContMDiffOn.congr ((contMDiffOn_symm _).comp h4 h5) ?_) b hb
   intro y hy
   simp only [Function.comp_apply]
   ext
@@ -489,7 +478,7 @@ lemma g_bilin_1_smooth_on_chart (i : B) :
   · simp only [innerAtP, heq_eq_eq]
     rw [Trivialization.symm_apply ψ _ (innerSL ℝ)]
     · simp [cast_eq]
-    · exact (mk_mem_target ψ).mp (this hy)
+    · exact (mk_mem_target ψ).mp (h5 hy)
 
 end section4
 
