@@ -234,6 +234,12 @@ lemma g_pos {i b : B}
   exact Std.lt_of_le_of_ne (inner_self_nonneg (𝕜 := ℝ))
     (inner_self_ne_zero.mpr h1).symm
 
+theorem g_bilin_symm_2 (i p : B) (v w : E p) :
+    ((g_bilin_2 F i p).toFun v).toFun w =
+    ((g_bilin_2 F i p).toFun w).toFun v := by
+  unfold g_bilin_2
+  simp [real_inner_comm]
+
 instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
     (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
     [FiniteDimensional ℝ (E x)] :
@@ -322,12 +328,6 @@ variable
   [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
-
-theorem g_bilin_symm_2 (i p : B) (v w : E p) :
-    ((g_bilin_2 F i p).toFun v).toFun w =
-    ((g_bilin_2 F i p).toFun w).toFun v := by
-  unfold g_bilin_2
-  simp [real_inner_comm]
 
 def g_global_bilin_2 (f : SmoothPartitionOfUnity B IB B) (p : B) :
     E p →L[ℝ] (E p →L[ℝ] ℝ) :=
@@ -437,7 +437,7 @@ lemma riemannian_unit_ball_bounded_2 (f : SmoothPartitionOfUnity B IB B)
 
 end section3
 
-section section4
+section smooth
 
 variable
   {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
@@ -480,19 +480,7 @@ lemma g_bilin_1_smooth_on_chart (i : B) :
     · simp [cast_eq]
     · exact (mk_mem_target ψ).mp (h5 hy)
 
-end section4
-
-noncomputable section section5
-
-variable
-  {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
-  [TopologicalSpace B] [ChartedSpace HB B]
-  [InnerProductSpace ℝ F]
-  [∀ x, NormedSpace ℝ (E x)]
-  [FiberBundle F E] [VectorBundle ℝ F E]
-  [ContMDiffVectorBundle ω F E IB]
-
-def g_global_bilin_1 (f : SmoothPartitionOfUnity B IB B) (p : B) :
+noncomputable def g_global_bilin_1 (f : SmoothPartitionOfUnity B IB B) (p : B) :
     E p →L[ℝ] (E p →L[ℝ] ℝ) :=
       ∑ᶠ (j : B), (f j) p • (g_bilin_1 (F := F) j p).snd
 
@@ -512,7 +500,7 @@ lemma g_global_bilin_1_smooth (f : SmoothPartitionOfUnity B IB B)
         unfold g_bilin_1
         simp only [Set.mem_inter_iff, implies_true]))
 
-end section5
+end smooth
 
 section section6
 
@@ -522,27 +510,6 @@ variable
   [InnerProductSpace ℝ F]
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
-
-lemma trivializationAt_vectorBundle_bilinearForm_apply
-    (x₀ x : B)
-    (w : E x →L[ℝ] E x →L[ℝ] ℝ)
-    (u v : F)
-    (hx : x ∈ (trivializationAt F E x₀).baseSet) :
-  (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
-                    (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) x₀).continuousLinearMapAt ℝ x w u v =
-    w ((trivializationAt F E x₀).symm x u)
-      ((trivializationAt F E x₀).symm x v) := by
-  rw [continuousLinearMapAt_apply, linearMapAt_apply]
-  simp only [hom_trivializationAt_baseSet, Trivial.fiberBundle_trivializationAt',
-             Trivial.trivialization_baseSet, Set.inter_univ, Set.inter_self]
-  rw [hom_trivializationAt_apply]
-  have hx' : x ∈ (trivializationAt F E x₀).baseSet ∩
-    ((trivializationAt F E x₀).baseSet ∩ Set.univ) := by
-    exact ⟨hx, ⟨hx, trivial⟩⟩
-  rw [if_pos hx',
-      inCoordinates_apply_eq₂ hx hx (by simp : x ∈ (trivializationAt ℝ (fun _ ↦ ℝ) x₀).baseSet)]
-  simp only [Trivial.fiberBundle_trivializationAt', Trivial.linearMapAt_trivialization,
-             LinearMap.id_coe, id_eq]
 
 lemma g_bilin_eq (i b : B)
   (hb : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source)
@@ -557,13 +524,18 @@ lemma g_bilin_eq (i b : B)
   have hc : b ∈ ψ.baseSet := by
     rw [hom_trivializationAt_baseSet]
     simp only [hom_trivializationAt_baseSet, Trivial.fiberBundle_trivializationAt',
-               Trivial.trivialization_baseSet, inter_univ, inter_self]
+               Trivial.trivialization_baseSet, Set.inter_univ, Set.inter_self]
     exact hb.1
   have h1 u v :
       (((continuousLinearMapAt ℝ ψ b) (ψ.symmL ℝ b (innerSL ℝ))) u) v = innerSL ℝ u v :=
     by rw [continuousLinearMapAt_symmL ψ hc]
   have h2 : ∀ u v, innerSL ℝ u v = w (χ.symm b u) (χ.symm b v) := fun u v => by
-    rw [← h1]; exact trivializationAt_vectorBundle_bilinearForm_apply i b w u v hb.1
+    rw [← h1, continuousLinearMapAt_apply, linearMapAt_apply, hom_trivializationAt_apply, if_pos hc]
+    simp only [inCoordinates_apply_eq₂ hb.1 hb.1
+      (by simp : b ∈ (trivializationAt ℝ (fun _ ↦ ℝ) i).baseSet),
+      Trivial.fiberBundle_trivializationAt', Trivial.linearMapAt_trivialization,
+      LinearMap.id_coe, id_eq]
+    exact DFunLike.congr_fun rfl ((trivializationAt F E i).symm b v)
   have h3 : χ.symm b (χ.continuousLinearMapAt ℝ b u) = u :=
     symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 u
   have h4 : χ.symm b (χ.continuousLinearMapAt ℝ b v) = v :=
