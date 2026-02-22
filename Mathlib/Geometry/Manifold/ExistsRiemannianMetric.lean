@@ -419,15 +419,14 @@ lemma riemannian_metric_pos_def_2 (f : SmoothPartitionOfUnity B IB B)
   letI h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) := fun j ↦ (f j) b • g_bilin_2 F j b
   letI h' x := f x b * ((g_bilin_2 F x b).toFun v).toFun v
   have h3 : (Function.support h) ⊆ h1.toFinset := Set.Finite.toFinset_subset.mp fun ⦃a⦄ a ↦ a
-  have h4 : ∀ i, 0 ≤ f.toFun i b := fun i => f.nonneg' i b
   have ⟨i, h5⟩ : ∃ i, 0 < f i b := by
     by_contra! hneg
-    have : ∀ (x : B), f x b = 0 := fun x => le_antisymm (hneg x) (h4 x)
+    have : ∀ (x : B), f x b = 0 := fun x => le_antisymm (hneg x) (f.nonneg' x b)
     exact absurd ((finsum_eq_zero_of_forall_eq_zero this).symm.trans (f.sum_eq_one' b trivial))
       one_ne_zero.symm
   have h6 : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source :=
     hf i (subset_closure (Function.mem_support.mpr h5.ne'))
-  have h7 : ∀ j, 0 ≤ h' j := fun j => mul_nonneg (h4 j) (g_nonneg v)
+  have h7 : ∀ j, 0 ≤ h' j := fun j => mul_nonneg (f.nonneg' j b) (g_nonneg v)
   have h8 : ∃ j, 0 < h' j := ⟨i, mul_pos h5 (g_pos h6 v hv)⟩
   have h9 : (Function.support h').Finite := by
     apply (f.locallyFinite'.point_finite b).subset
@@ -441,15 +440,14 @@ lemma riemannian_metric_pos_def_2 (f : SmoothPartitionOfUnity B IB B)
 
 lemma riemannian_unit_ball_bounded_2 (f : SmoothPartitionOfUnity B IB B)
   (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
-  [∀ x, FiniteDimensional ℝ (E x)] :
-  ∀ (b : B), Bornology.IsVonNBounded ℝ
-    {v : E b | g_global_bilin_2 (F := F) f b v v < 1} := fun b =>
+  [∀ x, FiniteDimensional ℝ (E x)] (b : B) :
+    Bornology.IsVonNBounded ℝ {v : E b | g_global_bilin_2 (F := F) f b v v < 1} :=
   aux_tvs (g_global_bilin_2 f b)
     (fun v => by
       rcases eq_or_ne v 0 with rfl | hv
       · simp
       · exact le_of_lt (riemannian_metric_pos_def_2 f hf b hv))
-    (fun u v => riemannian_metric_symm_2 f b u v)
+    (riemannian_metric_symm_2 f b)
     (fun v h => by
       by_contra hv
       exact lt_irrefl 0 (h ▸ riemannian_metric_pos_def_2 f hf b hv))
@@ -488,17 +486,11 @@ lemma g_bilin_1_smooth_on_chart (i : B) :
     =
     ψ.invFun (x, ((innerSL ℝ) : (F →L[ℝ] F →L[ℝ] ℝ))) := by
     intro x hx
-    have : (x, ((innerSL ℝ) : (F →L[ℝ] F →L[ℝ] ℝ))) ∈
-      (chartAt HB i).source ×ˢ Set.univ := Set.mk_mem_prod hx trivial
-    exact if_pos this
-  have h2 : ContMDiffOn (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
-    ψ.toPartialEquiv.symm ψ.target := contMDiffOn_symm _
+    exact if_pos (Set.mk_mem_prod hx (Set.mem_univ _))
   letI innerAtP : B → F →L[ℝ] F →L[ℝ] ℝ := fun x ↦ innerSL ℝ
   have h4 : ContMDiffOn IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
-    (fun c => (c, innerAtP c)) ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) := by
-      apply ContMDiffOn.prodMk
-      · exact contMDiffOn_id
-      · exact contMDiffOn_const
+    (fun c => (c, innerAtP c)) ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) :=
+    contMDiffOn_id.prodMk contMDiffOn_const
   have : (trivializationAt F E i).baseSet ∩ (chartAt HB i).source ⊆
   (fun c ↦ (c, innerAtP c)) ⁻¹' ψ.target := by
     intro c hc
@@ -511,16 +503,13 @@ lemma g_bilin_1_smooth_on_chart (i : B) :
                Trivial.trivialization_baseSet, Set.inter_univ, Set.inter_self]
     rw [←baseSet_eq]
     exact hc.1
-  have h5 : ContMDiffOn IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
-    (ψ.toPartialEquiv.symm ∘ fun c ↦ (c, innerAtP c))
-     ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) := h2.comp h4 this
-  refine (ContMDiffOn.congr h5 ?_) b hb
+  refine (ContMDiffOn.congr ((contMDiffOn_symm _).comp h4 this) ?_) b hb
   intro y hy
   simp only [Function.comp_apply]
   ext
   · rfl
   · simp only [innerAtP, Set.inter_univ, Set.inter_self, Set.mem_prod, Set.mem_univ, and_true,
-               OpenPartialHomeomorph.coe_coe_symm, heq_eq_eq, if_pos hy.1]
+               heq_eq_eq, if_pos hy.1]
     rfl
 
 end section4
@@ -542,32 +531,21 @@ def g_global_bilin_1 (f : SmoothPartitionOfUnity B IB B) (p : B) :
 lemma g_global_bilin_1_smooth (f : SmoothPartitionOfUnity B IB B)
   (h_sub : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source)) :
   ContMDiff IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
-    (fun x ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) x (g_global_bilin_1 (F := F) (E := E) f x)) := by
-  have h1 := contMDiff_totalSpace_weighted_sum_of_local_sections
+    (fun x ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) x (g_global_bilin_1 (F := F) (E := E) f x)) :=
+  contMDiff_totalSpace_weighted_sum_of_local_sections
     (V := fun b => E b →L[ℝ] (E b →L[ℝ] Trivial B ℝ b))
     (F_fiber := F →L[ℝ] (F →L[ℝ] ℝ))
     (s_loc := fun (i b : B) => (g_bilin_1 (F := F) i b).snd)
     (U := fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source)
-    (hU_isOpen := by
-      intro i
-      simp only
-      exact IsOpen.inter (trivializationAt F E i).open_baseSet (chartAt HB i).open_source)
+    (hU_isOpen := fun i => ((trivializationAt F E i).open_baseSet.inter (chartAt HB i).open_source))
     (hρ_subord := h_sub)
-    (h_smooth_s_loc := by
-      intro i
-      apply ContMDiffOn.congr
-      · exact g_bilin_1_smooth_on_chart i
-      · have h1 : ∀ y ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source,
-          TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) y ((g_bilin_1 (F := F) (E := E) i y).snd) =
-          g_bilin_1 (F := F) i y := by
-          unfold g_bilin_1
-          simp only [Set.mem_inter_iff, hom_trivializationAt_target, hom_trivializationAt_baseSet,
-            Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet, Set.inter_univ,
-            Set.inter_self, Set.mem_prod,
-            Set.mem_univ, and_true, PartialEquiv.invFun_as_coe,
-            OpenPartialHomeomorph.coe_coe_symm, dite_eq_ite, implies_true]
-        exact h1)
-  exact h1
+    (h_smooth_s_loc := fun i =>
+      (g_bilin_1_smooth_on_chart i).congr (by
+        unfold g_bilin_1
+        simp only [Set.mem_inter_iff, hom_trivializationAt_target, hom_trivializationAt_baseSet,
+          Trivial.fiberBundle_trivializationAt', Trivial.trivialization_baseSet, Set.inter_univ,
+          Set.inter_self, Set.mem_prod, Set.mem_univ, and_true, PartialEquiv.invFun_as_coe,
+          OpenPartialHomeomorph.coe_coe_symm, dite_eq_ite, implies_true]))
 
 end section5
 
@@ -660,8 +638,7 @@ lemma g_global_bilin_eq
       rw [h2, h3]
     · have hp : p ∈ tsupport (f j) := by
         rw [tsupport]
-        apply subset_closure
-        exact h
+        exact subset_closure h
       have hsupp : p ∈ (trivializationAt F E j).baseSet ∩ (chartAt HB j).source :=
         hf j hp
       simp only [ContinuousLinearMap.coe_smul', Pi.smul_apply, smul_eq_mul]
@@ -676,7 +653,7 @@ lemma riemannian_metric_symm_1
     g_global_bilin_1 (F := F) (E := E) f b v w =
     g_global_bilin_1 (F := F) (E := E) f b w v := by
   rw [g_global_bilin_eq f hf b v w, g_global_bilin_eq f hf b w v]
-  exact Real.ext_cauchy (congrArg Real.cauchy (riemannian_metric_symm_2 (F := F) f b v w))
+  exact (riemannian_metric_symm_2 (F := F) f b v w)
 
 lemma riemannian_metric_pos_def_1
     (f : SmoothPartitionOfUnity B IB B)
@@ -688,14 +665,10 @@ lemma riemannian_metric_pos_def_1
 
 lemma riemannian_unit_ball_bounded_1 (f : SmoothPartitionOfUnity B IB B)
   (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
-  [∀ x, FiniteDimensional ℝ (E x)] :
-  ∀ (b : B), Bornology.IsVonNBounded ℝ
+  [∀ x, FiniteDimensional ℝ (E x)] (b : B) :
+  Bornology.IsVonNBounded ℝ
     {v : E b | g_global_bilin_1 (F := F) (E := E) f b v v < 1} := by
-  intro b
-  have hy : ∀ v, g_global_bilin_1 (F := F) (E := E) f b v v =
-                  g_global_bilin_2 (F := F) f b v v :=
-    fun v => g_global_bilin_eq f hf b v v
-  simp_rw [hy]
+  simp_rw [fun v => g_global_bilin_eq f hf b v v]
   exact riemannian_unit_ball_bounded_2 f hf b
 
 end section6
