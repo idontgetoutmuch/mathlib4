@@ -511,40 +511,44 @@ variable
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
 
-lemma g_bilin_eq (i b : B)
-  (hb : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source)
-  (u v : E b) :
-  (g_bilin_1 (F := F) i b).snd.toFun u v = (g_bilin_2 F i b).toFun u v := by
-  unfold g_bilin_1 g_bilin_2
-  simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
+lemma inCoordinates_apply_eq₂_spec
+    {x₀ x : B} {ϕ : E x →L[ℝ] E x →L[ℝ] ℝ} {v w : F}
+    (h₁x : x ∈ (trivializationAt F E x₀).baseSet) :
+    ContinuousLinearMap.inCoordinates F E (F →L[ℝ] ℝ) (fun x ↦ E x →L[ℝ] ℝ) x₀ x x₀ x ϕ v w =
+    ϕ ((trivializationAt F E x₀).symm x v) ((trivializationAt F E x₀).symm x w) := by
+  rw [inCoordinates_apply_eq₂ h₁x h₁x (by simp [Trivial.fiberBundle_trivializationAt'])]
+  simp [Trivial.fiberBundle_trivializationAt', Trivial.linearMapAt_trivialization]
+
+lemma inCoordinates_apply_eq₂_spec_symm
+    (x₀ x : B) (hb : x ∈ (trivializationAt F E x₀).baseSet)
+    (ϕ : F →L[ℝ] F →L[ℝ] ℝ) (u v : E x) :
+    (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ) (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) x₀).symm x ϕ u v =
+    ϕ (trivializationAt F E x₀ |>.continuousLinearMapAt ℝ x u)
+      (trivializationAt F E x₀ |>.continuousLinearMapAt ℝ x v) := by
   letI ψ := FiberBundle.trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
-      (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
-  letI χ := trivializationAt F E i
-  letI w := ψ.symm b (innerSL ℝ)
-  have hc : b ∈ ψ.baseSet := by
+      (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) x₀
+  letI χ := trivializationAt F E x₀
+  letI w := ψ.symm x ϕ
+  have hc : x ∈ ψ.baseSet := by
     rw [hom_trivializationAt_baseSet]
     simp only [hom_trivializationAt_baseSet, Trivial.fiberBundle_trivializationAt',
-               Trivial.trivialization_baseSet, Set.inter_univ, Set.inter_self]
-    exact hb.1
-  have h1 u v :
-      (((continuousLinearMapAt ℝ ψ b) (ψ.symmL ℝ b (innerSL ℝ))) u) v = innerSL ℝ u v :=
-    by rw [continuousLinearMapAt_symmL ψ hc]
-  have h2 : ∀ u v, innerSL ℝ u v = w (χ.symm b u) (χ.symm b v) := fun u v => by
-    rw [← h1, continuousLinearMapAt_apply, linearMapAt_apply, hom_trivializationAt_apply, if_pos hc]
-    simp only [inCoordinates_apply_eq₂ hb.1 hb.1
-      (by simp : b ∈ (trivializationAt ℝ (fun _ ↦ ℝ) i).baseSet),
-      Trivial.fiberBundle_trivializationAt', Trivial.linearMapAt_trivialization,
-      LinearMap.id_coe, id_eq]
-    exact DFunLike.congr_fun rfl ((trivializationAt F E i).symm b v)
-  have h3 : χ.symm b (χ.continuousLinearMapAt ℝ b u) = u :=
-    symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 u
-  have h4 : χ.symm b (χ.continuousLinearMapAt ℝ b v) = v :=
-    symmL_continuousLinearMapAt (trivializationAt F E i) hb.1 v
-  have h5 : (innerSL ℝ) ((continuousLinearMapAt ℝ χ b) u) ((continuousLinearMapAt ℝ χ b) v) =
-      w u v := by
-    rw [h2 (χ.continuousLinearMapAt ℝ b u) (χ.continuousLinearMapAt ℝ b v), h3, h4]
-  rw [← h5]
-  exact real_inner_comm _ _
+    Trivial.trivialization_baseSet,
+    inter_univ, inter_self]
+    exact mem_of_subset_of_mem (fun ⦃a⦄ a_1 ↦ a_1) hb
+  have h1 : ∀ u v,
+      (((continuousLinearMapAt ℝ ψ x) (ψ.symmL ℝ x ϕ)) u) v = ϕ u v :=
+    fun u v => by rw [continuousLinearMapAt_symmL ψ hc]
+  have h2 : ∀ u v, ϕ u v = w (χ.symm x u) (χ.symm x v) := fun u v => by
+    rw [← h1, continuousLinearMapAt_apply, linearMapAt_apply, hom_trivializationAt_apply,
+      if_pos hc, ← inCoordinates_apply_eq₂_spec hb]
+    simp only [symmL_apply]
+    exact DFunLike.congr_fun rfl v
+  have h3 : χ.symm x (χ.continuousLinearMapAt ℝ x u) = u :=
+    symmL_continuousLinearMapAt (trivializationAt F E x₀) hb u
+  have h4 : χ.symm x (χ.continuousLinearMapAt ℝ x v) = v :=
+    symmL_continuousLinearMapAt (trivializationAt F E x₀) hb v
+  rw [show w u v = ϕ (χ.continuousLinearMapAt ℝ x u) (χ.continuousLinearMapAt ℝ x v) from by
+    rw [h2 (χ.continuousLinearMapAt ℝ x u) (χ.continuousLinearMapAt ℝ x v), h3, h4]]
 
 lemma g_global_bilin_eq
     (f : SmoothPartitionOfUnity B IB B)
@@ -571,7 +575,10 @@ lemma g_global_bilin_eq
         hf j hp
       simp only [ContinuousLinearMap.coe_smul', Pi.smul_apply, smul_eq_mul]
       congr 1
-      exact g_bilin_eq j p hsupp u v
+      unfold g_bilin_1 g_bilin_2
+      simp only [ContinuousLinearMap.coe_coe]
+      conv_lhs => rw [inCoordinates_apply_eq₂_spec_symm j p hsupp.1 (innerSL ℝ) u v]
+      exact real_inner_comm _ _
   rw [this]
 
 lemma riemannian_metric_symm_1
