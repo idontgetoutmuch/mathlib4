@@ -72,7 +72,9 @@ noncomputable def seminormOfBilinearForm {x : B} (φ : E x →L[ℝ] E x →L[�
         LinearMap.BilinForm.apply_mul_apply_le_of_forall_zero_le φ.toLinearMap₁₂ hpos r s
       have h1 : φ (r + s) (r + s) ≤ (Real.sqrt ((φ r) r) + Real.sqrt ((φ s) s)) ^ 2 := by
         calc φ (r + s) (r + s)
-          = (φ r) r + (φ r) s + (φ s) r + (φ s) s := by grind
+          = (φ r) r + (φ r) s + (φ s) r + (φ s) s := by
+              simp only [map_add, ContinuousLinearMap.add_apply]
+              ring
         _ = (φ r) r + 2 * (φ r) s + (φ s) s := by
               rw [hsymm r s]
               ring
@@ -103,14 +105,13 @@ lemma seminormOfBilinearForm_sub_self {x : B} (φ : E x →L[ℝ] E x →L[ℝ] 
   simp
 
 lemma seminormOfBilinearForm_sub_comm {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
-    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
-    (u v : VectorSpaceAux x φ hpos hsymm hdef) :
+  (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
+  (u v : VectorSpaceAux x φ hpos hsymm hdef) :
   seminormOfBilinearForm φ hpos hsymm (u.val - v.val) =
   seminormOfBilinearForm φ hpos hsymm (v.val - u.val) := by
-  unfold seminormOfBilinearForm
-  have : √((φ (u.val - v.val)) (u.val - v.val)) =  √((φ (v.val - u.val)) (v.val - u.val)) := by
-    grind
-  exact this
+  change √((φ (u.val - v.val)) (u.val - v.val)) = √((φ (v.val - u.val)) (v.val - u.val))
+  simp only [map_sub, ContinuousLinearMap.coe_sub', Pi.sub_apply]
+  ring_nf
 
 lemma my_eq_of_dist_eq_zero {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
     (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
@@ -354,6 +355,12 @@ def evalAt (b : B) (v w : E b) :
     map_zero' := by simp
     map_add' := by intro f g; exact rfl
 
+private lemma g_global_bilin_2_support_finite (f : SmoothPartitionOfUnity B IB B) (b : B) :
+    (Function.support fun j ↦ ((f j) b • (g_bilin_2 F j b) :
+      E b →L[ℝ] E b →L[ℝ] ℝ)).Finite :=
+  (f.locallyFinite'.point_finite b).subset (fun i hi => by
+    simp only [Function.mem_support, ne_eq, smul_eq_zero, not_or] at hi; exact hi.1)
+
 lemma riemannian_metric_symm_2 (f : SmoothPartitionOfUnity B IB B) (b : B)
   (v w : E b) :
   ((g_global_bilin_2 (F := F) f b).toFun v).toFun w
@@ -361,12 +368,7 @@ lemma riemannian_metric_symm_2 (f : SmoothPartitionOfUnity B IB B) (b : B)
   ((g_global_bilin_2 (F := F) f b).toFun w).toFun v := by
   unfold g_global_bilin_2
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
-  have h1 : (Function.support fun j ↦ ((f j) b • (g_bilin_2 F j b) :
-    E b →L[ℝ] E b →L[ℝ] ℝ)).Finite := by
-    apply (f.locallyFinite'.point_finite b).subset
-    intro i hi
-    simp only [Function.mem_support, ne_eq, smul_eq_zero, not_or] at hi
-    exact hi.1
+  have h1 := g_global_bilin_2_support_finite (F := F) (E := E) f b
   rw [finsum_eq_sum _ h1]
   letI h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) := fun j ↦ (f j) b • g_bilin_2 F j b
   have h2 : (Function.support h) ⊆ h1.toFinset := Finite.toFinset_subset.mp fun ⦃a⦄ a ↦ a
@@ -391,12 +393,7 @@ lemma riemannian_metric_pos_def_2 (f : SmoothPartitionOfUnity B IB B)
   (b : B) {v : E b} (hv : v ≠ 0) :
   0 < g_global_bilin_2 (F := F) f b v v := by
   unfold g_global_bilin_2
-  have h1 : (Function.support fun j ↦ ((f j) b • (g_bilin_2 F j b) :
-    E b →L[ℝ] E b →L[ℝ] ℝ)).Finite := by
-    apply (f.locallyFinite'.point_finite b).subset
-    intro i hi
-    simp only [Function.mem_support, ne_eq, smul_eq_zero, not_or] at hi
-    exact hi.1
+  have h1 := g_global_bilin_2_support_finite (F := F) (E := E) f b
   rw [finsum_eq_sum _ h1]
   have h2 : ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_2 F j b).toFun v).toFun v =
             ((∑ j ∈ h1.toFinset, (f j) b • g_bilin_2 F j b).toFun v).toFun v := by
