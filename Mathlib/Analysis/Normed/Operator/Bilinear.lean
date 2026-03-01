@@ -147,15 +147,6 @@ def flip (f : E →SL[σ₁₃] F →SL[σ₂₃] G) : F →SL[σ₂₃] E →SL
         (fun c y x => by simp only [f.map_smulₛₗ, smul_apply]))
     ‖f‖ fun y x => (f.le_opNorm₂ x y).trans_eq <| by simp only [mul_right_comm]
 
-@[simp]
-theorem linear_flip_apply
-  {𝕜 E F G : Type*}
-  [NontriviallyNormedField 𝕜]
-  [SeminormedAddCommGroup E] [SeminormedAddCommGroup F] [SeminormedAddCommGroup G]
-  [NormedSpace 𝕜 E] [NormedSpace 𝕜 F] [NormedSpace 𝕜 G]
-  (f : E →L[𝕜] F →L[𝕜] G) (x : F) (y : E) :
-  f.flip x y = f y x := rfl
-
 private theorem le_norm_flip (f : E →SL[σ₁₃] F →SL[σ₂₃] G) : ‖f‖ ≤ ‖flip f‖ :=
   f.opNorm_le_bound₂ (norm_nonneg f.flip) fun x y => by
     rw [mul_right_comm]

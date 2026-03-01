@@ -238,7 +238,10 @@ theorem g_bilin_symm_2 (i p : B) (v w : E p) :
     ((g_bilin_2 F i p).toFun v).toFun w =
     ((g_bilin_2 F i p).toFun w).toFun v := by
   unfold g_bilin_2
-  simp [real_inner_comm]
+  simp only [ContinuousLinearMap.coe_comp, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom,
+    LinearMap.coe_comp, ContinuousLinearMap.coe_coe, continuousLinearMapAt_apply,
+    Function.comp_apply]
+  exact real_inner_comm _ _
 
 instance {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
     (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
@@ -532,8 +535,7 @@ lemma inCoordinates_apply_eq₂_spec_symm
   have hc : x ∈ ψ.baseSet := by
     rw [hom_trivializationAt_baseSet]
     simp only [hom_trivializationAt_baseSet, Trivial.fiberBundle_trivializationAt',
-    Trivial.trivialization_baseSet,
-    inter_univ, inter_self]
+    Trivial.trivialization_baseSet, inter_univ, inter_self]
     exact mem_of_subset_of_mem (fun ⦃a⦄ a_1 ↦ a_1) hb
   have h1 : ∀ u v,
       (((continuousLinearMapAt ℝ ψ x) (ψ.symmL ℝ x ϕ)) u) v = ϕ u v :=
