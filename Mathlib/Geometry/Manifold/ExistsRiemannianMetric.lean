@@ -8,7 +8,7 @@ module
 public import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 public import Mathlib.Geometry.Manifold.PartitionOfUnity
 
-/-! ## Existence of a Riemannian bundle metric
+/-! # Existence of a Riemannian bundle metric
 
 Using a partition of unity, we prove the existence of a smooth Riemannian metric.
 
