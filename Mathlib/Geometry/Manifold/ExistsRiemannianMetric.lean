@@ -125,10 +125,10 @@ lemma seminormOfBilinearForm_sub_self {x : B} (φ : E x →L[ℝ] E x →L[ℝ] 
   simp
 
 lemma seminormOfBilinearForm_sub_comm {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
-  (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
-  (u v : VectorSpaceAux x φ hpos hsymm hdef) :
-  seminormOfBilinearForm φ hpos hsymm (u.val - v.val) =
-  seminormOfBilinearForm φ hpos hsymm (v.val - u.val) := by
+    (hsymm : ∀ u v, φ u v = φ v u) (hdef : ∀ v, φ v v = 0 → v = 0)
+    (u v : VectorSpaceAux x φ hpos hsymm hdef) :
+    seminormOfBilinearForm φ hpos hsymm (u.val - v.val) =
+    seminormOfBilinearForm φ hpos hsymm (v.val - u.val) := by
   change √((φ (u.val - v.val)) (u.val - v.val)) = √((φ (v.val - u.val)) (v.val - u.val))
   simp only [map_sub, ContinuousLinearMap.coe_sub', Pi.sub_apply]
   ring_nf
