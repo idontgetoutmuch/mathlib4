@@ -8,22 +8,42 @@ module
 public import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 public import Mathlib.Geometry.Manifold.PartitionOfUnity
 
-/-! # Existence of a Riemannian bundle metric
+/-! ## Existence of a Riemannian bundle metric
 
 Using a partition of unity, we prove the existence of a smooth Riemannian metric.
+
+The idea is that there are two equivalent ways of defining a bilinear positive definite form:
+
+  1) pull back the inner product on ℝ^n via the inverse trivialisation
+  2) push forward vectors and then apply the inner product on ℝ^n
+
+It turns out that using (1) makes proving smoothness straightforward and
+`g_bilin_smooth_on_chart` proves that locally `g_bilini` is smooth (the trick is to make
+the set on which this is true small enough hence the intersection:
+`((trivializationAt F E i).baseSet ∩ (chartAt HB i).source)`).
+This can then be used to prove global smoothness via a partition of unity.
+
+However it is not so clear (to me at any rate) how one uses (1) to prove positive definiteness.
+This is where (2) comes in. With this definition, it is straightforward to prove
+positivity, definiteness and symmetry.
+
+We then prove that the two definitions are equal which allows me to prove that (1) is symmetric,
+positive and definite.
+
+But one is still not done. Mathlib's definition requires von Neumann boundedness
+which is true for finite dimensional manifolds.
 
 -/
 
 open Set Bundle ContDiff Manifold Trivialization SmoothPartitionOfUnity
 
-variable
-{B : Type*}
-{E : B → Type*} [∀ x, NormedAddCommGroup (E x)]
+variable {B : Type*}
+  {E : B → Type*}
+  [∀ x, NormedAddCommGroup (E x)]
 
 section tangentSpaceEquiv
 
-variable
-  [∀ x, NormedSpace ℝ (E x)]
+variable [∀ x, NormedSpace ℝ (E x)]
 
 structure VectorSpaceAux
   (x : B) (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos : ∀ v, 0 ≤ φ v v)
@@ -119,7 +139,7 @@ lemma my_eq_of_dist_eq_zero {x : B} (φ : E x →L[ℝ] E x →L[ℝ] ℝ) (hpos
     (seminormOfBilinearForm φ hpos hsymm) (u.val - v.val) = 0 → u = v := by
     intro h
     rw [seminormOfBilinearForm] at h
-    have h1 : u.val - v.val = 0 := (hdef (u.val - v.val))
+    have h1 : u.val - v.val = 0 := hdef (u.val - v.val)
       ((Real.sqrt_eq_zero (hpos (u.val - v.val))).mp h)
     apply (VectorSpaceAux.ext_iff φ hpos hsymm hdef u v).mpr
     exact sub_eq_zero.mp h1
@@ -205,28 +225,28 @@ variable
   [IsManifold IB ω B] [ContMDiffVectorBundle ω F E IB]
   [FiniteDimensional ℝ EB]
 
-def g_bilin_1 (i b : B) :
+def g_bilin (i b : B) :
  (TotalSpace (F →L[ℝ] F →L[ℝ] ℝ)
              (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ)) :=
   ⟨b, (trivializationAt (F →L[ℝ] F →L[ℝ] ℝ)
         (fun (x : B) ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i).symm b (innerSL ℝ)⟩
 
 variable (F) in
-def g_bilin_2 (i p : B) : E p →L[ℝ] (E p →L[ℝ] ℝ) :=
+def g_bilin_aux (i p : B) : E p →L[ℝ] (E p →L[ℝ] ℝ) :=
   letI χ := trivializationAt F E i
   (innerSL ℝ).comp (χ.continuousLinearMapAt ℝ p) |>.flip.comp (χ.continuousLinearMapAt ℝ p)
 
 lemma g_nonneg {j b : B} (v : E b) :
-    0 ≤ ((g_bilin_2 F j b).toFun v).toFun v := by
-  unfold g_bilin_2
+    0 ≤ ((g_bilin_aux F j b).toFun v).toFun v := by
+  unfold g_bilin_aux
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
   · exact inner_self_nonneg (𝕜 := ℝ)
 
 lemma g_pos {i b : B}
     (hb : b ∈ (trivializationAt F E i).baseSet ∩ (chartAt HB i).source)
     (v : E b) (hv : v ≠ 0) :
-    0 < ((g_bilin_2 F i b).toFun v).toFun v := by
-  unfold g_bilin_2
+    0 < ((g_bilin_aux F i b).toFun v).toFun v := by
+  unfold g_bilin_aux
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
   letI χ := trivializationAt F E i
   have h1 : (continuousLinearMapAt ℝ χ b) v ≠ 0 := by
@@ -235,10 +255,10 @@ lemma g_pos {i b : B}
   exact Std.lt_of_le_of_ne (inner_self_nonneg (𝕜 := ℝ))
     (inner_self_ne_zero.mpr h1).symm
 
-theorem g_bilin_symm_2 (i p : B) (v w : E p) :
-    ((g_bilin_2 F i p).toFun v).toFun w =
-    ((g_bilin_2 F i p).toFun w).toFun v := by
-  unfold g_bilin_2
+theorem g_bilin_symm_aux (i p : B) (v w : E p) :
+    ((g_bilin_aux F i p).toFun v).toFun w =
+    ((g_bilin_aux F i p).toFun w).toFun v := by
+  unfold g_bilin_aux
   simp only [ContinuousLinearMap.coe_comp, AddHom.toFun_eq_coe, LinearMap.coe_toAddHom,
     LinearMap.coe_comp, ContinuousLinearMap.coe_coe, continuousLinearMapAt_apply,
     Function.comp_apply]
@@ -333,9 +353,9 @@ variable
   [∀ x, NormedSpace ℝ (E x)]
   [FiberBundle F E] [VectorBundle ℝ F E]
 
-def g_global_bilin_2 (f : SmoothPartitionOfUnity B IB B) (p : B) :
+def g_global_bilin_aux (f : SmoothPartitionOfUnity B IB B) (p : B) :
     E p →L[ℝ] (E p →L[ℝ] ℝ) :=
-  ∑ᶠ (j : B), (f j) p • g_bilin_2 F j p
+  ∑ᶠ (j : B), (f j) p • g_bilin_aux F j p
 
 lemma finsum_image_eq_sum {B E F : Type*} [AddCommMonoid E] [AddCommMonoid F]
   (φ : E →+ F) {f : B → E} {h_fin : Finset B}
@@ -355,52 +375,52 @@ def evalAt (b : B) (v w : E b) :
     map_zero' := by simp
     map_add' := by intro f g; exact rfl
 
-private lemma g_global_bilin_2_support_finite (f : SmoothPartitionOfUnity B IB B) (b : B) :
-    (Function.support fun j ↦ ((f j) b • (g_bilin_2 F j b) :
+private lemma g_global_bilin_aux_support_finite (f : SmoothPartitionOfUnity B IB B) (b : B) :
+    (Function.support fun j ↦ ((f j) b • (g_bilin_aux F j b) :
       E b →L[ℝ] E b →L[ℝ] ℝ)).Finite :=
   (f.locallyFinite'.point_finite b).subset (fun i hi => by
     simp only [Function.mem_support, ne_eq, smul_eq_zero, not_or] at hi; exact hi.1)
 
-lemma riemannian_metric_symm_2 (f : SmoothPartitionOfUnity B IB B) (b : B)
+lemma riemannian_metric_symm_aux (f : SmoothPartitionOfUnity B IB B) (b : B)
   (v w : E b) :
-  ((g_global_bilin_2 (F := F) f b).toFun v).toFun w
+  ((g_global_bilin_aux (F := F) f b).toFun v).toFun w
    =
-  ((g_global_bilin_2 (F := F) f b).toFun w).toFun v := by
-  unfold g_global_bilin_2
+  ((g_global_bilin_aux (F := F) f b).toFun w).toFun v := by
+  unfold g_global_bilin_aux
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
-  have h1 := g_global_bilin_2_support_finite (F := F) (E := E) f b
+  have h1 := g_global_bilin_aux_support_finite (F := F) (E := E) f b
   rw [finsum_eq_sum _ h1]
-  letI h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) := fun j ↦ (f j) b • g_bilin_2 F j b
+  letI h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) := fun j ↦ (f j) b • g_bilin_aux F j b
   have h2 : (Function.support h) ⊆ h1.toFinset := Finite.toFinset_subset.mp fun ⦃a⦄ a ↦ a
   have h3 : ∀ (u v : E b),
-      ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_2 F j b).toFun u).toFun v =
-      ((∑ j ∈ h1.toFinset, (f j) b • g_bilin_2 F j b).toFun u).toFun v := by
+      ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_aux F j b).toFun u).toFun v =
+      ((∑ j ∈ h1.toFinset, (f j) b • g_bilin_aux F j b).toFun u).toFun v := by
     intros u v
     simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
     rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
-  calc ((∑ j ∈ h1.toFinset, (f j) b • g_bilin_2 F j b).toFun v).toFun w
-      = ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_2 F j b).toFun v).toFun w := (h3 v w).symm
-    _ = ∑ᶠ (j : B), (((f j) b • g_bilin_2 F j b).toFun v).toFun w :=
+  calc ((∑ j ∈ h1.toFinset, (f j) b • g_bilin_aux F j b).toFun v).toFun w
+      = ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_aux F j b).toFun v).toFun w := (h3 v w).symm
+    _ = ∑ᶠ (j : B), (((f j) b • g_bilin_aux F j b).toFun v).toFun w :=
           (finsum_image_eq_sum (evalAt b v w) (f := h) (h_fin := h1.toFinset) h2).symm
-    _ = ∑ᶠ (j : B), (((f j) b • g_bilin_2 F j b).toFun w).toFun v :=
-          finsum_congr (fun j ↦ congrArg (HMul.hMul ((f j) b)) (g_bilin_symm_2 j b v w))
-    _ = ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_2 F j b).toFun w).toFun v :=
+    _ = ∑ᶠ (j : B), (((f j) b • g_bilin_aux F j b).toFun w).toFun v :=
+          finsum_congr (fun j ↦ congrArg (HMul.hMul ((f j) b)) (g_bilin_symm_aux j b v w))
+    _ = ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_aux F j b).toFun w).toFun v :=
           finsum_image_eq_sum (evalAt b w v) (f := h) (h_fin := h1.toFinset) h2
-    _ = ((∑ j ∈ h1.toFinset, (f j) b • g_bilin_2 F j b).toFun w).toFun v := h3 w v
+    _ = ((∑ j ∈ h1.toFinset, (f j) b • g_bilin_aux F j b).toFun w).toFun v := h3 w v
 
-lemma riemannian_metric_pos_def_2 (f : SmoothPartitionOfUnity B IB B)
+lemma riemannian_metric_pos_def_aux (f : SmoothPartitionOfUnity B IB B)
   (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
   (b : B) {v : E b} (hv : v ≠ 0) :
-  0 < g_global_bilin_2 (F := F) f b v v := by
-  unfold g_global_bilin_2
-  have h1 := g_global_bilin_2_support_finite (F := F) (E := E) f b
+  0 < g_global_bilin_aux (F := F) f b v v := by
+  unfold g_global_bilin_aux
+  have h1 := g_global_bilin_aux_support_finite (F := F) (E := E) f b
   rw [finsum_eq_sum _ h1]
-  have h2 : ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_2 F j b).toFun v).toFun v =
-            ((∑ j ∈ h1.toFinset, (f j) b • g_bilin_2 F j b).toFun v).toFun v := by
+  have h2 : ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_aux F j b).toFun v).toFun v =
+            ((∑ j ∈ h1.toFinset, (f j) b • g_bilin_aux F j b).toFun v).toFun v := by
     simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
     rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
-  letI h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) := fun j ↦ (f j) b • g_bilin_2 F j b
-  letI h' x := f x b * ((g_bilin_2 F x b).toFun v).toFun v
+  letI h : (j : B) → (E b →L[ℝ] (E b →L[ℝ] ℝ)) := fun j ↦ (f j) b • g_bilin_aux F j b
+  letI h' x := f x b * ((g_bilin_aux F x b).toFun v).toFun v
   have h3 : (Function.support h) ⊆ h1.toFinset := Set.Finite.toFinset_subset.mp fun ⦃a⦄ a ↦ a
   have ⟨i, h5⟩ : ∃ i, 0 < f i b := by
     by_contra! hneg
@@ -417,23 +437,23 @@ lemma riemannian_metric_pos_def_2 (f : SmoothPartitionOfUnity B IB B)
     simp only [Function.support_mul, Set.mem_inter_iff, Function.mem_support, ne_eq, h'] at hx
     exact mul_ne_zero_iff.mp (mul_ne_zero_iff.mpr hx) |>.1
   have hb : ∑ᶠ i, h' i =
-            ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_2 F j b).toFun v).toFun v :=
+            ∑ j ∈ h1.toFinset, (((f j) b • g_bilin_aux F j b).toFun v).toFun v :=
     (finsum_image_eq_sum (evalAt b v v) (f := h) (h_fin := h1.toFinset) h3) ▸ rfl
   exact lt_of_lt_of_eq (finsum_pos h7 h8 h9) (hb.trans h2)
 
-lemma riemannian_unit_ball_bounded_2 (f : SmoothPartitionOfUnity B IB B)
+lemma riemannian_unit_ball_bounded_aux (f : SmoothPartitionOfUnity B IB B)
   (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
   [∀ x, FiniteDimensional ℝ (E x)] (b : B) :
-    Bornology.IsVonNBounded ℝ {v : E b | g_global_bilin_2 (F := F) f b v v < 1} :=
-  aux_tvs (g_global_bilin_2 f b)
+    Bornology.IsVonNBounded ℝ {v : E b | g_global_bilin_aux (F := F) f b v v < 1} :=
+  aux_tvs (g_global_bilin_aux f b)
     (fun v => by
       rcases eq_or_ne v 0 with rfl | hv
       · simp
-      · exact le_of_lt (riemannian_metric_pos_def_2 f hf b hv))
-    (riemannian_metric_symm_2 f b)
+      · exact le_of_lt (riemannian_metric_pos_def_aux f hf b hv))
+    (riemannian_metric_symm_aux f b)
     (fun v h => by
       by_contra hv
-      exact lt_irrefl 0 (h ▸ riemannian_metric_pos_def_2 f hf b hv))
+      exact lt_irrefl 0 (h ▸ riemannian_metric_pos_def_aux f hf b hv))
 
 end section3
 
@@ -447,11 +467,11 @@ variable
   [FiberBundle F E] [VectorBundle ℝ F E]
   [ContMDiffVectorBundle ω F E IB]
 
-lemma g_bilin_1_smooth_on_chart (i : B) :
+lemma g_bilin_smooth_on_chart (i : B) :
   ContMDiffOn IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
-    (g_bilin_1 (F := F) (E := E) i)
+    (g_bilin (F := F) (E := E) i)
     ((trivializationAt F E i).baseSet ∩ (chartAt HB i).source) := by
-  unfold g_bilin_1
+  unfold g_bilin
   intro b hb
   letI ψ := trivializationAt (F →L[ℝ] F →L[ℝ] ℝ) (fun x ↦ E x →L[ℝ] E x →L[ℝ] ℝ) i
   letI innerAtP : B → F →L[ℝ] F →L[ℝ] ℝ := fun x ↦ innerSL ℝ
@@ -480,24 +500,24 @@ lemma g_bilin_1_smooth_on_chart (i : B) :
     · simp [cast_eq]
     · exact (mk_mem_target ψ).mp (h5 hy)
 
-noncomputable def g_global_bilin_1 (f : SmoothPartitionOfUnity B IB B) (p : B) :
+noncomputable def g_global_bilin (f : SmoothPartitionOfUnity B IB B) (p : B) :
     E p →L[ℝ] (E p →L[ℝ] ℝ) :=
-      ∑ᶠ (j : B), (f j) p • (g_bilin_1 (F := F) j p).snd
+      ∑ᶠ (j : B), (f j) p • (g_bilin (F := F) j p).snd
 
-lemma g_global_bilin_1_smooth (f : SmoothPartitionOfUnity B IB B)
+lemma g_global_bilin_smooth (f : SmoothPartitionOfUnity B IB B)
   (h_sub : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source)) :
   ContMDiff IB (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
-    (fun x ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) x (g_global_bilin_1 (F := F) (E := E) f x)) :=
+    (fun x ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) x (g_global_bilin (F := F) (E := E) f x)) :=
   contMDiff_totalSpace_weighted_sum_of_local_sections
     (V := fun b => E b →L[ℝ] (E b →L[ℝ] Trivial B ℝ b))
     (F_fiber := F →L[ℝ] (F →L[ℝ] ℝ))
-    (s_loc := fun (i b : B) => (g_bilin_1 (F := F) i b).snd)
+    (s_loc := fun (i b : B) => (g_bilin (F := F) i b).snd)
     (U := fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source)
     (hU_isOpen := fun i => ((trivializationAt F E i).open_baseSet.inter (chartAt HB i).open_source))
     (hρ_subord := h_sub)
     (h_smooth_s_loc := fun i =>
-      (g_bilin_1_smooth_on_chart i).congr (by
-        unfold g_bilin_1
+      (g_bilin_smooth_on_chart i).congr (by
+        unfold g_bilin
         simp only [Set.mem_inter_iff, implies_true]))
 
 end smooth
@@ -553,19 +573,19 @@ lemma g_global_bilin_eq
     (f : SmoothPartitionOfUnity B IB B)
     (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
     (p : B) (u v : E p) :
-    g_global_bilin_1 (F := F) (E := E) f p u v =
-    g_global_bilin_2 (F := F) f p u v := by
-  have : g_global_bilin_1 (F := F) (E := E) f p = g_global_bilin_2 (F := F) f p := by
-    unfold g_global_bilin_1 g_global_bilin_2
+    g_global_bilin (F := F) (E := E) f p u v =
+    g_global_bilin_aux (F := F) f p u v := by
+  have : g_global_bilin (F := F) (E := E) f p = g_global_bilin_aux (F := F) f p := by
+    unfold g_global_bilin g_global_bilin_aux
     congr 1
     ext j
     congr 2
     ext u v
     by_cases h : (f j) p = 0
-    · have h2 : (f j) p • (g_bilin_1 (F := F) (E := E) j p).snd = 0 :=
-        smul_eq_zero_of_left h (g_bilin_1 j p).snd
-      have h3 : (f j) p • g_bilin_2 F (E := E) j p = 0 :=
-        smul_eq_zero_of_left h (g_bilin_2 F j p)
+    · have h2 : (f j) p • (g_bilin (F := F) (E := E) j p).snd = 0 :=
+        smul_eq_zero_of_left h (g_bilin j p).snd
+      have h3 : (f j) p • g_bilin_aux F (E := E) j p = 0 :=
+        smul_eq_zero_of_left h (g_bilin_aux F j p)
       rw [h2, h3]
     · have hp : p ∈ tsupport (f j) := by
         rw [tsupport]
@@ -574,36 +594,36 @@ lemma g_global_bilin_eq
         hf j hp
       simp only [ContinuousLinearMap.coe_smul', Pi.smul_apply, smul_eq_mul]
       congr 1
-      unfold g_bilin_1 g_bilin_2
+      unfold g_bilin g_bilin_aux
       simp only [ContinuousLinearMap.coe_coe]
       conv_lhs => rw [inCoordinates_apply_eq₂_spec_symm j p hsupp.1 (innerSL ℝ) u v]
       exact real_inner_comm _ _
   rw [this]
 
-lemma riemannian_metric_symm_1
+lemma riemannian_metric_symm
     (f : SmoothPartitionOfUnity B IB B)
     (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
     (b : B) (v w : E b) :
-    g_global_bilin_1 (F := F) (E := E) f b v w =
-    g_global_bilin_1 (F := F) (E := E) f b w v := by
+    g_global_bilin (F := F) (E := E) f b v w =
+    g_global_bilin (F := F) (E := E) f b w v := by
   rw [g_global_bilin_eq f hf b v w, g_global_bilin_eq f hf b w v]
-  exact (riemannian_metric_symm_2 (F := F) f b v w)
+  exact (riemannian_metric_symm_aux (F := F) f b v w)
 
-lemma riemannian_metric_pos_def_1
+lemma riemannian_metric_pos_def
     (f : SmoothPartitionOfUnity B IB B)
     (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
     (b : B) (v : E b) (hv : v ≠ 0) :
-    0 < g_global_bilin_1 (F := F) (E := E) f b v v := by
+    0 < g_global_bilin (F := F) (E := E) f b v v := by
   rw [g_global_bilin_eq (F := F) (E := E) f hf b v v]
-  exact riemannian_metric_pos_def_2 f hf b hv
+  exact riemannian_metric_pos_def_aux f hf b hv
 
-lemma riemannian_unit_ball_bounded_1 (f : SmoothPartitionOfUnity B IB B)
+lemma riemannian_unit_ball_bounded (f : SmoothPartitionOfUnity B IB B)
   (hf : f.IsSubordinate (fun x ↦ (trivializationAt F E x).baseSet ∩ (chartAt HB x).source))
   [∀ x, FiniteDimensional ℝ (E x)] (b : B) :
   Bornology.IsVonNBounded ℝ
-    {v : E b | g_global_bilin_1 (F := F) (E := E) f b v v < 1} := by
+    {v : E b | g_global_bilin (F := F) (E := E) f b v v < 1} := by
   simp_rw [fun v => g_global_bilin_eq f hf b v v]
-  exact riemannian_unit_ball_bounded_2 f hf b
+  exact riemannian_unit_ball_bounded_aux f hf b
 
 end section6
 
@@ -633,10 +653,10 @@ public theorem exists_riemannian_metric
     · intro b _
       simp only [Set.mem_iUnion, Set.mem_inter_iff]
       exact ⟨b, FiberBundle.mem_baseSet_trivializationAt' b, mem_chart_source HB b⟩
-  ⟨{ inner := g_global_bilin_1 (F := F) f
-     symm := riemannian_metric_symm_1 f hf
-     pos := riemannian_metric_pos_def_1 f hf
-     isVonNBounded := riemannian_unit_ball_bounded_1 f hf
-     contMDiff := g_global_bilin_1_smooth f hf }⟩
+  ⟨{ inner := g_global_bilin (F := F) f
+     symm := riemannian_metric_symm f hf
+     pos := riemannian_metric_pos_def f hf
+     isVonNBounded := riemannian_unit_ball_bounded f hf
+     contMDiff := g_global_bilin_smooth f hf }⟩
 
 end section9
