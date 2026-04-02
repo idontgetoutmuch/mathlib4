@@ -371,9 +371,9 @@ lemma finsum_image_eq_sum {B E F : Type*} [AddCommMonoid E] [AddCommMonoid F]
 
 def evalAt (b : B) (v w : E b) :
     (E b →L[ℝ] (E b →L[ℝ] ℝ)) →+ ℝ where
-    toFun := fun f => (f.toFun v).toFun w
-    map_zero' := by simp
-    map_add' := by intro f g; exact rfl
+  toFun f := (f.toFun v).toFun w
+  map_zero' := by simp
+  map_add' _ _ := rfl
 
 private lemma g_global_bilin_aux_support_finite (f : SmoothPartitionOfUnity B IB B) (b : B) :
     (Function.support fun j ↦ ((f j) b • (g_bilin_aux F j b) :
